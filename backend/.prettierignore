@@ -1,0 +1,19 @@
+# Dependency and build files
+node_modules/
+dist/
+build/
+
+# Lockfiles
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Env/config
+.env
+.env.*
+
+# Other
+coverage/
+/build/coverage
+
+*/generated/*

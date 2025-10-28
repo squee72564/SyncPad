@@ -1,0 +1,20 @@
+services:
+  postgres:
+    env_file:
+      - .env.production
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    environment:
+      DOCKER: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: 3
+
+  pgbouncer:
+    env_file:
+      - .env.production
+
+volumes:
+  postgres_data:

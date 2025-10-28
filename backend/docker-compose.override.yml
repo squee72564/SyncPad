@@ -1,0 +1,15 @@
+services:
+  postgres:
+    env_file:
+      - .env.development
+    ports:
+      - "6432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql
+
+  pgbouncer:
+    env_file:
+      - .env.development
+
+volumes:
+  postgres_data_dev:
