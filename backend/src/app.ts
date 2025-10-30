@@ -32,7 +32,7 @@ app.use(helmet());
 // Enable cors
 app.use(
   cors({
-    origin: "*any",
+    origin: env.CORS_ORIGIN,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -52,6 +52,7 @@ app.use(hpp());
 
 // Mount express json middleware after Bearer Auth Handler
 // or only apply to routes that dont interact with better-auth
+
 app.use("/v1", routes.authRoute);
 
 // Parse json request body

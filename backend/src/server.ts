@@ -40,7 +40,3 @@ process.on("SIGTERM", async () => {
   logger.info("SIGTERM received");
   await exitHandler();
 });
-
-process.on("beforeExit", async () => {
-  await exitHandler();
-});
