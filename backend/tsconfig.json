@@ -19,7 +19,8 @@
       "esnext"
     ],
     "types": [
-      "node"
+      "node",
+      "vitest/globals"
     ],
     "esModuleInterop": true,
     // Stricter Typechecking Options
