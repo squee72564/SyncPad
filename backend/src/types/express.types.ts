@@ -1,5 +1,6 @@
 import { User, Session } from "better-auth";
 import { SessionWithImpersonatedBy, UserWithRole } from "better-auth/plugins";
+import type { WorkspaceContext } from "./workspace.js";
 
 declare global {
   /* eslint-disable @typescript-eslint/no-namespace */
@@ -7,6 +8,7 @@ declare global {
     interface Request {
       session?: Session & SessionWithImpersonatedBy;
       user?: User & UserWithRole;
+      workspaceContext?: WorkspaceContext;
     }
   }
 }
