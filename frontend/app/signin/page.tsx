@@ -78,7 +78,12 @@ export default function SignInPage() {
     <div className="grid min-h-screen w-full grid-rows-[auto_1fr] bg-background md:grid-cols-[1.1fr_0.9fr] md:grid-rows-1">
       <div className="relative hidden items-center justify-center overflow-hidden bg-muted/50 p-12 md:flex">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(82,63,255,0.18),_transparent_55%)]" />
-        <Carousel className="relative w-full max-w-xl" opts={{ loop: true, align: "start" }} autoplay autoplayInterval={6000}>
+        <Carousel
+          className="relative w-full max-w-xl"
+          opts={{ loop: true, align: "start" }}
+          autoplay
+          autoplayInterval={6000}
+        >
           <CarouselContent>
             {carouselSlides.map((slide, index) => (
               <CarouselItem key={index}>

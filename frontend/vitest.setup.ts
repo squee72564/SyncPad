@@ -82,6 +82,5 @@ if (typeof window.ResizeObserver === "undefined") {
     }
   }
 
-  // @ts-expect-error add mock to jsdom window
   window.ResizeObserver = ResizeObserver;
 }

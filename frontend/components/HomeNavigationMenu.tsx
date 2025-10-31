@@ -37,10 +37,12 @@ export default function HomeNavigationMenu({ className }: { className?: string }
                     className="from-primary/20 to-background flex h-full w-full flex-col justify-end rounded-md bg-linear-to-br p-4 no-underline outline-hidden transition-all duration-200 select-none focus:shadow-md md:p-6"
                     href="/#features"
                   >
-                    <div className="mb-2 text-lg font-semibold sm:mt-4">Why teams choose SyncPad</div>
+                    <div className="mb-2 text-lg font-semibold sm:mt-4">
+                      Why teams choose SyncPad
+                    </div>
                     <p className="text-muted-foreground text-sm leading-tight">
-                      Author, review, and discover institutional knowledge with realtime collaboration and
-                      AI-assisted search built on secure workspaces.
+                      Author, review, and discover institutional knowledge with realtime
+                      collaboration and AI-assisted search built on secure workspaces.
                     </p>
                   </Link>
                 </NavigationMenuLink>
@@ -49,7 +51,8 @@ export default function HomeNavigationMenu({ className }: { className?: string }
                 See how documents, comments, and activity come together in one timeline.
               </ListItem>
               <ListItem href="/#features" title="Realtime collaboration">
-                Conflict-free editing, inline reviews, and presence indicators for distributed teams.
+                Conflict-free editing, inline reviews, and presence indicators for distributed
+                teams.
               </ListItem>
               <ListItem href="/docs" title="Product documentation">
                 Dive into the roadmap, APIs, and deployment guidance as SyncPad evolves.
