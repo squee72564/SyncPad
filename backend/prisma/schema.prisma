@@ -16,16 +16,67 @@ datasource db {
   // direct Postgres for migrations
 }
 
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  EDITOR
+  COMMENTER
+  VIEWER
+}
+
+enum DocumentStatus {
+  DRAFT
+  IN_REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CommentStatus {
+  ACTIVE
+  RESOLVED
+  ARCHIVED
+}
+
+enum SharePermission {
+  VIEW
+  COMMENT
+  EDIT
+}
+
+enum AiJobType {
+  EMBEDDING
+  SUMMARY
+  QA
+  ALERT
+}
+
+enum AiJobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  id                   String              @id
+  name                 String
+  email                String
+  emailVerified        Boolean             @default(false)
+  image                String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @default(now()) @updatedAt
+  sessions             Session[]
+  accounts             Account[]
+  ownedWorkspaces      Workspace[]         @relation("WorkspaceCreator")
+  workspaceMemberships WorkspaceMember[]   @relation("WorkspaceMembers")
+  sentWorkspaceInvites WorkspaceInvite[]   @relation("WorkspaceInviter")
+  documents            Document[]          @relation("DocumentAuthor")
+  documentRevisions    DocumentRevision[]  @relation("DocumentRevisionAuthor")
+  documentComments     DocumentComment[]   @relation("DocumentCommentAuthor")
+  resolvedComments     DocumentComment[]   @relation("DocumentCommentResolver")
+  createdShareLinks    DocumentShareLink[] @relation("ShareLinkCreator")
+  activityLogs         ActivityLog[]       @relation("ActivityActor")
+  aiJobs               AiJob[]             @relation("AiJobRequester")
 
   role       String?
   banned     Boolean?  @default(false)
@@ -81,4 +132,208 @@ model Verification {
   updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("verification")
+}
+
+model Workspace {
+  id                String              @id @default(cuid())
+  name              String
+  slug              String              @unique
+  description       String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  createdById       String
+  createdBy         User                @relation("WorkspaceCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  members           WorkspaceMember[]
+  invites           WorkspaceInvite[]
+  documents         Document[]
+  shareLinks        DocumentShareLink[]
+  activity          ActivityLog[]
+  aiJobs            AiJob[]
+  DocumentEmbedding DocumentEmbedding[]
+
+  @@map("workspace")
+}
+
+model WorkspaceMember {
+  id          String        @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(EDITOR)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation("WorkspaceMembers", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_member")
+}
+
+model WorkspaceInvite {
+  id          String        @id @default(cuid())
+  workspaceId String
+  email       String
+  token       String        @unique
+  role        WorkspaceRole @default(VIEWER)
+  invitedById String?
+  expiresAt   DateTime?
+  acceptedAt  DateTime?
+  createdAt   DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy User?     @relation("WorkspaceInviter", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, email])
+  @@map("workspace_invite")
+}
+
+model Document {
+  id           String         @id @default(cuid())
+  workspaceId  String
+  authorId     String?
+  parentId     String?
+  title        String
+  slug         String?
+  headline     String?
+  status       DocumentStatus @default(DRAFT)
+  searchText   String?        @db.Text
+  summary      String?        @db.Text
+  content      Json?
+  publishedAt  DateTime?
+  lastEditedAt DateTime       @default(now())
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  workspace  Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  author     User?               @relation("DocumentAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  parent     Document?           @relation("DocumentHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children   Document[]          @relation("DocumentHierarchy")
+  revisions  DocumentRevision[]
+  comments   DocumentComment[]
+  embeddings DocumentEmbedding[]
+  shareLinks DocumentShareLink[]
+  activities ActivityLog[]       @relation("DocumentActivity")
+  aiJobs     AiJob[]
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId, status])
+  @@map("document")
+}
+
+model DocumentRevision {
+  id         String   @id @default(cuid())
+  documentId String
+  authorId   String?
+  version    Int
+  changeNote String?  @db.Text
+  content    Json?
+  createdAt  DateTime @default(now())
+
+  document   Document            @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  author     User?               @relation("DocumentRevisionAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  embeddings DocumentEmbedding[]
+  aiJobs     AiJob[]
+
+  @@unique([documentId, version])
+  @@map("document_revision")
+}
+
+model DocumentComment {
+  id           String        @id @default(cuid())
+  documentId   String
+  authorId     String
+  parentId     String?
+  body         String        @db.Text
+  status       CommentStatus @default(ACTIVE)
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  document   Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  author     User              @relation("DocumentCommentAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  parent     DocumentComment?  @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    DocumentComment[] @relation("CommentThread")
+  resolvedBy User?             @relation("DocumentCommentResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([documentId, status])
+  @@map("document_comment")
+}
+
+model DocumentShareLink {
+  id          String          @id @default(cuid())
+  documentId  String
+  workspaceId String
+  createdById String?
+  token       String          @unique
+  permission  SharePermission @default(VIEW)
+  expiresAt   DateTime?
+  createdAt   DateTime        @default(now())
+
+  document  Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy User?     @relation("ShareLinkCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@map("document_share_link")
+}
+
+model DocumentEmbedding {
+  id          String                @id @default(cuid())
+  documentId  String
+  workspaceId String
+  revisionId  String?
+  chunkId     String                @default(uuid())
+  content     String                @db.Text
+  embedding   Unsupported("vector")
+  createdAt   DateTime              @default(now())
+
+  document  Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  workspace Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  revision  DocumentRevision? @relation(fields: [revisionId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([documentId])
+  @@map("document_embedding")
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  workspaceId String
+  actorId     String?
+  documentId  String?
+  event       String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actor     User?     @relation("ActivityActor", fields: [actorId], references: [id], onDelete: SetNull)
+  document  Document? @relation("DocumentActivity", fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([documentId])
+  @@map("activity_log")
+}
+
+model AiJob {
+  id            String      @id @default(cuid())
+  workspaceId   String
+  documentId    String?
+  revisionId    String?
+  requestedById String?
+  type          AiJobType
+  status        AiJobStatus @default(PENDING)
+  payload       Json?
+  queuedAt      DateTime    @default(now())
+  startedAt     DateTime?
+  completedAt   DateTime?
+  error         String?     @db.Text
+
+  workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  document    Document?         @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  revision    DocumentRevision? @relation(fields: [revisionId], references: [id], onDelete: SetNull)
+  requestedBy User?             @relation("AiJobRequester", fields: [requestedById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, status])
+  @@map("ai_job")
 }
