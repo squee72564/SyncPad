@@ -19,7 +19,7 @@ export default function HomeNavigationMenu({ className }: { className?: string }
   const isMobile = useIsMobile();
 
   return (
-    <NavigationMenu className={cn(className, "max-w-full")} viewport={isMobile}>
+    <NavigationMenu className={cn("relative z-50 max-w-full", className)} viewport={isMobile}>
       <NavigationMenuList className="flex-wrap">
         <NavigationMenuItem>
           <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
@@ -28,50 +28,49 @@ export default function HomeNavigationMenu({ className }: { className?: string }
         </NavigationMenuItem>
 
         <NavigationMenuItem>
-          <NavigationMenuTrigger>Our Product</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid gap-2 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+          <NavigationMenuTrigger>Platform</NavigationMenuTrigger>
+          <NavigationMenuContent className="z-50">
+            <ul className="grid gap-2 md:w-[420px] lg:w-[520px] lg:grid-cols-[.75fr_1fr]">
               <li className="row-span-3">
                 <NavigationMenuLink asChild>
                   <Link
-                    className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-linear-to-b p-4 no-underline outline-hidden transition-all duration-200 select-none focus:shadow-md md:p-6"
-                    href="/products"
+                    className="from-primary/20 to-background flex h-full w-full flex-col justify-end rounded-md bg-linear-to-br p-4 no-underline outline-hidden transition-all duration-200 select-none focus:shadow-md md:p-6"
+                    href="/#features"
                   >
-                    <div className="mb-2 text-lg font-medium sm:mt-4">Test text 1</div>
+                    <div className="mb-2 text-lg font-semibold sm:mt-4">Why teams choose SyncPad</div>
                     <p className="text-muted-foreground text-sm leading-tight">
-                      This is some text that is used for a test. Yada yada yada
+                      Author, review, and discover institutional knowledge with realtime collaboration and
+                      AI-assisted search built on secure workspaces.
                     </p>
                   </Link>
                 </NavigationMenuLink>
               </li>
-              <ListItem href="/" title="Introduction">
-                Re-usable components built using Radix UI and Tailwind CSS.
+              <ListItem href="/#overview" title="Workspace overview">
+                See how documents, comments, and activity come together in one timeline.
               </ListItem>
-              <ListItem href="/" title="Installation">
-                How to install dependencies and structure your app.
+              <ListItem href="/#features" title="Realtime collaboration">
+                Conflict-free editing, inline reviews, and presence indicators for distributed teams.
               </ListItem>
-              <ListItem href="/" title="Typography">
-                Styles for headings, paragraphs, lists...etc
+              <ListItem href="/docs" title="Product documentation">
+                Dive into the roadmap, APIs, and deployment guidance as SyncPad evolves.
               </ListItem>
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
 
         <NavigationMenuItem className="hidden md:block">
-          <NavigationMenuTrigger>Simple</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid w-[200px] gap-4">
-              <li>
-                <NavigationMenuLink asChild>
-                  <Link href="#">Components</Link>
-                </NavigationMenuLink>
-                <NavigationMenuLink asChild>
-                  <Link href="#">Documentation</Link>
-                </NavigationMenuLink>
-                <NavigationMenuLink asChild>
-                  <Link href="#">Blocks</Link>
-                </NavigationMenuLink>
-              </li>
+          <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
+          <NavigationMenuContent className="z-50">
+            <ul className="grid w-[220px] gap-3 p-4">
+              <ListItem href="/about" title="About SyncPad">
+                Learn about the mission and the roadmap behind the product.
+              </ListItem>
+              <ListItem href="/docs" title="Documentation">
+                Get started with environment setup, workflows, and best practices.
+              </ListItem>
+              <ListItem href="/contact" title="Contact">
+                Chat with the team about pilots, integrations, or partnerships.
+              </ListItem>
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
