@@ -14,6 +14,20 @@ vi.mock("next/link", () => {
   };
 });
 
+vi.mock("next/navigation", () => {
+  return {
+    useRouter: () => ({
+      push: vi.fn(),
+      replace: vi.fn(),
+      prefetch: vi.fn(),
+      back: vi.fn(),
+      forward: vi.fn(),
+    }),
+    usePathname: () => "/",
+    useSearchParams: () => new URLSearchParams(),
+  };
+});
+
 // Mock window.matchMedia for components or hooks that use it
 if (!window.matchMedia) {
   window.matchMedia = (query) => ({
@@ -26,4 +40,48 @@ if (!window.matchMedia) {
     removeEventListener: () => {},
     dispatchEvent: () => false,
   });
+}
+
+if (typeof window.IntersectionObserver === "undefined") {
+  class IntersectionObserver {
+    constructor() {
+      // noop
+    }
+    observe() {
+      // noop
+    }
+    unobserve() {
+      // noop
+    }
+    disconnect() {
+      // noop
+    }
+    takeRecords() {
+      return [];
+    }
+  }
+
+  // @ts-expect-error add mock to jsdom window
+  window.IntersectionObserver = IntersectionObserver;
+}
+
+if (typeof window.ResizeObserver === "undefined") {
+  class ResizeObserver {
+    callback: ResizeObserverCallback;
+    constructor(callback: ResizeObserverCallback) {
+      this.callback = callback;
+    }
+    observe() {
+      // noop
+    }
+    unobserve() {
+      // noop
+    }
+    disconnect() {
+      // noop
+    }
+  }
+
+  // @ts-expect-error add mock to jsdom window
+  window.ResizeObserver = ResizeObserver;
 }
