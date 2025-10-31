@@ -32,6 +32,7 @@ import {
   Settings,
   Share2,
   Sparkles,
+  NotebookPen,
   Users,
   UserPlus,
 } from "lucide-react";
@@ -221,8 +222,13 @@ export default function DashboardSidebar() {
 
   return (
     <Sidebar variant={"sidebar"} collapsible={"icon"}>
-      <SidebarHeader>
-        <h1 className="truncate text-center font-semibold tracking-tight">SyncPad</h1>
+      <SidebarHeader className="px-2">
+        <div className="bg-sidebar-accent/20 text-sidebar-foreground flex items-center justify-center gap-2 rounded-md px-2 py-1">
+          <NotebookPen className="size-5 shrink-0" aria-hidden />
+          <span className="text-sm font-semibold uppercase tracking-tight group-data-[collapsible=icon]:hidden">
+            SyncPad
+          </span>
+        </div>
       </SidebarHeader>
       <SidebarSeparator />
       <SidebarContent>
