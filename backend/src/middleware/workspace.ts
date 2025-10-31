@@ -18,10 +18,7 @@ import {
   SHARE_PERMISSION_MAP,
 } from "../types/workspace.js";
 
-import workspaceService from "../services/workspace.service.ts";
-
-
-
+import workspaceService from "../services/workspace.service.js";
 // Resolve identifier precedence: params > query > body.
 const extractFromRequest = (req: Request, key: string): string | undefined => {
   const paramValue = req.params?.[key];
@@ -52,7 +49,10 @@ const extractFromRequest = (req: Request, key: string): string | undefined => {
 };
 
 // Support share tokens from headers or request payloads.
-const extractShareToken = (req: Request, options: Required<Pick<AttachWorkspaceContextOptions, "shareTokenHeader" | "shareTokenParam">>): string | undefined => {
+const extractShareToken = (
+  req: Request,
+  options: Required<Pick<AttachWorkspaceContextOptions, "shareTokenHeader" | "shareTokenParam">>
+): string | undefined => {
   const headerKey = options.shareTokenHeader.toLowerCase();
   const headerValue = req.headers[headerKey];
   if (typeof headerValue === "string" && headerValue) {
@@ -93,7 +93,7 @@ export const attachWorkspaceContext = (
 ): RequestHandler => {
   const {
     workspaceIdParam = DEFAULT_WORKSPACE_ID_PARAM,
-    workspaceLookup = "id",
+    workspaceLookup = "auto",
     requireMembership = true,
     allowShareLinks = false,
     shareTokenParam = DEFAULT_SHARE_TOKEN_PARAM,
@@ -133,18 +133,14 @@ export const attachWorkspaceContext = (
     let shareLink = null;
     if (!membership && allowShareLinks) {
       const token =
-        shareTokenExtractor?.(req) ??
-        extractShareToken(req, { shareTokenHeader, shareTokenParam });
+        shareTokenExtractor?.(req) ?? extractShareToken(req, { shareTokenHeader, shareTokenParam });
 
       if (token) {
         shareLink = await prisma.documentShareLink.findFirst({
           where: {
             token,
             workspaceId: workspace.id,
-            OR: [
-              { expiresAt: null },
-              { expiresAt: { gt: new Date() } },
-            ],
+            OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
           },
         });
       }
@@ -189,9 +185,7 @@ export const attachWorkspaceContext = (
 };
 
 // Guard route handlers by workspace role (super admins always pass).
-export const requireWorkspaceRole = (
-  roles: EffectiveWorkspaceRole[]
-): RequestHandler => {
+export const requireWorkspaceRole = (roles: EffectiveWorkspaceRole[]): RequestHandler => {
   return (req, _res, next) => {
     const context = req.workspaceContext;
 

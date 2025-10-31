@@ -8,8 +8,8 @@ export default function ActivityPage() {
         </p>
       </div>
       <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        Activity insights coming soon. You&apos;ll see a feed powered by the `ActivityLog` model with filters
-        for document, actor, and event type.
+        Activity insights coming soon. You&apos;ll see a feed powered by the `ActivityLog` model
+        with filters for document, actor, and event type.
       </div>
     </div>
   );

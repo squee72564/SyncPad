@@ -4,7 +4,8 @@ export default function AiSettingsPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">AI Settings</h1>
         <p className="text-sm text-muted-foreground">
-          Configure providers, privacy controls, and automation thresholds for workspace intelligence.
+          Configure providers, privacy controls, and automation thresholds for workspace
+          intelligence.
         </p>
       </div>
       <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">

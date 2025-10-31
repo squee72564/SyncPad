@@ -8,8 +8,8 @@ export default function AiQaPage() {
         </p>
       </div>
       <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        Conversational interface coming soon. This experience will blend retrieval-augmented responses
-        with document citations.
+        Conversational interface coming soon. This experience will blend retrieval-augmented
+        responses with document citations.
       </div>
     </div>
   );

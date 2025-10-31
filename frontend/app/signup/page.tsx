@@ -62,7 +62,10 @@ function OnboardingCard({ slide }: { slide: OnboardingSlide }) {
         </div>
         <dl className="grid gap-3 text-sm text-muted-foreground">
           {slide.stats.map((stat) => (
-            <div key={stat.label} className="flex items-center justify-between rounded-lg bg-background/70 px-3 py-2">
+            <div
+              key={stat.label}
+              className="flex items-center justify-between rounded-lg bg-background/70 px-3 py-2"
+            >
               <dt className="font-medium text-foreground/80">{stat.label}</dt>
               <dd className="text-foreground">{stat.value}</dd>
             </div>
@@ -78,7 +81,12 @@ export default function SignUpPage() {
     <div className="grid min-h-screen w-full grid-rows-[auto_1fr] bg-background md:grid-cols-[0.95fr_1.05fr] md:grid-rows-1">
       <div className="relative hidden items-center justify-center overflow-hidden bg-muted/60 p-12 md:flex">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(82,63,255,0.18),_transparent_55%)]" />
-        <Carousel className="relative w-full max-w-lg" opts={{ loop: true, align: "start" }} autoplay autoplayInterval={6500}>
+        <Carousel
+          className="relative w-full max-w-lg"
+          opts={{ loop: true, align: "start" }}
+          autoplay
+          autoplayInterval={6500}
+        >
           <CarouselContent>
             {onboardingSlides.map((slide, index) => (
               <CarouselItem key={index}>
@@ -93,9 +101,12 @@ export default function SignUpPage() {
         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background via-background/60 to-transparent md:hidden" />
         <div className="w-full max-w-lg space-y-10">
           <div className="space-y-3 text-center md:text-left">
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Create your SyncPad workspace</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+              Create your SyncPad workspace
+            </h1>
             <p className="text-sm text-muted-foreground">
-              Start with core collaboration tools and scale to realtime, AI-assisted workflows as your team adopts SyncPad.
+              Start with core collaboration tools and scale to realtime, AI-assisted workflows as
+              your team adopts SyncPad.
             </p>
           </div>
           <SignUp className="w-full" />

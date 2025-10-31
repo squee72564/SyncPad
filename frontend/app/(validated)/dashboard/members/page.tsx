@@ -8,8 +8,8 @@ export default function MembersPage() {
         </p>
       </div>
       <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        Member management UI coming soon. This view will surface owners, admins, editors, commenters,
-        and viewers from the workspace roster.
+        Member management UI coming soon. This view will surface owners, admins, editors,
+        commenters, and viewers from the workspace roster.
       </div>
     </div>
   );

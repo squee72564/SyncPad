@@ -71,8 +71,8 @@ export default function Home() {
               SyncPad keeps every decision, document, and discussion at your team&apos;s fingertips.
             </h1>
             <p className="text-balance text-base text-muted-foreground sm:text-lg">
-              Write together in realtime, search across your institutional knowledge with AI, and deliver
-              updates confidently—without context switching or knowledge silos.
+              Write together in realtime, search across your institutional knowledge with AI, and
+              deliver updates confidently—without context switching or knowledge silos.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Button asChild size="lg">
@@ -94,7 +94,10 @@ export default function Home() {
               </div>
               <dl className="grid gap-6 text-sm text-muted-foreground">
                 {pillars.map((pillar) => (
-                  <div key={pillar.title} className="rounded-xl border border-border/60 bg-background/80 p-4">
+                  <div
+                    key={pillar.title}
+                    className="rounded-xl border border-border/60 bg-background/80 p-4"
+                  >
                     <dt className="text-sm font-semibold text-foreground">{pillar.title}</dt>
                     <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">
                       {pillar.description}
@@ -107,7 +110,10 @@ export default function Home() {
         </section>
 
         <section id="features" className="grid gap-8">
-          <span className="text-primary text-xs font-semibold uppercase tracking-[0.4em]"> Why SyncPad</span>
+          <span className="text-primary text-xs font-semibold uppercase tracking-[0.4em]">
+            {" "}
+            Why SyncPad
+          </span>
           <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
             Designed for distributed teams managing high-stakes knowledge.
           </h2>
@@ -138,18 +144,25 @@ export default function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.35),transparent_55%)]" />
           <div className="relative grid gap-8 px-10 py-12 text-primary-foreground md:grid-cols-[1.2fr_0.8fr] md:items-center">
             <div className="flex flex-col gap-4">
-              <h2 className="text-3xl font-semibold tracking-tight">Ready to unify your knowledge?</h2>
+              <h2 className="text-3xl font-semibold tracking-tight">
+                Ready to unify your knowledge?
+              </h2>
               <p className="text-sm text-primary-foreground/90">
-                SyncPad streamlines document creation, approvals, and discovery so your team can focus on
-                delivering impactful work. Start with local Docker Compose, graduate to cloud-native deployments
-                whenever you are ready.
+                SyncPad streamlines document creation, approvals, and discovery so your team can
+                focus on delivering impactful work. Start with local Docker Compose, graduate to
+                cloud-native deployments whenever you are ready.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg" variant="secondary">
                 <Link href="/signup">Create your workspace</Link>
               </Button>
-              <Button asChild size="lg" variant="ghost" className="text-primary-foreground hover:text-primary">
+              <Button
+                asChild
+                size="lg"
+                variant="ghost"
+                className="text-primary-foreground hover:text-primary"
+              >
                 <Link href="/contact">Talk to us about enterprise</Link>
               </Button>
             </div>

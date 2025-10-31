@@ -8,9 +8,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: "./vitest.setup.ts",
-    include: [
-      "__tests__/**/*.{ts,tsx}"
-    ],
+    include: ["__tests__/**/*.{ts,tsx}"],
     coverage: {
       reporter: ["text", "lcov"],
       exclude: ["next.config.ts", "postcss.config.mjs", "components.json"],

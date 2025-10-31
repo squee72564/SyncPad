@@ -8,8 +8,8 @@ export default function InvitesPage() {
         </p>
       </div>
       <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        Invitation management coming soon. Expect controls for resending, expiring, and elevating invite
-        roles, plus visibility into external share tokens.
+        Invitation management coming soon. Expect controls for resending, expiring, and elevating
+        invite roles, plus visibility into external share tokens.
       </div>
     </div>
   );

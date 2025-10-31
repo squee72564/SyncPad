@@ -8,8 +8,6 @@ describe("Docs page", () => {
     expect(
       screen.getByRole("heading", { name: /syncpad product documentation/i })
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /quickstart/i, level: 2 })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /quickstart/i, level: 2 })).toBeInTheDocument();
   });
 });

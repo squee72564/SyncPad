@@ -8,8 +8,8 @@ export default function AiEmbeddingsPage() {
         </p>
       </div>
       <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        Embedding explorer coming soon. We&apos;ll expose data from the `DocumentEmbedding` table alongside
-        vector store sync health.
+        Embedding explorer coming soon. We&apos;ll expose data from the `DocumentEmbedding` table
+        alongside vector store sync health.
       </div>
     </div>
   );
