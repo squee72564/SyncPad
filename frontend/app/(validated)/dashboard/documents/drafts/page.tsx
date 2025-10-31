@@ -8,8 +8,8 @@ export default function DocumentDraftsPage() {
         </p>
       </div>
       <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        Drafts dashboard coming soon. Expect filters for author, last edit, and review readiness pulled
-        from the `DocumentStatus` field.
+        Drafts dashboard coming soon. Expect filters for author, last edit, and review readiness
+        pulled from the `DocumentStatus` field.
       </div>
     </div>
   );

@@ -8,8 +8,8 @@ export default function DocumentsPage() {
         </p>
       </div>
       <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        Document explorer coming soon. This page will surface the `Document` tree, last edited metadata,
-        and quick filters for status, owner, and tags.
+        Document explorer coming soon. This page will surface the `Document` tree, last edited
+        metadata, and quick filters for status, owner, and tags.
       </div>
     </div>
   );

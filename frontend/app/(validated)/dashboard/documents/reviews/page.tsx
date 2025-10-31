@@ -8,8 +8,8 @@ export default function DocumentReviewsPage() {
         </p>
       </div>
       <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        Review insights coming soon. We&apos;ll aggregate `DocumentComment` threads by status to show blockers
-        and highlight resolved discussions.
+        Review insights coming soon. We&apos;ll aggregate `DocumentComment` threads by status to
+        show blockers and highlight resolved discussions.
       </div>
     </div>
   );

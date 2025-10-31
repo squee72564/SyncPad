@@ -8,8 +8,8 @@ export default function AiJobsPage() {
         </p>
       </div>
       <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        Queue insights coming soon. This screen will list `AiJob` records with status, latency, and retry
-        controls.
+        Queue insights coming soon. This screen will list `AiJob` records with status, latency, and
+        retry controls.
       </div>
     </div>
   );

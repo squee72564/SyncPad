@@ -4,12 +4,13 @@ export default function PublishedDocumentsPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Published Documents</h1>
         <p className="text-sm text-muted-foreground">
-          Browse the canonical, published content that&apos;s ready for consumption across the workspace.
+          Browse the canonical, published content that&apos;s ready for consumption across the
+          workspace.
         </p>
       </div>
       <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        Published library coming soon. This view will highlight review history, publication dates, and
-        share visibility.
+        Published library coming soon. This view will highlight review history, publication dates,
+        and share visibility.
       </div>
     </div>
   );
