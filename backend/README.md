@@ -68,6 +68,13 @@ src/
 └── validations/        # Schema-based request validation
 ```
 
+### API Highlights
+
+- `routes/v1/workspace.route.ts` exposes workspace CRUD endpoints (`GET/POST /workspaces`, `GET/PATCH/DELETE /workspaces/:workspaceId`) with Zod validation and workspace-aware middleware.
+- `controllers/workspace.controller.ts` consolidates request handling using Prisma-backed services wrapped in `catchAsync`.
+- `services/workspace.service.ts` provides database accessors for listing, creating, updating, and deleting workspaces while normalizing slugs and seeding owner memberships.
+- `middleware/workspace.ts` enriches requests with workspace context and now auto-detects CUID vs slug identifiers when `workspaceLookup` is left as `auto`.
+
 ## Scripts
 
 ```json

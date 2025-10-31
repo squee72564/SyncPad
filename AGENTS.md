@@ -24,8 +24,8 @@ Run commands through pnpm to stay inside the correct package context.
 TypeScript is the default language. Prettier (via lint-staged) enforces two-space indentation, double quotes, and trailing commas; run the `pretty` script after sizable refactors. ESLint forbids unused variables unless prefixed with `_`. Backend files stay kebab-case (e.g., `health.route.ts`), and React components use PascalCase default exports. Hooks must start with `use`, and utilities should expose named exports from `lib` folders.
 
 ## Authorization & Validation Layers
-- Workspace-aware access control lives in `backend/src/middleware/workspace.ts`. Compose `attachWorkspaceContext` after Better Auth’s session middleware to load the current workspace, membership role, and share-link permissions, then guard handlers with `requireWorkspaceRole` or `requireWorkspacePermission`.
-- Shared request validation for workspace-scoped routes is in `backend/src/validations/workspace.validations.ts`. Use `workspaceValidations.withWorkspaceScope(z.object({...}))` to merge the `workspaceId` param into any route-specific schema.
+- Workspace-aware access control lives in `backend/src/middleware/workspace.ts`. Compose `attachWorkspaceContext` after Better Auth’s session middleware to load the current workspace, membership role, and share-link permissions, then guard handlers with `requireWorkspaceRole` or `requireWorkspacePermission`. Leave `workspaceLookup` as `auto` to accept either CUIDs or slugs.
+- Shared request validation for workspace-scoped routes is in `backend/src/validations/workspace.validations.ts`. Use the exported schemas (`ListWorkspacesRequestSchema`, `CreateWorkspaceRequestSchema`, `UpdateWorkspaceRequestSchema`, etc.) and `workspaceValidations.withWorkspaceScope(z.object({...}))` to merge the `workspaceId` param into any route-specific schema.
 - Prisma schema now models workspaces, membership, documents, revisions, comments, share links, embeddings, activity logs, and AI jobs. Keep migrations additive and coordinate across the team when altering relationships or enums.
 
 ## Testing Guidelines

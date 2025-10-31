@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type {
   Workspace,
   WorkspaceMember,
@@ -7,6 +8,8 @@ import type {
 } from "../../prisma/generated/prisma-postgres/index.js";
 
 import { Request } from "express";
+import workspaceValidations from "@/validations/workspace.validations.js";
+import { ZodRequest } from "../utils/zodReqeust.ts";
 
 export type WorkspacePermission =
   | "workspace:view"
@@ -30,8 +33,8 @@ export type EffectiveWorkspaceRole = WorkspaceRole | "SUPERADMIN" | "ANONYMOUS";
 
 export interface WorkspaceContext {
   workspace: Workspace;
-  membership?: WorkspaceMember;
-  shareLink?: DocumentShareLink;
+  membership?: WorkspaceMember | undefined;
+  shareLink?: DocumentShareLink | undefined;
   effectiveRole: EffectiveWorkspaceRole;
   permissions: WorkspacePermission[];
 }
@@ -109,7 +112,7 @@ export const DEFAULT_WORKSPACE_ID_PARAM = "workspaceId";
 export const DEFAULT_SHARE_TOKEN_PARAM = "shareToken";
 export const DEFAULT_SHARE_TOKEN_HEADER = "x-share-token";
 
-export type WorkspaceLookupField = "id" | "slug";
+export type WorkspaceLookupField = "id" | "slug" | "auto";
 
 export interface AttachWorkspaceContextOptions {
   workspaceIdParam?: string;
@@ -122,3 +125,27 @@ export interface AttachWorkspaceContextOptions {
 }
 
 export type { WorkspaceRole };
+
+export type ListWorkspacesRequest = ZodRequest<
+  typeof workspaceValidations.ListWorkspacesRequestSchema
+>;
+export type ListWorkspacesArgs = ListWorkspacesRequest["query"];
+
+export type CreateWorkspaceRequest = ZodRequest<
+  typeof workspaceValidations.CreateWorkspaceRequestSchema
+>;
+export type CreateWorkspaceArgs = CreateWorkspaceRequest["body"];
+
+export type GetWorkspaceRequest = ZodRequest<typeof workspaceValidations.GetWorkspaceRequestSchema>;
+
+export type UpdateWorkspaceRequest = ZodRequest<
+  typeof workspaceValidations.UpdateWorkspaceRequestSchema
+>;
+export type UpdateWorkspaceArgs = UpdateWorkspaceRequest["params"] &
+  z.infer<typeof workspaceValidations.UpdateWorkspaceBodySchema>;
+export type UpdateWorkspaceBody = z.infer<typeof workspaceValidations.UpdateWorkspaceBodySchema>;
+
+export type DeleteWorkspaceRequest = ZodRequest<
+  typeof workspaceValidations.DeleteWorkspaceRequestSchema
+>;
+export type DeleteWorkspaceArgs = DeleteWorkspaceRequest["params"];
