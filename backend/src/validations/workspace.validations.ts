@@ -11,36 +11,16 @@ const workspaceIdentifier = z
   .union([z.cuid({ message: "workspaceId must be a valid CUID" }), workspaceSlug])
   .describe("Workspace identifier (cuid or slug)");
 
-const WorkspaceParamsSchema = z.object({
+const WorkspaceShareTokenSchema = z.object({
   params: z.object({
     workspaceId: workspaceIdentifier,
   }),
-});
-
-const WorkspaceShareTokenSchema = WorkspaceParamsSchema.extend({
   query: z
     .object({
       shareToken: z.string().min(1, "shareToken cannot be empty").optional(),
     })
     .optional(),
 });
-
-const withWorkspaceScope = <Schema extends z.ZodObject<z.ZodRawShape>>(schema: Schema) => {
-  const existingParams = schema.shape.params;
-
-  const paramsSchema =
-    existingParams instanceof z.ZodObject
-      ? existingParams.extend({
-          workspaceId: workspaceIdentifier,
-        })
-      : z.object({
-          workspaceId: workspaceIdentifier,
-        });
-
-  return schema.extend({
-    params: paramsSchema,
-  });
-};
 
 const ListWorkspacesRequestSchema = z.object({
   query: z
@@ -61,7 +41,11 @@ const CreateWorkspaceRequestSchema = z.object({
   }),
 });
 
-const GetWorkspaceRequestSchema = withWorkspaceScope(z.object({}));
+const GetWorkspaceRequestSchema = z.object({
+  params: z.object({
+    workspaceId: workspaceIdentifier,
+  }),
+});
 
 const UpdateWorkspaceBodySchema = z
   .object({
@@ -82,19 +66,22 @@ const UpdateWorkspaceBodySchema = z
     }
   );
 
-const UpdateWorkspaceRequestSchema = withWorkspaceScope(
-  z.object({
-    body: UpdateWorkspaceBodySchema,
-  })
-);
+const UpdateWorkspaceRequestSchema = z.object({
+  params: z.object({
+    workspaceId: workspaceIdentifier,
+  }),
+  body: UpdateWorkspaceBodySchema,
+});
 
-const DeleteWorkspaceRequestSchema = withWorkspaceScope(z.object({}));
+const DeleteWorkspaceRequestSchema = z.object({
+  params: z.object({
+    workspaceId: workspaceIdentifier,
+  }),
+});
 
 export default {
   workspaceIdentifier,
-  WorkspaceParamsSchema,
   WorkspaceShareTokenSchema,
-  withWorkspaceScope,
   workspaceSlug,
   ListWorkspacesRequestSchema,
   CreateWorkspaceRequestSchema,
