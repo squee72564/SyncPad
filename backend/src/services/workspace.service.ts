@@ -5,12 +5,14 @@ import type {
   UpdateWorkspaceBody,
   WorkspaceLookupField,
 } from "@/types/workspace.ts";
-import type {
+import {
   Prisma,
   Workspace,
   WorkspaceMember,
   WorkspaceRole,
 } from "../../prisma/generated/prisma-postgres/index.js";
+import ApiError from "@/utils/ApiError.ts";
+import httpStatus from "http-status";
 
 export interface WorkspaceListItem {
   workspace: Workspace;
@@ -103,36 +105,43 @@ const listUserWorkspaces = async (
   return Array.from(resultMap.values());
 };
 
-const createWorkspace = async (
+export const createWorkspace = async (
   args: CreateWorkspaceArgs,
   userId: string
 ): Promise<WorkspaceListItem> => {
   const slug = normalizeSlug(args.slug);
 
-  return prisma.$transaction(async (tx) => {
-    const workspace = await tx.workspace.create({
-      data: {
-        name: args.name,
-        slug,
-        description: args.description ?? null,
-        createdById: userId,
-      },
-    });
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const workspace = await tx.workspace.create({
+        data: {
+          name: args.name,
+          slug,
+          description: args.description ?? null,
+          createdById: userId,
+        },
+      });
 
-    const membership = await tx.workspaceMember.create({
-      data: {
-        workspaceId: workspace.id,
-        userId,
-        role: "OWNER",
-      },
-    });
+      const membership = await tx.workspaceMember.create({
+        data: {
+          workspaceId: workspace.id,
+          userId,
+          role: "OWNER",
+        },
+      });
 
-    return {
-      workspace,
-      membership,
-      effectiveRole: membership.role,
-    };
-  });
+      return {
+        workspace,
+        membership,
+        effectiveRole: membership.role,
+      };
+    });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      throw new ApiError(httpStatus.CONFLICT, `A workspace with slug "${slug}" already exists.`);
+    }
+    throw err;
+  }
 };
 
 const updateWorkspace = async (workspaceId: string, updates: UpdateWorkspaceBody) => {
