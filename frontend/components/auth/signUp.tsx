@@ -42,9 +42,31 @@ export default function SignUp({ className }: { className?: string }) {
     }
   };
 
-  const handleSuccess = async () => {
-    toast.success("Signed up successfully.");
-    router.push("/dashboard");
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    await signUp.email({
+      email,
+      password,
+      name: `${firstName} ${lastName}`,
+      image: image ? await convertImageToBase64(image) : "",
+      callbackURL: "/dashboard",
+      fetchOptions: {
+        onResponse: () => {
+          setLoading(false);
+        },
+        onRequest: () => {
+          setLoading(true);
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message);
+        },
+        onSuccess: async () => {
+          toast.success("Signed up successfully.");
+          router.push("/dashboard");
+        },
+      },
+    });
   };
 
   return (
@@ -56,7 +78,7 @@ export default function SignUp({ className }: { className?: string }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
+        <form className="grid gap-4" onSubmit={handleSignUp}>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="first-name">First name</Label>
@@ -102,6 +124,7 @@ export default function SignUp({ className }: { className?: string }) {
               id="password"
               type="password"
               value={password}
+              required
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
               placeholder="Password"
@@ -113,6 +136,7 @@ export default function SignUp({ className }: { className?: string }) {
               id="password_confirmation"
               type="password"
               value={passwordConfirmation}
+              required
               onChange={(e) => setPasswordConfirmation(e.target.value)}
               autoComplete="new-password"
               placeholder="Confirm Password"
@@ -146,37 +170,10 @@ export default function SignUp({ className }: { className?: string }) {
               </div>
             </div>
           </div>
-          <Button
-            type="submit"
-            className={cn("w-full")}
-            disabled={loading}
-            onClick={async () => {
-              await signUp.email({
-                email,
-                password,
-                name: `${firstName} ${lastName}`,
-                image: image ? await convertImageToBase64(image) : "",
-                callbackURL: "/dashboard",
-                fetchOptions: {
-                  onResponse: () => {
-                    setLoading(false);
-                  },
-                  onRequest: () => {
-                    setLoading(true);
-                  },
-                  onError: (ctx) => {
-                    toast.error(ctx.error.message);
-                  },
-                  onSuccess: async () => {
-                    await handleSuccess();
-                  },
-                },
-              });
-            }}
-          >
+          <Button type="submit" className={cn("w-full")} disabled={loading}>
             {loading ? <Loader2 size={16} className="animate-spin" /> : "Create an account"}
           </Button>
-        </div>
+        </form>
       </CardContent>
       <CardFooter>
         <div className="flex justify-center w-full border-t py-4">
