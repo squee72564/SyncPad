@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Plus, ShieldCheck } from "lucide-react";
+import { Plus, ShieldCheck } from "lucide-react";
 
 import { getWorkspaces } from "@/lib/workspaces";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import WorkspaceActions from "./workspaces/WorkspaceActions";
+import ViewDocumentsButton from "./workspaces/ViewDocumentsButton";
 
 const roleLabels: Record<string, string> = {
   OWNER: "Owner",
@@ -104,12 +105,7 @@ export default async function DashboardPage() {
                 </CardContent>
                 <CardFooter className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Button asChild variant="outline" size="sm">
-                      <Link href="/dashboard/documents" className="inline-flex items-center gap-1">
-                        View documents
-                        <ArrowUpRight className="h-4 w-4" />
-                      </Link>
-                    </Button>
+                    <ViewDocumentsButton workspace={entry.workspace} />
                     <WorkspaceActions summary={entry} />
                   </div>
                   <span
