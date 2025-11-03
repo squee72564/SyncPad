@@ -2,7 +2,7 @@ import prisma from "../lib/prisma.js";
 import type {
   CreateWorkspaceArgs,
   ListWorkspacesArgs,
-  UpdateWorkspaceBody,
+  UpdateWorkspaceArgs,
   WorkspaceLookupField,
 } from "@/types/workspace.ts";
 import {
@@ -144,7 +144,7 @@ export const createWorkspace = async (
   }
 };
 
-const updateWorkspace = async (workspaceId: string, updates: UpdateWorkspaceBody) => {
+const updateWorkspace = async (workspaceId: string, updates: UpdateWorkspaceArgs) => {
   const data: Prisma.WorkspaceUpdateInput = {};
 
   if (updates.name !== undefined) {

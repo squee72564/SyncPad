@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type {
+import {
   Workspace,
   WorkspaceMember,
   DocumentShareLink,
@@ -40,6 +40,7 @@ export interface WorkspaceContext {
 }
 
 // Baseline permissions per workspace role; adjust as policy evolves.
+
 export const ownerPermissions: WorkspacePermission[] = [
   "workspace:view",
   "workspace:manage",
@@ -141,9 +142,8 @@ export type GetWorkspaceRequest = ZodRequest<typeof workspaceValidations.GetWork
 export type UpdateWorkspaceRequest = ZodRequest<
   typeof workspaceValidations.UpdateWorkspaceRequestSchema
 >;
-export type UpdateWorkspaceArgs = UpdateWorkspaceRequest["params"] &
-  z.infer<typeof workspaceValidations.UpdateWorkspaceBodySchema>;
-export type UpdateWorkspaceBody = z.infer<typeof workspaceValidations.UpdateWorkspaceBodySchema>;
+
+export type UpdateWorkspaceArgs = UpdateWorkspaceRequest["body"];
 
 export type DeleteWorkspaceRequest = ZodRequest<
   typeof workspaceValidations.DeleteWorkspaceRequestSchema
