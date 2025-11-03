@@ -61,7 +61,7 @@ export default function CreateWorkspaceForm() {
       const result = await createWorkspaceAction({
         name: formState.name,
         slug: formState.slug,
-        description: formState.description || null,
+        description: formState.description || "",
       });
 
       if (!result.success) {

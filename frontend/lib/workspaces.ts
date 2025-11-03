@@ -1,10 +1,11 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { authorizedFetch } from "./api-client";
+const ACTIVE_WORKSPACE_ID_COOKIE = "active_workspace_id";
+const ACTIVE_WORKSPACE_SLUG_COOKIE = "active_workspace_slug";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
-
-type WorkspaceRecord = {
+export type WorkspaceRecord = {
   id: string;
   name: string;
   slug: string;
@@ -14,7 +15,7 @@ type WorkspaceRecord = {
   createdById: string;
 };
 
-type WorkspaceMembership = {
+export type WorkspaceMembership = {
   id: string;
   workspaceId: string;
   userId: string;
@@ -44,49 +45,6 @@ type UpdateWorkspacePayload = {
   slug?: string;
   description?: string | null;
 };
-
-async function buildCookieHeader(): Promise<string | undefined> {
-  const cookieStore = await cookies();
-  const cookiePairs = cookieStore
-    .getAll()
-    .map((cookie) => `${cookie.name}=${cookie.value}`)
-    .join("; ");
-
-  return cookiePairs.length > 0 ? cookiePairs : undefined;
-}
-
-async function authorizedFetch(path: string, init: RequestInit = {}) {
-  const cookieHeader = await buildCookieHeader();
-  const headers = new Headers(init.headers);
-
-  if (cookieHeader) {
-    headers.set("cookie", cookieHeader);
-  }
-
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers,
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    let message = response.statusText || "Request failed";
-
-    try {
-      const data = await response.json();
-      message = (data?.message as string) ?? (data?.error as string) ?? message;
-    } catch {
-      const fallback = await response.text();
-      if (fallback) {
-        message = fallback;
-      }
-    }
-
-    throw new Error(message);
-  }
-
-  return response;
-}
 
 export async function getWorkspaces(options: { includeMembership?: boolean } = {}) {
   const query = new URLSearchParams();
@@ -135,4 +93,86 @@ export async function updateWorkspace(workspaceId: string, payload: UpdateWorksp
   });
 
   return (await response.json()) as { workspace: WorkspaceRecord };
+}
+
+type WorkspaceSelectionCookies =
+  | {
+      workspaceId?: string;
+      workspaceSlug?: string;
+    }
+  | undefined;
+
+export async function readActiveWorkspaceSelection(): Promise<WorkspaceSelectionCookies> {
+  const cookieStore = await cookies();
+
+  const workspaceId = cookieStore.get(ACTIVE_WORKSPACE_ID_COOKIE)?.value;
+  const workspaceSlug = cookieStore.get(ACTIVE_WORKSPACE_SLUG_COOKIE)?.value;
+
+  if (!workspaceId && !workspaceSlug) {
+    return undefined;
+  }
+
+  return {
+    workspaceId: workspaceId ?? undefined,
+    workspaceSlug: workspaceSlug ?? undefined,
+  };
+}
+
+export async function setActiveWorkspaceSelection(workspace: Pick<WorkspaceRecord, "id" | "slug">) {
+  const cookieStore = await cookies();
+
+  cookieStore.set(ACTIVE_WORKSPACE_ID_COOKIE, workspace.id, {
+    httpOnly: false,
+    sameSite: "lax",
+    path: "/",
+  });
+
+  cookieStore.set(ACTIVE_WORKSPACE_SLUG_COOKIE, workspace.slug, {
+    httpOnly: false,
+    sameSite: "lax",
+    path: "/",
+  });
+}
+
+export async function clearActiveWorkspaceSelection() {
+  const cookieStore = await cookies();
+  cookieStore.delete(ACTIVE_WORKSPACE_ID_COOKIE);
+  cookieStore.delete(ACTIVE_WORKSPACE_SLUG_COOKIE);
+}
+
+export type ActiveWorkspaceSummary = WorkspaceSummary | null;
+
+export async function resolveActiveWorkspace(options?: {
+  workspaces?: WorkspaceSummary[];
+}): Promise<{
+  workspaces: WorkspaceSummary[];
+  activeWorkspace: ActiveWorkspaceSummary;
+}> {
+  const initialSelection = await readActiveWorkspaceSelection();
+  const source =
+    options?.workspaces ?? (await getWorkspaces({ includeMembership: true })).workspaces;
+
+  if (!initialSelection) {
+    return {
+      workspaces: source,
+      activeWorkspace: null,
+    };
+  }
+
+  const match = source.find((entry) => {
+    if (initialSelection.workspaceId && entry.workspace.id === initialSelection.workspaceId) {
+      return true;
+    }
+
+    if (initialSelection.workspaceSlug && entry.workspace.slug === initialSelection.workspaceSlug) {
+      return true;
+    }
+
+    return false;
+  });
+
+  return {
+    workspaces: source,
+    activeWorkspace: match ?? null,
+  };
 }
