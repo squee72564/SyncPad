@@ -35,8 +35,12 @@ import {
   NotebookPen,
   Users,
   UserPlus,
+  FileSearch,
+  FileLock,
 } from "lucide-react";
 import { type LucideIcon } from "lucide-react";
+import type { WorkspaceSummary } from "@/lib/workspaces";
+import WorkspaceSwitcher from "./workspaces/WorkspaceSwitcher";
 
 type NavItem = {
   title: string;
@@ -57,15 +61,7 @@ type NavSection = {
   items: NavItem[];
 };
 
-const mockCounts = {
-  invites: 3,
-  drafts: 6,
-  shareLinks: 4,
-  reviewThreads: 9,
-  aiJobs: 2,
-};
-
-const navSections: NavSection[] = [
+const buildNavSections = (): NavSection[] => [
   {
     label: "Workspace",
     action: {
@@ -91,7 +87,6 @@ const navSections: NavSection[] = [
         title: "Invites & Access",
         href: "/dashboard/invites",
         icon: UserPlus,
-        badge: String(mockCounts.invites),
         tooltip: "Pending invitations",
       },
       {
@@ -120,8 +115,13 @@ const navSections: NavSection[] = [
         title: "Drafts",
         href: "/dashboard/documents/drafts",
         icon: FilePenLine,
-        badge: String(mockCounts.drafts),
         tooltip: "Documents in progress",
+      },
+      {
+        title: "In Review",
+        href: "/dashboard/documents/review",
+        icon: FileSearch,
+        tooltip: "Documents in review",
       },
       {
         title: "Published",
@@ -130,17 +130,21 @@ const navSections: NavSection[] = [
         tooltip: "Published workspace docs",
       },
       {
+        title: "Archived",
+        href: "/dashboard/documents/archive",
+        icon: FileLock,
+        tooltip: "Archived workspace docs",
+      },
+      {
         title: "Share Links",
         href: "/dashboard/documents/share-links",
         icon: Share2,
-        badge: String(mockCounts.shareLinks),
         tooltip: "Public and guest access",
       },
       {
         title: "Review Threads",
         href: "/dashboard/documents/reviews",
         icon: MessageSquareMore,
-        badge: String(mockCounts.reviewThreads),
         tooltip: "Open comments & suggestions",
       },
     ],
@@ -152,7 +156,6 @@ const navSections: NavSection[] = [
         title: "AI Job Queue",
         href: "/dashboard/ai/jobs",
         icon: Bot,
-        badge: String(mockCounts.aiJobs),
         tooltip: "Embedding & summary jobs",
       },
       {
@@ -217,8 +220,14 @@ const renderNavSection = (section: NavSection, pathname: string) => {
   );
 };
 
-export default function DashboardSidebar() {
+type DashboardSidebarProps = {
+  workspaces: WorkspaceSummary[];
+  activeWorkspaceId: string | null;
+};
+
+export default function DashboardSidebar({ workspaces, activeWorkspaceId }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const navSections = buildNavSections();
 
   return (
     <Sidebar variant={"sidebar"} collapsible={"icon"}>
@@ -228,6 +237,9 @@ export default function DashboardSidebar() {
           <span className="text-sm font-semibold uppercase tracking-tight group-data-[collapsible=icon]:hidden">
             SyncPad
           </span>
+        </div>
+        <div className="group-data-[collapsible=icon]:hidden mt-3">
+          <WorkspaceSwitcher workspaces={workspaces} activeWorkspaceId={activeWorkspaceId} />
         </div>
       </SidebarHeader>
       <SidebarSeparator />
