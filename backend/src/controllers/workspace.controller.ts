@@ -11,7 +11,6 @@ import {
   GetWorkspaceRequest,
   ListWorkspacesArgs,
   ListWorkspacesRequest,
-  UpdateWorkspaceBody,
   UpdateWorkspaceRequest,
 } from "../types/workspace.ts";
 
@@ -79,8 +78,7 @@ const updateWorkspace = catchAsync(
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
     }
 
-    const updates = req.body as UpdateWorkspaceBody;
-    const workspace = await workspaceService.updateWorkspace(context.workspace.id, updates);
+    const workspace = await workspaceService.updateWorkspace(context.workspace.id, req.body);
     res.status(httpStatus.OK).json({ workspace });
   }
 );
