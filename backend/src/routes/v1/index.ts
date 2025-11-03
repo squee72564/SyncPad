@@ -4,6 +4,7 @@ import authRoute from "./auth.route.js";
 import userRoute from "./user.route.js";
 import adminRoute from "./admin.route.js";
 import workspaceRoute from "./workspace.route.js";
+import documentRoute from "./document.route.js";
 
 const router: Router = express.Router();
 
@@ -23,6 +24,10 @@ const defaultRoutes = [
   {
     path: "/workspaces",
     route: workspaceRoute,
+  },
+  {
+    path: "/workspaces/:workspaceId/documents",
+    route: documentRoute,
   },
 ] as { path: string; route: Router }[];
 
