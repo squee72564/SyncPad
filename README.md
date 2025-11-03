@@ -11,6 +11,8 @@ SyncPad is an emerging collaborative knowledge base that blends team wikis with 
 ## Current Architecture (In Progress)
 - **Frontend**: Next.js 15 (React 19) application in `frontend/` with a refreshed landing page, auth flows, dashboard shells, and Vitest/Testing Library coverage.
 - **Backend**: Express 5 TypeScript service in `backend/` handling REST APIs, auth, workspace-aware middleware, rate limiting, logging, and Prisma integration.
+- **Documents API**: Workspace-scoped document CRUD is now available under `v1/workspaces/:workspaceId/documents` with validation, RBAC, slug uniqueness checks, and publish guards.
+- **Dashboard UX**: Next.js dashboard now includes a workspace switcher, API-backed document listings (all, drafts, published), and forms for creating/updating document metadata.
 - **Data Layer**: PostgreSQL via Prisma ORM. The schema now models workspaces, membership roles, documents, revisions, comments, share links, embeddings, activity logs, and AI jobs. The roadmap still includes a vector store (pgvector, Pinecone, etc.) for retrieval-augmented generation.
 - **Gateway & Integration**: API gateway layer to broker frontend requests, enforce rate limiting, and host future service-to-service calls.
 - **Collaboration Stack**: Planned WebSocket broker with CRDT-powered document state and optional pub/sub bridge for horizontal scaling.

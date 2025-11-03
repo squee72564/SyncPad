@@ -71,8 +71,9 @@ src/
 ### API Highlights
 
 - `routes/v1/workspace.route.ts` exposes workspace CRUD endpoints (`GET/POST /workspaces`, `GET/PATCH/DELETE /workspaces/:workspaceId`) with Zod validation and workspace-aware middleware.
-- `controllers/workspace.controller.ts` consolidates request handling using Prisma-backed services wrapped in `catchAsync`.
-- `services/workspace.service.ts` provides database accessors for listing, creating, updating, and deleting workspaces while normalizing slugs and seeding owner memberships.
+- `routes/v1/document.route.ts` adds document CRUD under `/workspaces/:workspaceId/documents`, reusing workspace context middleware, enforcing document permissions, and honoring share-link access when configured.
+- `controllers/workspace.controller.ts` and `controllers/document.controller.ts` consolidate request handling using Prisma-backed services wrapped in `catchAsync`.
+- `services/workspace.service.ts` and `services/document.service.ts` provide database accessors for listing, creating, updating, and deleting workspaces/documents while normalizing slugs, validating parent relationships, and surfacing friendly Prisma conflicts.
 - `middleware/workspace.ts` enriches requests with workspace context and now auto-detects CUID vs slug identifiers when `workspaceLookup` is left as `auto`.
 
 ## Scripts
@@ -181,52 +182,3 @@ src/
    ```bash
    To Be Added Soon
    ```
-
-### Important: Use Better Auth Client Libraries
-
-While you can make direct HTTP requests to `/auth` endpoints, **it's strongly recommended to use Better Auth's client libraries** for the following reasons:
-
-- **Type Safety**: Full TypeScript support with inferred types from your auth configuration
-- **Automatic Session Management**: Handles tokens, cookies, and session refresh automatically
-- **Error Handling**: Standardized error responses and states
-- **Framework Integration**: Official plugins for React, Vue, Svelte, Next.js, and more
-
-### Client Setup Example
-
-**React/Next.js:**
-
-```typescript
-import { createAuthClient } from "better-auth/react";
-
-export const authClient = createAuthClient({
-  baseURL: "http://localhost:3000", // Your API URL
-});
-
-// Usage in components
-const { signIn, signUp, signOut, session } = authClient;
-```
-
-**Vanilla JavaScript:**
-
-```typescript
-import { createAuthClient } from "better-auth/client";
-
-export const authClient = createAuthClient({
-  baseURL: "http://localhost:3000",
-});
-
-// Make authenticated requests
-await authClient.signIn.email({
-  email: "user@example.com",
-  password: "password123",
-});
-```
-
-### Available Client Libraries
-
-- `better-auth/react` - React hooks and components
-- `better-auth/vue` - Vue composables
-- `better-auth/svelte` - Svelte stores
-- `better-auth/client` - Vanilla JS/framework-agnostic
-
-For more information, see the [Better Auth documentation](https://www.better-auth.com/docs/basic-usage#client-side).
