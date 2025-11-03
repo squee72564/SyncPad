@@ -6,7 +6,7 @@ import type {
   CreateDocumentArgs,
   ListDocumentsQuery,
   UpdateDocumentBody,
-} from "@/types/document.ts";
+} from "@/types/document.types.ts";
 import { Prisma } from "../../prisma/generated/prisma-postgres/index.js";
 
 // Align slug format for uniqueness checks.

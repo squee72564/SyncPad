@@ -4,7 +4,7 @@ import type {
   ListWorkspacesArgs,
   UpdateWorkspaceArgs,
   WorkspaceLookupField,
-} from "@/types/workspace.ts";
+} from "@/types/workspace.types.ts";
 import {
   Prisma,
   Workspace,

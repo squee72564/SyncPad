@@ -16,7 +16,7 @@ import {
   ALL_PERMISSIONS,
   WORKSPACE_ROLE_PERMISSIONS,
   SHARE_PERMISSION_MAP,
-} from "../types/workspace.js";
+} from "../types/workspace.types.ts";
 
 import workspaceService from "../services/workspace.service.js";
 // Resolve identifier precedence: params > query > body.

@@ -5,7 +5,7 @@ import type { Request, Response, NextFunction } from "express";
 import type { User } from "better-auth";
 import type { UserWithRole } from "better-auth/plugins";
 
-import type { WorkspaceContext } from "../types/workspace.js";
+import type { WorkspaceContext } from "../types/workspace.types.ts";
 import type {
   Document,
   Workspace,

@@ -1,6 +1,6 @@
 import { User, Session } from "better-auth";
 import { SessionWithImpersonatedBy, UserWithRole } from "better-auth/plugins";
-import type { WorkspaceContext } from "./workspace.js";
+import type { WorkspaceContext } from "./workspace.types.ts";
 
 declare global {
   /* eslint-disable @typescript-eslint/no-namespace */

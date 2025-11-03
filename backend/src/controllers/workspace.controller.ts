@@ -12,7 +12,7 @@ import {
   ListWorkspacesArgs,
   ListWorkspacesRequest,
   UpdateWorkspaceRequest,
-} from "../types/workspace.ts";
+} from "../types/workspace.types.ts";
 
 const listWorkspaces = catchAsync(
   async (req: ListWorkspacesRequest, res: Response, _next: NextFunction) => {

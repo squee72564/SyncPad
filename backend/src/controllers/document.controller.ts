@@ -5,16 +5,12 @@ import catchAsync from "../utils/catchAsync.js";
 import ApiError from "../utils/ApiError.js";
 import documentService from "../services/document.service.js";
 import {
-  type CreateDocumentArgs,
   type CreateDocumentRequest,
-  type DeleteDocumentParams,
   type DeleteDocumentRequest,
-  type GetDocumentParams,
   type GetDocumentRequest,
   type ListDocumentsRequest,
-  type UpdateDocumentParams,
   type UpdateDocumentRequest,
-} from "../types/document.ts";
+} from "../types/document.types.ts";
 
 // Return all documents in a workspace, optionally filtered by parent/status, respecting permission scope.
 const listDocuments = catchAsync(
