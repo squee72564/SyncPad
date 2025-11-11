@@ -5,8 +5,11 @@
 - [done] Add document validations, types, services, controller, and `v1/workspaces/:workspaceId/documents` routes with workspace-aware permissions, slug uniqueness handling, and publish guards.
 - Add controllers/services that mirror the remaining Prisma schema (member role changes, invite acceptance, comment resolution, AI job queue operations). Workspace & document scaffolding now exist—extend it for additional resources.
 - [done] Extend Zod request validation using `workspaceValidations` helpers so every workspace-scoped route validates `workspaceId` + payload shape before hitting controllers.
+- [done] Add workspace invite functionality based on the `WorkspaceInvite` table in `backend/prisma/schema.prisma`. Workspace invitations are now managed at `/v1/workspaces/:workspaceId/invites` (list/create/resend/revoke) plus `/v1/workspaces/invites/:token/accept`, enforcing `member:invite`, token expiry, duplicate checks, and membership creation on acceptance.
+- Wire email delivery + frontend UX for invites (send email templates when creating/resending invites, expose copyable invite links in dev, and add accept flows that handle login/signup + success states).
 - Cover the workspace/document middleware, validators, and service flows with Vitest + Supertest (membership, share links, permission failures, happy paths).
 - Seed or fixture sample workspace data to accelerate local testing and future Playwright flows.
+
 
 ## Frontend
 - [in-progress] Replace dashboard placeholders with API-driven data once backend routes are ready (documents now integrate with the API; members, invites, and AI views still pending).
