@@ -2,7 +2,7 @@ import request from "supertest";
 import httpStatus from "http-status";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Request, Response, NextFunction } from "express";
-import type { User } from "better-auth";
+import { email, type User } from "better-auth";
 import type { UserWithRole } from "better-auth/plugins";
 
 import type { WorkspaceContext } from "../types/workspace.types.ts";
@@ -93,6 +93,11 @@ const cloneContext = (): WorkspaceContext => ({
   permissions: [...workspaceContext.permissions],
 });
 
+const emailServiceMock = vi.hoisted(() => ({
+  queueWorkspaceInviteEmail: vi.fn(),
+  buildWorkspaceInviteAcceptUrl: vi.fn((token: string) => `http://localhost:3000/invites/${token}`)
+}));
+
 const workspaceServiceMock = vi.hoisted(() => ({
   listUserWorkspaces: vi.fn(),
   createWorkspace: vi.fn(),
@@ -134,6 +139,11 @@ vi.mock("../services/workspace.service.js", () => ({
   default: workspaceServiceMock,
 }));
 
+vi.mock("../services/email.service.js", () => ({
+  __esModule: true,
+  default: emailServiceMock,
+}));
+
 // Import after mocks so they receive the mocked dependencies.
 import app from "../app.js";
 
@@ -150,6 +160,8 @@ describe("Workspace routes", () => {
     workspaceServiceMock.resendWorkspaceInvite.mockReset();
     workspaceServiceMock.revokeWorkspaceInvite.mockReset();
     workspaceServiceMock.acceptWorkspaceInvite.mockReset();
+    emailServiceMock.queueWorkspaceInviteEmail.mockReset();
+    emailServiceMock.buildWorkspaceInviteAcceptUrl.mockClear();
 
     workspaceContext.workspace = { ...baseWorkspace };
     workspaceContext.membership = { ...baseMembership };
@@ -325,9 +337,12 @@ describe("Workspace routes", () => {
       expect.objectContaining({
         id: baseWorkspaceInvite.id,
         email: baseWorkspaceInvite.email,
+        acceptUrl: expect.stringContaining(`/invites/${baseWorkspaceInvite.token}`),
       })
     );
     expect(response.body.invites[0].token).toBeUndefined();
+    expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledWith(baseWorkspaceInvite.token);
+    expect(emailServiceMock.queueWorkspaceInviteEmail).not.toHaveBeenCalled();
     expect(workspaceServiceMock.listWorkspaceInvites).toHaveBeenCalledWith(baseWorkspace.id);
   });
 
@@ -353,15 +368,25 @@ describe("Workspace routes", () => {
         id: baseWorkspaceInvite.id,
         email: baseWorkspaceInvite.email,
         role: baseWorkspaceInvite.role,
+        acceptUrl: expect.stringContaining(`/invites/${baseWorkspaceInvite.token}`),
       })
     );
     expect(response.body.invite.token).toBeUndefined();
+    expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledWith(baseWorkspaceInvite.token);
     expect(workspaceServiceMock.createWorkspaceInvite).toHaveBeenCalledWith({
       workspaceId: baseWorkspace.id,
       email: baseWorkspaceInvite.email,
       role: baseWorkspaceInvite.role,
       invitedById: TEST_USER_ID,
     });
+    expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledTimes(1);
+    expect(emailServiceMock.queueWorkspaceInviteEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        invite: inviteWithInviter,
+        workspace: expect.objectContaining({ id: baseWorkspace.id }),
+        acceptUrl: expect.stringContaining(`/invites/${baseWorkspaceInvite.token}`),
+      })
+    );
   });
 
   it("resends a workspace invite", async () => {
@@ -379,16 +404,22 @@ describe("Workspace routes", () => {
     const response = await request(app).post(
       `/v1/workspaces/${baseWorkspace.id}/invites/${baseWorkspaceInvite.id}/resend`
     );
-    
-    console.log(response.body);
 
     expect(response.status).toBe(httpStatus.OK);
+    expect(response.body.invite).toEqual(
+      expect.objectContaining({
+        id: baseWorkspaceInvite.id,
+        acceptUrl: expect.stringContaining(`/invites/${baseWorkspaceInvite.token}`),
+      })
+    );
     expect(response.body.invite.token).toBeUndefined();
+    expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledWith(baseWorkspaceInvite.token);
     expect(workspaceServiceMock.resendWorkspaceInvite).toHaveBeenCalledWith(
       baseWorkspace.id,
       baseWorkspaceInvite.id,
       TEST_USER_ID
     );
+    expect(emailServiceMock.queueWorkspaceInviteEmail).toHaveBeenCalledTimes(1);
   });
 
   it("revokes a workspace invite", async () => {
