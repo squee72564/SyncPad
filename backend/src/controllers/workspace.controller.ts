@@ -8,6 +8,7 @@ import {
   CreateWorkspaceArgs,
   CreateWorkspaceRequest,
   DeleteWorkspaceRequest,
+  GetWorkspaceMembersRequest,
   GetWorkspaceRequest,
   ListWorkspacesArgs,
   ListWorkspacesRequest,
@@ -70,6 +71,20 @@ const getWorkspace = catchAsync(
   }
 );
 
+const getWorkspaceMembers = catchAsync(
+  async (req: GetWorkspaceMembersRequest, res: Response, _next: NextFunction) => {
+      const context = req.workspaceContext;
+
+      if (!context) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
+      }
+
+      const workspaceMembers = await workspaceService.getWorkspaceMembers(req.params);
+
+      res.status(httpStatus.OK).json(workspaceMembers);
+  }
+);
+
 const updateWorkspace = catchAsync(
   async (req: UpdateWorkspaceRequest, res: Response, _next: NextFunction) => {
     const context = req.workspaceContext;
@@ -100,6 +115,7 @@ export default {
   listWorkspaces,
   createWorkspace,
   getWorkspace,
+  getWorkspaceMembers,
   updateWorkspace,
   deleteWorkspace,
 };

@@ -1,6 +1,7 @@
 import prisma from "../lib/prisma.js";
 import type {
   CreateWorkspaceArgs,
+  GetWorkspaceMembersArgs,
   ListWorkspacesArgs,
   UpdateWorkspaceArgs,
   WorkspaceLookupField,
@@ -54,6 +55,26 @@ const getWorkspaceMemeber = async (workspaceId: string, userId: string) => {
       },
     },
   });
+};
+
+const getWorkspaceMembers = async (args: GetWorkspaceMembersArgs) => {
+  return prisma.workspaceMember.findMany({
+    where: { workspaceId: args.workspaceId },
+    select: {
+      role: true,
+      createdAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        }
+      }
+    },
+    orderBy: {
+      createdAt: "asc",
+    }
+  })
 };
 
 const listUserWorkspaces = async (
@@ -174,6 +195,7 @@ const deleteWorkspace = async (workspaceId: string) => {
 export default {
   getWorkspaceByIdentifier,
   getWorkspaceMemeber,
+  getWorkspaceMembers,
   listUserWorkspaces,
   createWorkspace,
   updateWorkspace,

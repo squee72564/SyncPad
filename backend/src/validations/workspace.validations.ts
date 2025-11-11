@@ -47,36 +47,49 @@ const GetWorkspaceRequestSchema = z.object({
   }),
 });
 
-const UpdateWorkspaceBodySchema = z
-  .object({
-    name: z
-      .string()
-      .min(1, "workspace name is required")
-      .max(120, "name must be 120 characters or less")
-      .optional(),
-    slug: workspaceSlug.optional(),
-    description: z
-      .union([z.string().max(512, "description must be 512 characters or less"), z.null()])
-      .optional(),
-  })
-  .refine(
-    (data) => data.name !== undefined || data.slug !== undefined || data.description !== undefined,
-    {
-      message: "At least one field must be provided",
-    }
-  );
-
 const UpdateWorkspaceRequestSchema = z.object({
   params: z.object({
     workspaceId: workspaceIdentifier,
   }),
-  body: UpdateWorkspaceBodySchema,
+  body: z
+    .object({
+      name: z
+        .string()
+        .min(1, "workspace name is required")
+        .max(120, "name must be 120 characters or less")
+        .optional(),
+      slug: workspaceSlug.optional(),
+      description: z
+        .union([z.string().max(512, "description must be 512 characters or less"), z.null()])
+        .optional(),
+    })
+    .refine(
+      (data) => data.name !== undefined || data.slug !== undefined || data.description !== undefined,
+      {
+        message: "At least one field must be provided",
+      }
+    )
 });
 
 const DeleteWorkspaceRequestSchema = z.object({
   params: z.object({
     workspaceId: workspaceIdentifier,
   }),
+});
+
+const GetWorkspaceMembersRequestSchema = z.object({
+  params: z.object({
+    workspaceId: workspaceIdentifier,
+  }),
+});
+
+const WorkspaceInviteRequestSchema = z.object({
+  params: z.object({
+    workspaceId: workspaceIdentifier,
+  }),
+  body: z.object({
+    userId: z.cuid()
+  })
 });
 
 export default {
@@ -88,5 +101,6 @@ export default {
   GetWorkspaceRequestSchema,
   UpdateWorkspaceRequestSchema,
   DeleteWorkspaceRequestSchema,
-  UpdateWorkspaceBodySchema,
+  GetWorkspaceMembersRequestSchema,
+  WorkspaceInviteRequestSchema,
 };

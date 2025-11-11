@@ -52,4 +52,14 @@ router
     workspaceController.deleteWorkspace
   );
 
+router
+  .route("/:workspaceId/members")
+  .get(
+    auth([...defaultRoles, ...adminRoles]),
+    validate(workspaceValidations.GetWorkspaceMembersRequestSchema),
+    attachWorkspaceContext(),
+    requireWorkspacePermission("workspace:view"),
+    workspaceController.getWorkspaceMembers
+  )
+
 export default router;

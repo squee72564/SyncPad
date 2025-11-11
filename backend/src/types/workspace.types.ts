@@ -149,3 +149,6 @@ export type DeleteWorkspaceRequest = ZodRequest<
   typeof workspaceValidations.DeleteWorkspaceRequestSchema
 >;
 export type DeleteWorkspaceArgs = DeleteWorkspaceRequest["params"];
+
+export type GetWorkspaceMembersRequest = ZodRequest<typeof workspaceValidations.GetWorkspaceMembersRequestSchema>;
+export type GetWorkspaceMembersArgs = GetWorkspaceMembersRequest["params"];
