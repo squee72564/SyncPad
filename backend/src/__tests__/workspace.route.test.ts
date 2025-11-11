@@ -95,7 +95,7 @@ const cloneContext = (): WorkspaceContext => ({
 
 const emailServiceMock = vi.hoisted(() => ({
   queueWorkspaceInviteEmail: vi.fn(),
-  buildWorkspaceInviteAcceptUrl: vi.fn((token: string) => `http://localhost:3000/invites/${token}`)
+  buildWorkspaceInviteAcceptUrl: vi.fn((token: string) => `http://localhost:3000/invites/${token}`),
 }));
 
 const workspaceServiceMock = vi.hoisted(() => ({
@@ -341,7 +341,9 @@ describe("Workspace routes", () => {
       })
     );
     expect(response.body.invites[0].token).toBeUndefined();
-    expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledWith(baseWorkspaceInvite.token);
+    expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledWith(
+      baseWorkspaceInvite.token
+    );
     expect(emailServiceMock.queueWorkspaceInviteEmail).not.toHaveBeenCalled();
     expect(workspaceServiceMock.listWorkspaceInvites).toHaveBeenCalledWith(baseWorkspace.id);
   });
@@ -372,7 +374,9 @@ describe("Workspace routes", () => {
       })
     );
     expect(response.body.invite.token).toBeUndefined();
-    expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledWith(baseWorkspaceInvite.token);
+    expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledWith(
+      baseWorkspaceInvite.token
+    );
     expect(workspaceServiceMock.createWorkspaceInvite).toHaveBeenCalledWith({
       workspaceId: baseWorkspace.id,
       email: baseWorkspaceInvite.email,
@@ -413,7 +417,9 @@ describe("Workspace routes", () => {
       })
     );
     expect(response.body.invite.token).toBeUndefined();
-    expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledWith(baseWorkspaceInvite.token);
+    expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledWith(
+      baseWorkspaceInvite.token
+    );
     expect(workspaceServiceMock.resendWorkspaceInvite).toHaveBeenCalledWith(
       baseWorkspace.id,
       baseWorkspaceInvite.id,

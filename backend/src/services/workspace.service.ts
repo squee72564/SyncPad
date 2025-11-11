@@ -10,7 +10,12 @@ import type {
   WorkspaceLookupField,
   WorkspaceInviteRole,
 } from "@/types/workspace.types.ts";
-import { Prisma, Workspace, WorkspaceMember, WorkspaceRole } from "../../prisma/generated/prisma-postgres/index.js";
+import {
+  Prisma,
+  Workspace,
+  WorkspaceMember,
+  WorkspaceRole,
+} from "../../prisma/generated/prisma-postgres/index.js";
 import ApiError from "@/utils/ApiError.ts";
 import httpStatus from "http-status";
 
@@ -282,7 +287,10 @@ const upsertWorkspaceInvite = async (
 };
 
 const createWorkspaceInvite = async (
-  args: Omit<CreateWorkspaceInviteArgs, "workspaceId"> & { workspaceId: string; invitedById: string }
+  args: Omit<CreateWorkspaceInviteArgs, "workspaceId"> & {
+    workspaceId: string;
+    invitedById: string;
+  }
 ) => {
   const email = normalizeEmail(args.email);
   await ensureUserIsNotAlreadyMember(args.workspaceId, email);
