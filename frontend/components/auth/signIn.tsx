@@ -35,7 +35,8 @@ export default function SignIn({ className }: { className?: string }) {
           onResponse: async (ctx) => {
             setLoading(false);
             if (!ctx.response.ok) {
-              toast.error(ctx.response.statusText);
+              const error: { code: string; message: string } = await ctx.response.json();
+              toast.error(`${ctx.response.statusText}: ${error.message}`);
               return;
             }
 
