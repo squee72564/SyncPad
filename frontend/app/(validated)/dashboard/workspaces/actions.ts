@@ -9,7 +9,13 @@ import {
   readActiveWorkspaceSelection,
   setActiveWorkspaceSelection,
   updateWorkspace,
+  getWorkspaceMembers,
+  getWorkspaceMembersResult,
 } from "@/lib/workspaces";
+
+function revalidatePaths(paths: string[]): void {
+  paths.forEach((path) => revalidatePath(path));
+}
 
 export type CreateWorkspaceInput = {
   name: string;
@@ -49,7 +55,7 @@ export async function createWorkspaceAction(
       description: input.description ?? null,
     });
 
-    revalidatePath("/dashboard");
+    revalidatePaths(["/dashboard"]);
 
     return {
       success: true,
@@ -98,7 +104,7 @@ export async function updateWorkspaceAction(
   try {
     const result = await updateWorkspace(workspaceId, updates);
 
-    revalidatePath("/dashboard");
+    revalidatePaths(["/dashboard"]);
 
     return {
       success: true,
@@ -123,11 +129,15 @@ export async function deleteWorkspaceAction(workspaceId: string): Promise<Create
       await clearActiveWorkspaceSelection();
     }
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/documents");
-    revalidatePath("/dashboard/documents/drafts");
-    revalidatePath("/dashboard/documents/published");
-    revalidatePath("/dashboard/documents/new");
+    revalidatePaths([
+      "/dashboard",
+      "/dashboard/documents",
+      "/dashboard/documents/new",
+      "/dashboard/documents/drafts",
+      "/dashboard/documents/review",
+      "/dashboard/documents/archived",
+      "/dashboard/documents/published",
+    ]);
 
     return {
       success: true,
@@ -160,15 +170,26 @@ export async function setActiveWorkspaceAction(
 
   await setActiveWorkspaceSelection(match.workspace);
 
-  revalidatePath("/dashboard");
-  revalidatePath("/dashboard/documents");
-  revalidatePath("/dashboard/documents/new");
-  revalidatePath("/dashboard/documents/drafts");
-  revalidatePath("/dashboard/documents/published");
+  revalidatePaths([
+    "/dashboard",
+    "/dashboard/documents",
+    "/dashboard/documents/new",
+    "/dashboard/documents/drafts",
+    "/dashboard/documents/review",
+    "/dashboard/documents/archived",
+    "/dashboard/documents/published",
+  ]);
 
   return {
     success: true,
     workspaceId: match.workspace.id,
     slug: match.workspace.slug,
   };
+}
+
+export async function getWorkspaceMembersAction(
+  workspaceId: string
+): Promise<getWorkspaceMembersResult[]> {
+  const data = (await getWorkspaceMembers(workspaceId)) as getWorkspaceMembersResult[];
+  return data;
 }
