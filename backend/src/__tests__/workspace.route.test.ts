@@ -6,7 +6,11 @@ import type { User } from "better-auth";
 import type { UserWithRole } from "better-auth/plugins";
 
 import type { WorkspaceContext } from "../types/workspace.types.ts";
-import type { Workspace, WorkspaceMember } from "../../prisma/generated/prisma-postgres/index.js";
+import type {
+  Workspace,
+  WorkspaceMember,
+  WorkspaceInvite,
+} from "../../prisma/generated/prisma-postgres/index.js";
 
 type WorkspaceServiceMock = {
   listUserWorkspaces: ReturnType<typeof vi.fn>;
@@ -15,6 +19,11 @@ type WorkspaceServiceMock = {
   getWorkspaceMemeber: ReturnType<typeof vi.fn>;
   updateWorkspace: ReturnType<typeof vi.fn>;
   deleteWorkspace: ReturnType<typeof vi.fn>;
+  listWorkspaceInvites: ReturnType<typeof vi.fn>;
+  createWorkspaceInvite: ReturnType<typeof vi.fn>;
+  resendWorkspaceInvite: ReturnType<typeof vi.fn>;
+  revokeWorkspaceInvite: ReturnType<typeof vi.fn>;
+  acceptWorkspaceInvite: ReturnType<typeof vi.fn>;
 };
 
 const TEST_USER_ID = "user_123";
@@ -56,6 +65,18 @@ const workspaceContext: WorkspaceContext = {
   permissions: ["workspace:view", "workspace:manage", "workspace:delete"],
 };
 
+const baseWorkspaceInvite: WorkspaceInvite = {
+  id: "cmhuzyo4e000004l7hqwx8n06",
+  workspaceId: baseWorkspace.id,
+  email: "invitee@example.com",
+  token: "testing-token",
+  role: "VIEWER",
+  invitedById: TEST_USER_ID,
+  expiresAt: new Date("2024-01-02T00:00:00.000Z"),
+  acceptedAt: null,
+  createdAt: new Date("2024-01-01T00:00:00.000Z"),
+};
+
 const cloneContext = (): WorkspaceContext => ({
   workspace: { ...workspaceContext.workspace },
   membership: workspaceContext.membership
@@ -79,6 +100,11 @@ const workspaceServiceMock = vi.hoisted(() => ({
   getWorkspaceMemeber: vi.fn(),
   updateWorkspace: vi.fn(),
   deleteWorkspace: vi.fn(),
+  listWorkspaceInvites: vi.fn(),
+  createWorkspaceInvite: vi.fn(),
+  resendWorkspaceInvite: vi.fn(),
+  revokeWorkspaceInvite: vi.fn(),
+  acceptWorkspaceInvite: vi.fn(),
 })) as WorkspaceServiceMock;
 
 vi.mock("../middleware/auth.js", () => ({
@@ -119,6 +145,11 @@ describe("Workspace routes", () => {
     workspaceServiceMock.getWorkspaceMemeber.mockReset();
     workspaceServiceMock.updateWorkspace.mockReset();
     workspaceServiceMock.deleteWorkspace.mockReset();
+    workspaceServiceMock.listWorkspaceInvites.mockReset();
+    workspaceServiceMock.createWorkspaceInvite.mockReset();
+    workspaceServiceMock.resendWorkspaceInvite.mockReset();
+    workspaceServiceMock.revokeWorkspaceInvite.mockReset();
+    workspaceServiceMock.acceptWorkspaceInvite.mockReset();
 
     workspaceContext.workspace = { ...baseWorkspace };
     workspaceContext.membership = { ...baseMembership };
@@ -272,5 +303,133 @@ describe("Workspace routes", () => {
 
     expect(response.status).toBe(httpStatus.NO_CONTENT);
     expect(workspaceServiceMock.deleteWorkspace).toHaveBeenCalledWith(baseWorkspace.id);
+  });
+
+  it("lists pending workspace invites", async () => {
+    const inviteWithInviter = {
+      ...baseWorkspaceInvite,
+      invitedBy: {
+        id: TEST_USER_ID,
+        name: mockUser.name,
+        email: mockUser.email,
+      },
+    };
+
+    workspaceServiceMock.listWorkspaceInvites.mockResolvedValue([inviteWithInviter]);
+
+    const response = await request(app).get(`/v1/workspaces/${baseWorkspace.id}/invites`);
+
+    expect(response.status).toBe(httpStatus.OK);
+    expect(response.body.invites).toHaveLength(1);
+    expect(response.body.invites[0]).toEqual(
+      expect.objectContaining({
+        id: baseWorkspaceInvite.id,
+        email: baseWorkspaceInvite.email,
+      })
+    );
+    expect(response.body.invites[0].token).toBeUndefined();
+    expect(workspaceServiceMock.listWorkspaceInvites).toHaveBeenCalledWith(baseWorkspace.id);
+  });
+
+  it("creates a workspace invite", async () => {
+    const inviteWithInviter = {
+      ...baseWorkspaceInvite,
+      invitedBy: {
+        id: TEST_USER_ID,
+        name: mockUser.name,
+        email: mockUser.email,
+      },
+    };
+
+    workspaceServiceMock.createWorkspaceInvite.mockResolvedValue(inviteWithInviter);
+
+    const response = await request(app)
+      .post(`/v1/workspaces/${baseWorkspace.id}/invites`)
+      .send({ email: baseWorkspaceInvite.email, role: baseWorkspaceInvite.role });
+
+    expect(response.status).toBe(httpStatus.CREATED);
+    expect(response.body.invite).toEqual(
+      expect.objectContaining({
+        id: baseWorkspaceInvite.id,
+        email: baseWorkspaceInvite.email,
+        role: baseWorkspaceInvite.role,
+      })
+    );
+    expect(response.body.invite.token).toBeUndefined();
+    expect(workspaceServiceMock.createWorkspaceInvite).toHaveBeenCalledWith({
+      workspaceId: baseWorkspace.id,
+      email: baseWorkspaceInvite.email,
+      role: baseWorkspaceInvite.role,
+      invitedById: TEST_USER_ID,
+    });
+  });
+
+  it("resends a workspace invite", async () => {
+    const inviteWithInviter = {
+      ...baseWorkspaceInvite,
+      invitedBy: {
+        id: TEST_USER_ID,
+        name: mockUser.name,
+        email: mockUser.email,
+      },
+    };
+
+    workspaceServiceMock.resendWorkspaceInvite.mockResolvedValue(inviteWithInviter);
+
+    const response = await request(app).post(
+      `/v1/workspaces/${baseWorkspace.id}/invites/${baseWorkspaceInvite.id}/resend`
+    );
+    
+    console.log(response.body);
+
+    expect(response.status).toBe(httpStatus.OK);
+    expect(response.body.invite.token).toBeUndefined();
+    expect(workspaceServiceMock.resendWorkspaceInvite).toHaveBeenCalledWith(
+      baseWorkspace.id,
+      baseWorkspaceInvite.id,
+      TEST_USER_ID
+    );
+  });
+
+  it("revokes a workspace invite", async () => {
+    workspaceServiceMock.revokeWorkspaceInvite.mockResolvedValue(undefined);
+
+    const response = await request(app).delete(
+      `/v1/workspaces/${baseWorkspace.id}/invites/${baseWorkspaceInvite.id}`
+    );
+
+    expect(response.status).toBe(httpStatus.NO_CONTENT);
+    expect(workspaceServiceMock.revokeWorkspaceInvite).toHaveBeenCalledWith(
+      baseWorkspace.id,
+      baseWorkspaceInvite.id
+    );
+  });
+
+  it("accepts a workspace invite", async () => {
+    workspaceServiceMock.acceptWorkspaceInvite.mockResolvedValue({
+      invite: {
+        ...baseWorkspaceInvite,
+        workspaceId: baseWorkspace.id,
+        acceptedAt: new Date("2024-01-03T00:00:00.000Z"),
+      },
+      membership: baseMembership,
+    });
+
+    const response = await request(app).post(
+      `/v1/workspaces/invites/${baseWorkspaceInvite.token}/accept`
+    );
+
+    expect(response.status).toBe(httpStatus.OK);
+    expect(response.body.workspaceId).toBe(baseWorkspace.id);
+    expect(response.body.membership).toEqual(
+      expect.objectContaining({
+        id: baseMembership.id,
+        role: baseMembership.role,
+      })
+    );
+    expect(workspaceServiceMock.acceptWorkspaceInvite).toHaveBeenCalledWith(
+      baseWorkspaceInvite.token,
+      TEST_USER_ID
+    );
   });
 });
