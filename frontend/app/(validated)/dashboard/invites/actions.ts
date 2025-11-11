@@ -11,9 +11,7 @@ import {
 
 const INVITES_PATH = "/dashboard/invites";
 
-type ActionResult<T = undefined> =
-  | { success: true; data?: T }
-  | { success: false; error: string };
+type ActionResult<T = undefined> = { success: true; data?: T } | { success: false; error: string };
 
 const formatError = (error: unknown, fallback: string) =>
   error instanceof Error ? error.message : fallback;

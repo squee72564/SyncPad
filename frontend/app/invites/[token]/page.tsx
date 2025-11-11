@@ -25,9 +25,7 @@ export default async function InviteAcceptPage({ params }: InvitePageProps) {
   if (!session?.user) {
     const headersList = await headers();
     const origin =
-      headersList.get("origin") ??
-      process.env.NEXT_PUBLIC_APP_URL ??
-      "http://localhost:3000";
+      headersList.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
     const signinUrl = new URL("/signin", origin);
     signinUrl.searchParams.set("redirect", redirectTarget);
     redirect(signinUrl.toString());

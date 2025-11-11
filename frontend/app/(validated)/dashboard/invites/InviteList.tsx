@@ -6,10 +6,7 @@ import { Copy, Loader2, RefreshCcw, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { WorkspaceInviteRecord } from "@/lib/invites";
-import {
-  resendWorkspaceInviteAction,
-  revokeWorkspaceInviteAction,
-} from "./actions";
+import { resendWorkspaceInviteAction, revokeWorkspaceInviteAction } from "./actions";
 import { cn } from "@/lib/utils";
 
 type InviteListProps = {
@@ -20,12 +17,10 @@ type InviteListProps = {
 
 type PendingActionType = "resend" | "revoke";
 
-type PendingAction =
-  | {
-      inviteId: string;
-      type: PendingActionType;
-    }
-  | null;
+type PendingAction = {
+  inviteId: string;
+  type: PendingActionType;
+} | null;
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Admin",
@@ -82,7 +77,11 @@ export default function InviteList({ workspaceId, invites, canManage }: InviteLi
     }
   };
 
-  const executeAction = (inviteId: string, type: PendingActionType, action: () => Promise<void>) => {
+  const executeAction = (
+    inviteId: string,
+    type: PendingActionType,
+    action: () => Promise<void>
+  ) => {
     startTransition(() => {
       setPendingAction({ inviteId, type });
       action().finally(() => {

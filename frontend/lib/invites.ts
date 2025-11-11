@@ -73,9 +73,12 @@ export async function resendWorkspaceInvite(
   workspaceId: string,
   inviteId: string
 ): Promise<WorkspaceInviteRecord> {
-  const response = await authorizedFetch(`/v1/workspaces/${workspaceId}/invites/${inviteId}/resend`, {
-    method: "POST",
-  });
+  const response = await authorizedFetch(
+    `/v1/workspaces/${workspaceId}/invites/${inviteId}/resend`,
+    {
+      method: "POST",
+    }
+  );
 
   const data = (await response.json()) as InviteResponse;
   return data.invite;
@@ -87,9 +90,7 @@ export async function revokeWorkspaceInvite(workspaceId: string, inviteId: strin
   });
 }
 
-export async function acceptWorkspaceInvite(
-  token: string
-): Promise<AcceptWorkspaceInviteResult> {
+export async function acceptWorkspaceInvite(token: string): Promise<AcceptWorkspaceInviteResult> {
   const response = await authorizedFetch(`/v1/workspaces/invites/${token}/accept`, {
     method: "POST",
   });

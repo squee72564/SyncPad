@@ -22,7 +22,8 @@ export default async function InvitesPage() {
         </div>
         <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
           <p className="mb-4">
-            You do not have an active workspace. Choose one from the sidebar or create a new workspace to begin inviting collaborators.
+            You do not have an active workspace. Choose one from the sidebar or create a new
+            workspace to begin inviting collaborators.
           </p>
           <Button asChild size="sm">
             <Link href="/dashboard/workspaces/new">Create workspace</Link>

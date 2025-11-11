@@ -20,7 +20,11 @@ import type { WorkspaceInviteRole } from "@/lib/invites";
 import { createWorkspaceInviteAction } from "./actions";
 
 const ROLE_OPTIONS: { value: WorkspaceInviteRole; label: string; description: string }[] = [
-  { value: "ADMIN", label: "Admin", description: "Manage members, invites, and workspace settings." },
+  {
+    value: "ADMIN",
+    label: "Admin",
+    description: "Manage members, invites, and workspace settings.",
+  },
   {
     value: "EDITOR",
     label: "Editor",
