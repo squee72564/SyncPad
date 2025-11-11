@@ -202,7 +202,7 @@ const updateWorkspace = async (workspaceId: string, updates: UpdateWorkspaceArgs
 };
 
 const deleteWorkspace = async (workspaceId: string) => {
-  prisma.workspace.delete({
+  return prisma.workspace.delete({
     where: { id: workspaceId },
   });
 };
