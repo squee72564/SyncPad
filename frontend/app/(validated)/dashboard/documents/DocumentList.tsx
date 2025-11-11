@@ -5,6 +5,7 @@ import type { DocumentRecord } from "@/lib/documents";
 import { DocumentStatusBadge } from "./DocumentStatusBadge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import DocumentSheet from "./DocumentSheet";
 
 type DocumentListProps = {
   documents: DocumentRecord[];
@@ -62,7 +63,7 @@ export default function DocumentList({ documents }: DocumentListProps) {
             >
               <div className="flex flex-col gap-1">
                 <Link
-                  href={`/dashboard/documents?documentId=${document.id}`}
+                  href={`/dashboard/documents/${document.id}`}
                   className="text-foreground font-medium hover:underline"
                 >
                   {document.title}
@@ -91,10 +92,7 @@ export default function DocumentList({ documents }: DocumentListProps) {
                     "inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <Link href={`/dashboard/documents?documentId=${document.id}`}>
-                    Open
-                    <ArrowUpRight className="h-4 w-4" />
-                  </Link>
+                  <DocumentSheet SelectedDocument={document} workspaceDocuments={documents} />
                 </Button>
               </div>
             </div>
