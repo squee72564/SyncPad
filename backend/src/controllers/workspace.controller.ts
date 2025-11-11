@@ -10,6 +10,7 @@ import {
   DeleteWorkspaceRequest,
   GetWorkspaceMembersRequest,
   GetWorkspaceRequest,
+  InviteMemberToWorkspaceRequest,
   ListWorkspacesArgs,
   ListWorkspacesRequest,
   UpdateWorkspaceRequest,
@@ -73,15 +74,41 @@ const getWorkspace = catchAsync(
 
 const getWorkspaceMembers = catchAsync(
   async (req: GetWorkspaceMembersRequest, res: Response, _next: NextFunction) => {
-      const context = req.workspaceContext;
+    const context = req.workspaceContext;
 
-      if (!context) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
-      }
+    if (!context) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
+    }
 
-      const workspaceMembers = await workspaceService.getWorkspaceMembers(req.params);
+    const workspaceMembers = await workspaceService.getWorkspaceMembers(req.params);
 
-      res.status(httpStatus.OK).json(workspaceMembers);
+    res.status(httpStatus.OK).json(workspaceMembers);
+  }
+);
+
+const inviteMemberToWorkspace = catchAsync(
+  async (req: InviteMemberToWorkspaceRequest, res: Response, _next: NextFunction) => {
+    const context = req.workspaceContext;
+
+    if (!req.user) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
+    }
+
+    if (!context) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
+    }
+
+    const workspaceInvite = await workspaceService.inviteUserToWorkspace(
+      context.workspace.id,
+      req.body.email,
+      req.user.id,
+      "testing-token-replace-me",
+      req.body.role
+    );
+
+    // TODO: Send an email notification notifying user to join the workspace?
+
+    res.status(httpStatus.OK).json(workspaceInvite);
   }
 );
 
@@ -116,6 +143,7 @@ export default {
   createWorkspace,
   getWorkspace,
   getWorkspaceMembers,
+  inviteMemberToWorkspace,
   updateWorkspace,
   deleteWorkspace,
 };

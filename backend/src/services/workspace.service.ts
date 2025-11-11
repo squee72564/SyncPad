@@ -68,13 +68,13 @@ const getWorkspaceMembers = async (args: GetWorkspaceMembersArgs) => {
           id: true,
           name: true,
           email: true,
-        }
-      }
+        },
+      },
     },
     orderBy: {
       createdAt: "asc",
-    }
-  })
+    },
+  });
 };
 
 const listUserWorkspaces = async (
@@ -187,8 +187,30 @@ const updateWorkspace = async (workspaceId: string, updates: UpdateWorkspaceArgs
 };
 
 const deleteWorkspace = async (workspaceId: string) => {
-  await prisma.workspace.delete({
+  prisma.workspace.delete({
     where: { id: workspaceId },
+  });
+};
+
+const inviteUserToWorkspace = async (
+  workspaceId: string,
+  invitedUserEmail: string,
+  userId: string,
+  token: string,
+  role: "ADMIN" | "VIEWER" | "EDITOR" | "COMMENTER"
+) => {
+  const expirationDate = new Date();
+  expirationDate.setHours(expirationDate.getHours() + 24);
+
+  return prisma.workspaceInvite.create({
+    data: {
+      workspaceId,
+      email: invitedUserEmail,
+      token: token,
+      role: role,
+      invitedById: userId,
+      expiresAt: expirationDate,
+    },
   });
 };
 
@@ -200,4 +222,5 @@ export default {
   createWorkspace,
   updateWorkspace,
   deleteWorkspace,
+  inviteUserToWorkspace,
 };

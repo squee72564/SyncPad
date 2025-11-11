@@ -64,11 +64,12 @@ const UpdateWorkspaceRequestSchema = z.object({
         .optional(),
     })
     .refine(
-      (data) => data.name !== undefined || data.slug !== undefined || data.description !== undefined,
+      (data) =>
+        data.name !== undefined || data.slug !== undefined || data.description !== undefined,
       {
         message: "At least one field must be provided",
       }
-    )
+    ),
 });
 
 const DeleteWorkspaceRequestSchema = z.object({
@@ -88,8 +89,9 @@ const WorkspaceInviteRequestSchema = z.object({
     workspaceId: workspaceIdentifier,
   }),
   body: z.object({
-    userId: z.cuid()
-  })
+    email: z.email(),
+    role: z.enum(["ADMIN", "EDITOR", "VIEWER", "COMMENTER"]),
+  }),
 });
 
 export default {

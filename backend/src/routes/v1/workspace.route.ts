@@ -60,6 +60,16 @@ router
     attachWorkspaceContext(),
     requireWorkspacePermission("workspace:view"),
     workspaceController.getWorkspaceMembers
-  )
+  );
+
+router
+  .route("/:workspaceId/members/invite")
+  .post(
+    auth([...defaultRoles, ...adminRoles]),
+    validate(workspaceValidations.WorkspaceInviteRequestSchema),
+    attachWorkspaceContext(),
+    requireWorkspacePermission("member:invite"),
+    workspaceController.inviteMemberToWorkspace
+  );
 
 export default router;
