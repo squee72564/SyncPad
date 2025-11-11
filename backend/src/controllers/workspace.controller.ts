@@ -7,14 +7,24 @@ import workspaceService from "../services/workspace.service.js";
 import {
   CreateWorkspaceArgs,
   CreateWorkspaceRequest,
+  CreateWorkspaceInviteRequest,
   DeleteWorkspaceRequest,
   GetWorkspaceMembersRequest,
   GetWorkspaceRequest,
-  InviteMemberToWorkspaceRequest,
   ListWorkspacesArgs,
   ListWorkspacesRequest,
+  ListWorkspaceInvitesRequest,
+  ResendWorkspaceInviteRequest,
+  RevokeWorkspaceInviteRequest,
   UpdateWorkspaceRequest,
+  AcceptWorkspaceInviteRequest,
 } from "../types/workspace.types.ts";
+
+const redactInviteToken = <T extends { token: string }>(invite: T): Omit<T, "token"> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { token, ...rest } = invite;
+  return rest;
+};
 
 const listWorkspaces = catchAsync(
   async (req: ListWorkspacesRequest, res: Response, _next: NextFunction) => {
@@ -86,8 +96,24 @@ const getWorkspaceMembers = catchAsync(
   }
 );
 
-const inviteMemberToWorkspace = catchAsync(
-  async (req: InviteMemberToWorkspaceRequest, res: Response, _next: NextFunction) => {
+const listWorkspaceInvites = catchAsync(
+  async (req: ListWorkspaceInvitesRequest, res: Response, _next: NextFunction) => {
+    const context = req.workspaceContext;
+
+    if (!context) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
+    }
+
+    const invites = await workspaceService.listWorkspaceInvites(context.workspace.id);
+
+    res.status(httpStatus.OK).json({
+      invites: invites.map((invite) => redactInviteToken(invite)),
+    });
+  }
+);
+
+const createWorkspaceInvite = catchAsync(
+  async (req: CreateWorkspaceInviteRequest, res: Response, _next: NextFunction) => {
     const context = req.workspaceContext;
 
     if (!req.user) {
@@ -98,17 +124,70 @@ const inviteMemberToWorkspace = catchAsync(
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
     }
 
-    const workspaceInvite = await workspaceService.inviteUserToWorkspace(
+    const invite = await workspaceService.createWorkspaceInvite({
+      workspaceId: context.workspace.id,
+      email: req.body.email,
+      role: req.body.role,
+      invitedById: req.user.id,
+    });
+
+    res.status(httpStatus.CREATED).json({
+      invite: redactInviteToken(invite),
+    });
+  }
+);
+
+const resendWorkspaceInvite = catchAsync(
+  async (req: ResendWorkspaceInviteRequest, res: Response, _next: NextFunction) => {
+    const context = req.workspaceContext;
+
+    if (!req.user) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
+    }
+
+    if (!context) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
+    }
+
+    const invite = await workspaceService.resendWorkspaceInvite(
       context.workspace.id,
-      req.body.email,
-      req.user.id,
-      "testing-token-replace-me",
-      req.body.role
+      req.params.inviteId,
+      req.user.id
     );
 
-    // TODO: Send an email notification notifying user to join the workspace?
+    res.status(httpStatus.OK).json({
+      invite: redactInviteToken(invite),
+    });
+  }
+);
 
-    res.status(httpStatus.OK).json(workspaceInvite);
+const revokeWorkspaceInvite = catchAsync(
+  async (req: RevokeWorkspaceInviteRequest, res: Response, _next: NextFunction) => {
+    const context = req.workspaceContext;
+
+    if (!context) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
+    }
+
+    await workspaceService.revokeWorkspaceInvite(context.workspace.id, req.params.inviteId);
+
+    res.status(httpStatus.NO_CONTENT).send();
+  }
+);
+
+const acceptWorkspaceInvite = catchAsync(
+  async (req: AcceptWorkspaceInviteRequest, res: Response, _next: NextFunction) => {
+    if (!req.user) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
+    }
+
+    const result = await workspaceService.acceptWorkspaceInvite(req.params.token, req.user.id);
+
+    res.status(httpStatus.OK).json({
+      workspaceId: result.invite.workspaceId,
+      acceptedAt: result.invite.acceptedAt,
+      membership: result.membership,
+    });
   }
 );
 
@@ -143,7 +222,11 @@ export default {
   createWorkspace,
   getWorkspace,
   getWorkspaceMembers,
-  inviteMemberToWorkspace,
+  listWorkspaceInvites,
+  createWorkspaceInvite,
+  resendWorkspaceInvite,
+  revokeWorkspaceInvite,
+  acceptWorkspaceInvite,
   updateWorkspace,
   deleteWorkspace,
 };

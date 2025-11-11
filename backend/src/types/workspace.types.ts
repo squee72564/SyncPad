@@ -1,4 +1,3 @@
-import { z } from "zod";
 import {
   Workspace,
   WorkspaceMember,
@@ -114,6 +113,7 @@ export const DEFAULT_SHARE_TOKEN_PARAM = "shareToken";
 export const DEFAULT_SHARE_TOKEN_HEADER = "x-share-token";
 
 export type WorkspaceLookupField = "id" | "slug" | "auto";
+export type WorkspaceInviteRole = Exclude<WorkspaceRole, "OWNER">;
 
 export interface AttachWorkspaceContextOptions {
   workspaceIdParam?: string;
@@ -155,8 +155,25 @@ export type GetWorkspaceMembersRequest = ZodRequest<
 >;
 export type GetWorkspaceMembersArgs = GetWorkspaceMembersRequest["params"];
 
-export type InviteMemberToWorkspaceRequest = ZodRequest<
+export type CreateWorkspaceInviteRequest = ZodRequest<
   typeof workspaceValidations.WorkspaceInviteRequestSchema
 >;
-export type InviteMemberToWorkspaceArgs = InviteMemberToWorkspaceRequest["params"] &
-  InviteMemberToWorkspaceRequest["body"];
+export type CreateWorkspaceInviteArgs = CreateWorkspaceInviteRequest["params"] &
+  CreateWorkspaceInviteRequest["body"];
+
+export type ListWorkspaceInvitesRequest = ZodRequest<
+  typeof workspaceValidations.WorkspaceInviteListRequestSchema
+>;
+export type ListWorkspaceInvitesArgs = ListWorkspaceInvitesRequest["params"];
+
+export type ResendWorkspaceInviteRequest = ZodRequest<
+  typeof workspaceValidations.WorkspaceInviteResendRequestSchema
+>;
+export type RevokeWorkspaceInviteRequest = ZodRequest<
+  typeof workspaceValidations.WorkspaceInviteRevokeRequestSchema
+>;
+
+export type AcceptWorkspaceInviteRequest = ZodRequest<
+  typeof workspaceValidations.WorkspaceInviteAcceptRequestSchema
+>;
+export type AcceptWorkspaceInviteArgs = AcceptWorkspaceInviteRequest["params"];

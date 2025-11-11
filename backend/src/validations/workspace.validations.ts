@@ -94,6 +94,31 @@ const WorkspaceInviteRequestSchema = z.object({
   }),
 });
 
+const WorkspaceInviteListRequestSchema = z.object({
+  params: z.object({
+    workspaceId: workspaceIdentifier,
+  }),
+});
+
+const WorkspaceInviteIdParamsSchema = z.object({
+  workspaceId: workspaceIdentifier,
+  inviteId: z.cuid("inviteId must be a valid CUID"),
+});
+
+const WorkspaceInviteResendRequestSchema = z.object({
+  params: WorkspaceInviteIdParamsSchema,
+});
+
+const WorkspaceInviteRevokeRequestSchema = z.object({
+  params: WorkspaceInviteIdParamsSchema,
+});
+
+const WorkspaceInviteAcceptRequestSchema = z.object({
+  params: z.object({
+    token: z.string().min(1, "invite token is required"),
+  }),
+});
+
 export default {
   workspaceIdentifier,
   WorkspaceShareTokenSchema,
@@ -105,4 +130,8 @@ export default {
   DeleteWorkspaceRequestSchema,
   GetWorkspaceMembersRequestSchema,
   WorkspaceInviteRequestSchema,
+  WorkspaceInviteListRequestSchema,
+  WorkspaceInviteResendRequestSchema,
+  WorkspaceInviteRevokeRequestSchema,
+  WorkspaceInviteAcceptRequestSchema,
 };

@@ -63,13 +63,48 @@ router
   );
 
 router
-  .route("/:workspaceId/members/invite")
+  .route("/:workspaceId/invites")
+  .get(
+    auth([...defaultRoles, ...adminRoles]),
+    validate(workspaceValidations.WorkspaceInviteListRequestSchema),
+    attachWorkspaceContext(),
+    requireWorkspacePermission("member:invite"),
+    workspaceController.listWorkspaceInvites
+  )
   .post(
     auth([...defaultRoles, ...adminRoles]),
     validate(workspaceValidations.WorkspaceInviteRequestSchema),
     attachWorkspaceContext(),
     requireWorkspacePermission("member:invite"),
-    workspaceController.inviteMemberToWorkspace
+    workspaceController.createWorkspaceInvite
+  );
+
+router
+  .route("/:workspaceId/invites/:inviteId/resend")
+  .post(
+    auth([...defaultRoles, ...adminRoles]),
+    validate(workspaceValidations.WorkspaceInviteResendRequestSchema),
+    attachWorkspaceContext(),
+    requireWorkspacePermission("member:invite"),
+    workspaceController.resendWorkspaceInvite
+  );
+
+router
+  .route("/:workspaceId/invites/:inviteId")
+  .delete(
+    auth([...defaultRoles, ...adminRoles]),
+    validate(workspaceValidations.WorkspaceInviteRevokeRequestSchema),
+    attachWorkspaceContext(),
+    requireWorkspacePermission("member:invite"),
+    workspaceController.revokeWorkspaceInvite
+  );
+
+router
+  .route("/invites/:token/accept")
+  .post(
+    auth([...defaultRoles, ...adminRoles]),
+    validate(workspaceValidations.WorkspaceInviteAcceptRequestSchema),
+    workspaceController.acceptWorkspaceInvite
   );
 
 export default router;
