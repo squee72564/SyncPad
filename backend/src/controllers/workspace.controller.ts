@@ -1,9 +1,11 @@
 import type { NextFunction, Response } from "express";
 import httpStatus from "http-status";
 
+import env from "../config/index.js";
 import catchAsync from "../utils/catchAsync.js";
 import ApiError from "../utils/ApiError.js";
 import workspaceService from "../services/workspace.service.js";
+import emailService from "../services/email.service.js";
 import {
   CreateWorkspaceArgs,
   CreateWorkspaceRequest,
@@ -20,10 +22,23 @@ import {
   AcceptWorkspaceInviteRequest,
 } from "../types/workspace.types.ts";
 
-const redactInviteToken = <T extends { token: string }>(invite: T): Omit<T, "token"> => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const includeInviteLinksInResponses = env.NODE_ENV !== "production";
+
+const serializeInvite = <T extends { token: string }>(
+  invite: T,
+  options?: { acceptUrl?: string }
+): Omit<T, "token"> & { acceptUrl?: string } => {
   const { token, ...rest } = invite;
-  return rest;
+
+  if (!includeInviteLinksInResponses) {
+    return rest;
+  }
+
+  const acceptUrl = options?.acceptUrl ?? emailService.buildWorkspaceInviteAcceptUrl(token);
+  return {
+    ...rest,
+    acceptUrl,
+  };
 };
 
 const listWorkspaces = catchAsync(
@@ -107,7 +122,7 @@ const listWorkspaceInvites = catchAsync(
     const invites = await workspaceService.listWorkspaceInvites(context.workspace.id);
 
     res.status(httpStatus.OK).json({
-      invites: invites.map((invite) => redactInviteToken(invite)),
+      invites: invites.map((invite) => serializeInvite(invite)),
     });
   }
 );
@@ -131,8 +146,15 @@ const createWorkspaceInvite = catchAsync(
       invitedById: req.user.id,
     });
 
+    const acceptUrl = emailService.buildWorkspaceInviteAcceptUrl(invite.token);
+    emailService.queueWorkspaceInviteEmail({
+      invite,
+      workspace: context.workspace,
+      acceptUrl,
+    });
+
     res.status(httpStatus.CREATED).json({
-      invite: redactInviteToken(invite),
+      invite: serializeInvite(invite, { acceptUrl }),
     });
   }
 );
@@ -155,8 +177,15 @@ const resendWorkspaceInvite = catchAsync(
       req.user.id
     );
 
+    const acceptUrl = emailService.buildWorkspaceInviteAcceptUrl(invite.token);
+    emailService.queueWorkspaceInviteEmail({
+      invite,
+      workspace: context.workspace,
+      acceptUrl,
+    });
+
     res.status(httpStatus.OK).json({
-      invite: redactInviteToken(invite),
+      invite: serializeInvite(invite, { acceptUrl }),
     });
   }
 );

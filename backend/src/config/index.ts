@@ -14,6 +14,7 @@ const envSchema = z.object({
   // App
   PORT: z.string().default("3000"),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  APP_BASE_URL: z.url().default("http://localhost:3000"),
 
   // Database
   DATABASE_URL: z.url(),
@@ -29,6 +30,8 @@ const envSchema = z.object({
 
   GITHUB_CLIENT_ID: z.string().optional(),
   GITHUB_CLIENT_SECRET: z.string().optional(),
+  INVITE_EMAIL_FROM: z.email("INVITE_EMAIL_FROM must be a valid email address").optional(),
+  RESEND_API_KEY: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
