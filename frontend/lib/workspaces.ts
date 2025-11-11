@@ -176,3 +176,24 @@ export async function resolveActiveWorkspace(options?: {
     activeWorkspace: match ?? null,
   };
 }
+
+export type getWorkspaceMembersResult = {
+  user: {
+    name: string;
+    id: string;
+    email: string;
+  };
+  createdAt: Date;
+  role: "OWNER" | "ADMIN" | "EDITOR" | "COMMENTER" | "VIEWER";
+};
+
+export async function getWorkspaceMembers(workspaceId: string) {
+  const query = new URLSearchParams();
+
+  query.set("workspaceId", `${workspaceId}`);
+
+  const response = await authorizedFetch(`/v1/workspaces/${workspaceId}/members`);
+
+  const data = (await response.json()) as getWorkspaceMembersResult[];
+  return data;
+}
