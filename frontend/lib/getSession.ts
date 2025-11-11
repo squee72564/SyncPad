@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+//import { redirect } from "next/navigation";
 
 export default async function getSession() {
   const cookieStore = await cookies();
@@ -7,9 +7,9 @@ export default async function getSession() {
     cookieStore.get("__Secure-better-auth.session_token")?.value ??
     cookieStore.get("better-auth.session_token")?.value;
 
-  if (!sessionCookie) {
-    redirect("/signin");
-  }
+  // if (!sessionCookie) {
+  //   redirect("/signin");
+  // }
 
   const res = await fetch("http://localhost:3001/v1/user/self", {
     headers: {

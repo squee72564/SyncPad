@@ -6,18 +6,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getSafeRedirect } from "@/lib/utils";
 import { toast } from "sonner";
 
 import { signIn } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
-export default function SignIn({ className }: { className?: string }) {
+export default function SignIn({
+  className,
+  redirectTo,
+}: {
+  className?: string;
+  redirectTo?: string;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
+  const destination = getSafeRedirect(redirectTo);
 
   const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,7 +48,7 @@ export default function SignIn({ className }: { className?: string }) {
             }
 
             toast.info("Logged in");
-            router.replace("/dashboard");
+            router.replace(destination);
           },
         }
       );
@@ -141,7 +148,9 @@ export default function SignIn({ className }: { className?: string }) {
             variant="default"
             disabled={loading}
             onClick={() => {
-              router.push("/signup");
+              router.push(
+                destination ? `/signup?redirect=${encodeURIComponent(destination)}` : "/signup"
+              );
             }}
           >
             Create a New Account

@@ -76,7 +76,15 @@ function OnboardingCard({ slide }: { slide: OnboardingSlide }) {
   );
 }
 
-export default function SignUpPage() {
+type SignUpPageProps = {
+  searchParams: Promise<{ redirect?: string }>;
+};
+
+
+export default async function SignUpPage({ searchParams }: SignUpPageProps) {
+  const { redirect: redirectParam } = await searchParams;
+  const redirectTo = redirectParam;
+  
   return (
     <div className="grid min-h-screen w-full grid-rows-[auto_1fr] bg-background md:grid-cols-[0.95fr_1.05fr] md:grid-rows-1">
       <div className="relative hidden items-center justify-center overflow-hidden bg-muted/60 p-12 md:flex">
@@ -109,7 +117,7 @@ export default function SignUpPage() {
               your team adopts SyncPad.
             </p>
           </div>
-          <SignUp className="w-full" />
+          <SignUp className="w-full" redirectTo={redirectTo ?? undefined} />
         </div>
       </div>
     </div>

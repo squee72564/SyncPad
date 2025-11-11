@@ -15,11 +15,17 @@ import { useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { signUp } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, getSafeRedirect } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-export default function SignUp({ className }: { className?: string }) {
+export default function SignUp({
+  className,
+  redirectTo,
+}: {
+  className?: string;
+  redirectTo?: string;
+}) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,6 +35,7 @@ export default function SignUp({ className }: { className?: string }) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const destination = getSafeRedirect(redirectTo);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,7 +57,7 @@ export default function SignUp({ className }: { className?: string }) {
       password,
       name: `${firstName} ${lastName}`,
       image: image ? await convertImageToBase64(image) : "",
-      callbackURL: "/dashboard",
+      callbackURL: destination,
       fetchOptions: {
         onResponse: () => {
           setLoading(false);
@@ -63,7 +70,7 @@ export default function SignUp({ className }: { className?: string }) {
         },
         onSuccess: async () => {
           toast.success("Signed up successfully.");
-          router.push("/dashboard");
+          router.push(destination);
         },
       },
     });

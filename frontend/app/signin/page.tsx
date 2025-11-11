@@ -73,7 +73,14 @@ function SlideCard({ slide }: { slide: CarouselSlide }) {
   );
 }
 
-export default function SignInPage() {
+type SignInPageProps = {
+  searchParams: Promise<{ redirect?: string }>;
+};
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const { redirect: redirectParam } = await searchParams;
+  const redirectTo = redirectParam;
+
   return (
     <div className="grid min-h-screen w-full grid-rows-[auto_1fr] bg-background md:grid-cols-[1.1fr_0.9fr] md:grid-rows-1">
       <div className="relative hidden items-center justify-center overflow-hidden bg-muted/50 p-12 md:flex">
@@ -101,7 +108,7 @@ export default function SignInPage() {
 
       <div className="relative flex items-center justify-center px-6 py-12 md:px-12">
         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background via-background/60 to-transparent md:hidden" />
-        <SignIn className="w-full" />
+        <SignIn className="w-full" redirectTo={redirectTo ?? undefined} />
       </div>
     </div>
   );
