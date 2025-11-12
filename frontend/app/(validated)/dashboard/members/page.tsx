@@ -65,6 +65,7 @@ export default async function MembersPage() {
                     user={memberInfo.user}
                     role={memberInfo.role}
                     createdAt={memberInfo.createdAt}
+                    workspaceId={activeWorkspace.workspace.id}
                   />
                 )}
               </div>

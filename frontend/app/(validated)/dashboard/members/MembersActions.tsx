@@ -119,7 +119,7 @@ export default function MembersActions({ user, role, id, workspaceId }: MembersA
 
         <form onSubmit={handleUpdate} className="flex flex-1 flex-col gap-4 p-5 overflow-y-auto">
           <div className="grid gap-2">
-            <Label htmlFor={`user-role-${user.id}`}>Role</Label>
+            <Label>Role</Label>
             <Select
               required
               value={formState.role}

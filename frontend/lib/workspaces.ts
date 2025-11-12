@@ -189,10 +189,6 @@ export type getWorkspaceMembersResult = {
 };
 
 export async function getWorkspaceMembers(workspaceId: string) {
-  const query = new URLSearchParams();
-
-  query.set("workspaceId", `${workspaceId}`);
-
   const response = await authorizedFetch(`/v1/workspaces/${workspaceId}/members`);
 
   const data = (await response.json()) as getWorkspaceMembersResult[];
