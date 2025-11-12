@@ -9,29 +9,22 @@ import {
 import { SidebarMenuButton } from "./ui/sidebar";
 import { ChevronUp, User2 } from "lucide-react";
 
-import { signOut, useSession } from "@/lib/auth-client";
+import { logout } from "@/lib/logout";
+import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
-import router, { RedirectType } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 
 export default function AccountDropdown() {
   const session = useSession();
-  const [isLoggedOut, setIsLoggedOut] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!session || !session.data) {
-      return;
-    }
-
-    if (isLoggedOut) {
-      router.redirect("/signin", RedirectType.replace);
-    }
-  }, [session, isLoggedOut]);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild disabled={isPending}>
         <SidebarMenuButton>
           <User2 /> <span>{session.data?.user.name || "..."}</span>
           <ChevronUp className="ml-auto" />
@@ -50,15 +43,19 @@ export default function AccountDropdown() {
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={async () => {
-            try {
-              await signOut();
-              toast.info("Logged out");
-              setIsLoggedOut(true);
-            } catch (error) {
-              toast.error("Error logging out");
-              console.error(error);
-            }
+            startTransition(async () => {
+              try {
+                await logout();
+                toast.info("Logged out");
+                setIsOpen(false);
+                router.replace("/signin");
+              } catch (error) {
+                toast.error("Error logging out");
+                console.error(error);
+              }
+            });
           }}
+          disabled={isPending}
         >
           <span>Sign out</span>
         </DropdownMenuItem>
