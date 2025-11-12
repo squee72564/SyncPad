@@ -1,33 +1,20 @@
 "use server";
 
-import { Button } from "@/components/ui/button";
 import { resolveActiveWorkspace } from "@/lib/workspaces";
-import Link from "next/link";
 import { getWorkspaceMembersAction } from "../workspaces/actions";
 import MembersActions from "./MembersActions";
+import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
 
 export default async function MembersPage() {
   const { activeWorkspace } = await resolveActiveWorkspace();
 
   if (!activeWorkspace) {
     return (
-      <div className="flex flex-col gap-4 p-6 w-full">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Members &amp; Roles</h1>
-          <p className="text-sm text-muted-foreground">
-            Review workspace membership, assign roles, and track invitations tied to each seat.
-          </p>
-        </div>
-        <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-          <p className="mb-4">
-            You do not have an active workspace. Choose one from the sidebar or create a new
-            workspace to begin organizing documents.
-          </p>
-          <Button asChild size="sm">
-            <Link href="/dashboard/workspaces/new">Create workspace</Link>
-          </Button>
-        </div>
-      </div>
+      <WorkspaceSelectionPrompt
+        title="Members &amp; Roles"
+        description="Review workspace membership, assign roles, and track invitations tied to each seat."
+        body="You do not have an active workspace. Choose one from the sidebar or create a new workspace to begin organizing documents."
+      />
     );
   }
 

@@ -1,32 +1,18 @@
-import Link from "next/link";
-
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { listDocuments } from "@/lib/documents";
 import DocumentList from "../DocumentList";
-import { Button } from "@/components/ui/button";
+import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
 
 export default async function PublishedDocumentsPage() {
   const { activeWorkspace } = await resolveActiveWorkspace();
 
   if (!activeWorkspace) {
     return (
-      <div className="flex flex-col gap-4 p-6 w-full">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Published Documents</h1>
-          <p className="text-sm text-muted-foreground">
-            Choose a workspace to review the documents that are published and ready for your team.
-          </p>
-        </div>
-        <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-          <p className="mb-4">
-            To see published docs, pick a workspace from the sidebar or create one to start
-            publishing content.
-          </p>
-          <Button asChild size="sm">
-            <Link href="/dashboard/workspaces/new">Create workspace</Link>
-          </Button>
-        </div>
-      </div>
+      <WorkspaceSelectionPrompt
+        title="Published Documents"
+        description="Choose a workspace to review the documents that are published and ready for your team."
+        body="To see published docs, pick a workspace from the sidebar or create one to start publishing content."
+      />
     );
   }
 

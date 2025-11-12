@@ -1,10 +1,8 @@
-import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { getWorkspaceInvites, type WorkspaceInviteRecord } from "@/lib/invites";
 import InviteComposer from "./InviteComposer";
 import InviteList from "./InviteList";
+import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
 
 const INVITE_ROLES = new Set(["OWNER", "ADMIN", "SUPERADMIN"]);
 
@@ -13,23 +11,11 @@ export default async function InvitesPage() {
 
   if (!activeWorkspace) {
     return (
-      <div className="flex flex-col gap-4 p-6 w-full">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Invites &amp; Access</h1>
-          <p className="text-sm text-muted-foreground">
-            Choose a workspace to manage invitations and monitor pending access requests.
-          </p>
-        </div>
-        <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-          <p className="mb-4">
-            You do not have an active workspace. Choose one from the sidebar or create a new
-            workspace to begin inviting collaborators.
-          </p>
-          <Button asChild size="sm">
-            <Link href="/dashboard/workspaces/new">Create workspace</Link>
-          </Button>
-        </div>
-      </div>
+      <WorkspaceSelectionPrompt
+        title="Invites &amp; Access"
+        description="Choose a workspace to manage invitations and monitor pending access requests."
+        body="You do not have an active workspace. Choose one from the sidebar or create a new workspace to begin inviting collaborators."
+      />
     );
   }
 
