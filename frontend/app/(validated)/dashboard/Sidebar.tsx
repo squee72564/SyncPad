@@ -197,10 +197,7 @@ const renderNavSection = (section: NavSection, pathname: string) => {
         <SidebarMenu>
           {section.items.map((item) => {
             const Icon = item.icon;
-            const isActive =
-              item.exact === true
-                ? pathname === item.href
-                : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const isActive = pathname === item.href;
 
             return (
               <SidebarMenuItem key={item.href}>
