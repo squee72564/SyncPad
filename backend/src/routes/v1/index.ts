@@ -5,6 +5,8 @@ import userRoute from "./user.route.js";
 import adminRoute from "./admin.route.js";
 import workspaceRoute from "./workspace.route.js";
 import documentRoute from "./document.route.js";
+import shareLinkRoute from "./share-link.route.js";
+import shareLinkPublicRoute from "./share-link.public.route.js";
 
 const router: Router = express.Router();
 
@@ -28,6 +30,14 @@ const defaultRoutes = [
   {
     path: "/workspaces/:workspaceId/documents",
     route: documentRoute,
+  },
+  {
+    path: "/workspaces/:workspaceId/documents/:documentId/share-links",
+    route: shareLinkRoute,
+  },
+  {
+    path: "/share-links",
+    route: shareLinkPublicRoute,
   },
 ] as { path: string; route: Router }[];
 
