@@ -32,7 +32,7 @@ export default async function DashboardPage() {
   const { workspaces } = await getWorkspaces({ includeMembership: true });
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6 p-6 w-full">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Workspace Overview</h1>

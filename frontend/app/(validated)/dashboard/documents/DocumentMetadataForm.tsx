@@ -120,7 +120,7 @@ export function DocumentMetadataForm({ document, allDocuments }: DocumentMetadat
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5 overflow-y-auto">
       <div className="grid gap-1.5">
         <Label htmlFor="document-title">Title</Label>
         <Input

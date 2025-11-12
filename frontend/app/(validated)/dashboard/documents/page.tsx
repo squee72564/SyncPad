@@ -10,7 +10,7 @@ export default async function DocumentsPage() {
 
   if (!activeWorkspace) {
     return (
-      <div className="flex flex-col gap-4 p-6">
+      <div className="flex flex-col gap-4 p-6 w-full">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">All Documents</h1>
           <p className="text-sm text-muted-foreground">
@@ -35,7 +35,7 @@ export default async function DocumentsPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6 p-6 w-full">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">All Documents</h1>
         <p className="text-sm text-muted-foreground">
@@ -44,9 +44,7 @@ export default async function DocumentsPage() {
           hierarchy and status.
         </p>
       </div>
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <DocumentList documents={documents} />
-      </div>
+      <DocumentList documents={documents} />
     </div>
   );
 }

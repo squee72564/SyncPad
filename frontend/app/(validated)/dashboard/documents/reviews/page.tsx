@@ -1,6 +1,6 @@
 export default function DocumentReviewsPage() {
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex flex-col gap-4 p-6 w-full">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Review Threads</h1>
         <p className="text-sm text-muted-foreground">

@@ -10,7 +10,7 @@ export default async function DocumentDraftsPage() {
 
   if (!activeWorkspace) {
     return (
-      <div className="flex flex-col gap-4 p-6">
+      <div className="flex flex-col gap-4 p-6 w-full">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Drafts</h1>
           <p className="text-sm text-muted-foreground">
@@ -35,7 +35,7 @@ export default async function DocumentDraftsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex flex-col gap-4 p-6 w-full">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">Drafts</h1>
         <p className="text-sm text-muted-foreground">

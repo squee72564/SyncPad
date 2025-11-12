@@ -10,7 +10,7 @@ export default async function PublishedDocumentsPage() {
 
   if (!activeWorkspace) {
     return (
-      <div className="flex flex-col gap-4 p-6">
+      <div className="flex flex-col gap-4 p-6 w-full">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Published Documents</h1>
           <p className="text-sm text-muted-foreground">
@@ -39,7 +39,7 @@ export default async function PublishedDocumentsPage() {
   );
 
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex flex-col gap-4 p-6 w-full">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">Published Documents</h1>
         <p className="text-sm text-muted-foreground">

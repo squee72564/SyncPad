@@ -75,7 +75,7 @@ export function CreateDocumentForm({ documents }: CreateDocumentFormProps) {
           }
 
           toast.success("Document created");
-          router.push(`/dashboard/documents?documentId=${result.documentId}`);
+          router.push(`/dashboard/documents`);
           router.refresh();
         })
         .catch((error) => {

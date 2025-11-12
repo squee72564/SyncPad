@@ -10,7 +10,7 @@ export default async function NewDocumentPage() {
 
   if (!activeWorkspace) {
     return (
-      <div className="flex flex-col gap-4 p-6">
+      <div className="flex flex-col gap-4 p-6 w-full">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Create Document</h1>
           <p className="text-sm text-muted-foreground">
@@ -36,7 +36,7 @@ export default async function NewDocumentPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6 p-6 w-full">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">Create Document</h1>
         <p className="text-sm text-muted-foreground">

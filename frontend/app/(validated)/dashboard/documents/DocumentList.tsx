@@ -27,7 +27,7 @@ const formatDate = (value: string | null | undefined) => {
 export default function DocumentList({ documents }: DocumentListProps) {
   if (documents.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-muted-foreground/40 p-10 text-center">
+      <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-muted-foreground/40 p-10 text-center w-full">
         <h3 className="text-base font-semibold">No documents yet</h3>
         <p className="max-w-sm text-sm text-muted-foreground">
           Create your first document to capture knowledge, collaborate with teammates, and unlock AI
@@ -46,7 +46,7 @@ export default function DocumentList({ documents }: DocumentListProps) {
   const documentsById = new Map(documents.map((doc) => [doc.id, doc]));
 
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="overflow-hidden rounded-lg border w-full">
       <div className="bg-muted/40 grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-4 border-b px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         <span>Title</span>
         <span>Status</span>
