@@ -63,7 +63,7 @@ router
   );
 
 router
-  .route("/:workspaceId/members/:userId")
+  .route("/:workspaceId/members/:memberId")
   .delete(
     auth([...defaultRoles, ...adminRoles]),
     validate(workspaceValidations.RemoveWorkspaceMemberRequestSchema),
