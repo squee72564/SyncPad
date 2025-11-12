@@ -183,6 +183,7 @@ export type getWorkspaceMembersResult = {
     id: string;
     email: string;
   };
+  id: string;
   createdAt: Date;
   role: "OWNER" | "ADMIN" | "EDITOR" | "COMMENTER" | "VIEWER";
 };
@@ -196,4 +197,26 @@ export async function getWorkspaceMembers(workspaceId: string) {
 
   const data = (await response.json()) as getWorkspaceMembersResult[];
   return data;
+}
+
+export async function updateWorkspaceMemberRoleApi(
+  workspaceId: string,
+  memberId: string,
+  role: "ADMIN" | "EDITOR" | "COMMENTER" | "VIEWER"
+) {
+  const response = await authorizedFetch(`/v1/workspaces/${workspaceId}/members/${memberId}`, {
+    method: "PATCH",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ role }),
+  });
+
+  return (await response.json()) as { member: unknown };
+}
+
+export async function removeWorkspaceMemberApi(workspaceId: string, memberId: string) {
+  await authorizedFetch(`/v1/workspaces/${workspaceId}/members/${memberId}`, {
+    method: "DELETE",
+  });
 }

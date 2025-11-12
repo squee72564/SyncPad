@@ -61,6 +61,7 @@ export default async function MembersPage() {
                 <span>{memberInfo.role}</span>
                 {effectiveRole === "OWNER" && (
                   <MembersActions
+                    id={memberInfo.id}
                     user={memberInfo.user}
                     role={memberInfo.role}
                     createdAt={memberInfo.createdAt}

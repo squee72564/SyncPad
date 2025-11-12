@@ -25,8 +25,13 @@ import {
 } from "@/components/ui/select";
 
 import { getWorkspaceMembersResult } from "@/lib/workspaces";
+import { removeWorkspaceMemberAction, updateWorkspaceMemberRoleAction } from "./actions";
 
-export default function MembersActions({ user, createdAt, role }: getWorkspaceMembersResult) {
+type MembersActionsProps = getWorkspaceMembersResult & {
+  workspaceId: string;
+};
+
+export default function MembersActions({ user, role, id, workspaceId }: MembersActionsProps) {
   const [open, setOpen] = useState(false);
   const [formState, setFormState] = useState({
     role: role,
@@ -42,7 +47,26 @@ export default function MembersActions({ user, createdAt, role }: getWorkspaceMe
   const handleUpdate = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    startTransition(async () => {});
+    if (formState.role === role) {
+      toast.info("No changes detected");
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await updateWorkspaceMemberRoleAction({
+        workspaceId,
+        memberId: id,
+        role: formState.role,
+      });
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success("Member role updated");
+      setOpen(false);
+    });
   };
 
   const handleDelete = () => {
@@ -51,7 +75,20 @@ export default function MembersActions({ user, createdAt, role }: getWorkspaceMe
       return;
     }
 
-    startTransition(async () => {});
+    startTransition(async () => {
+      const result = await removeWorkspaceMemberAction({
+        workspaceId,
+        memberId: id,
+      });
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success("Member removed");
+      setOpen(false);
+    });
   };
 
   return (
@@ -83,7 +120,13 @@ export default function MembersActions({ user, createdAt, role }: getWorkspaceMe
         <form onSubmit={handleUpdate} className="flex flex-1 flex-col gap-4 p-5 overflow-y-auto">
           <div className="grid gap-2">
             <Label htmlFor={`user-role-${user.id}`}>Role</Label>
-            <Select required>
+            <Select
+              required
+              value={formState.role}
+              onValueChange={(value: typeof formState.role) =>
+                setFormState((prev) => ({ ...prev, role: value }))
+              }
+            >
               <SelectTrigger>
                 <SelectValue className="capitalize" placeholder={role.toLocaleLowerCase()} />
               </SelectTrigger>
