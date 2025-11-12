@@ -63,6 +63,25 @@ router
   );
 
 router
+  .route("/:workspaceId/members/:userId")
+  .delete(
+    auth([...defaultRoles, ...adminRoles]),
+    validate(workspaceValidations.RemoveWorkspaceMemberRequestSchema),
+    attachWorkspaceContext(),
+    requireWorkspaceRole(["OWNER", "ADMIN"]),
+    requireWorkspacePermission("member:manage"),
+    workspaceController.removeWorkspaceMember
+  )
+  .patch(
+    auth([...defaultRoles, ...adminRoles]),
+    validate(workspaceValidations.UpdateWorkspaceMemberRoleRequestSchema),
+    attachWorkspaceContext(),
+    requireWorkspaceRole(["OWNER", "ADMIN"]),
+    requireWorkspacePermission("member:manage"),
+    workspaceController.updateWorkspaceMemberRole
+  );
+
+router
   .route("/:workspaceId/invites")
   .get(
     auth([...defaultRoles, ...adminRoles]),

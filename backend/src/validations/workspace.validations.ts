@@ -119,6 +119,22 @@ const WorkspaceInviteAcceptRequestSchema = z.object({
   }),
 });
 
+const WorkspaceMemeberManagerParamsSchema = z.object({
+  workspaceId: workspaceIdentifier,
+  memberId: z.cuid("memberId must be a valid CUID"),
+});
+
+const RemoveWorkspaceMemberRequestSchema = z.object({
+  params: WorkspaceMemeberManagerParamsSchema,
+});
+
+const UpdateWorkspaceMemberRoleRequestSchema = z.object({
+  params: WorkspaceMemeberManagerParamsSchema,
+  body: z.object({
+    role: z.enum(["ADMIN", "EDITOR", "VIEWER", "COMMENTER"]),
+  }),
+});
+
 export default {
   workspaceIdentifier,
   WorkspaceShareTokenSchema,
@@ -134,4 +150,6 @@ export default {
   WorkspaceInviteResendRequestSchema,
   WorkspaceInviteRevokeRequestSchema,
   WorkspaceInviteAcceptRequestSchema,
+  RemoveWorkspaceMemberRequestSchema,
+  UpdateWorkspaceMemberRoleRequestSchema,
 };

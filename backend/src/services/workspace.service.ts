@@ -78,6 +78,7 @@ const getWorkspaceMembers = async (args: GetWorkspaceMembersArgs) => {
     select: {
       role: true,
       createdAt: true,
+      id: true,
       user: {
         select: {
           id: true,
@@ -450,6 +451,31 @@ const acceptWorkspaceInvite = async (token: string, userId: string) => {
   return result;
 };
 
+const updateWorkspaceMemberRole = async (
+  workspaceId: string,
+  memberId: string,
+  newRole: WorkspaceRole
+) => {
+  return prisma.workspaceMember.updateMany({
+    where: {
+      workspaceId,
+      id: memberId,
+    },
+    data: {
+      role: newRole,
+    },
+  });
+};
+
+const removeWorkspaceMember = async (workspaceId: string, memberId: string) => {
+  return prisma.workspaceMember.deleteMany({
+    where: {
+      workspaceId,
+      id: memberId,
+    },
+  });
+};
+
 export default {
   getWorkspaceByIdentifier,
   getWorkspaceMemeber,
@@ -463,4 +489,6 @@ export default {
   resendWorkspaceInvite,
   revokeWorkspaceInvite,
   acceptWorkspaceInvite,
+  updateWorkspaceMemberRole,
+  removeWorkspaceMember,
 };

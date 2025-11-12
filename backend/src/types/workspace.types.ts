@@ -177,3 +177,14 @@ export type AcceptWorkspaceInviteRequest = ZodRequest<
   typeof workspaceValidations.WorkspaceInviteAcceptRequestSchema
 >;
 export type AcceptWorkspaceInviteArgs = AcceptWorkspaceInviteRequest["params"];
+
+export type RemoveWorkspaceMemberRequest = ZodRequest<
+  typeof workspaceValidations.RemoveWorkspaceMemberRequestSchema
+>;
+export type RemoveWorkspaceMemberArgs = RemoveWorkspaceMemberRequest["params"];
+
+export type UpdateWorkspaceMemberRoleRequest = ZodRequest<
+  typeof workspaceValidations.UpdateWorkspaceMemberRoleRequestSchema
+>;
+export type UpdateWorkspaceMemberRoleArgs = UpdateWorkspaceMemberRoleRequest["params"] &
+  UpdateWorkspaceMemberRoleRequest["body"];

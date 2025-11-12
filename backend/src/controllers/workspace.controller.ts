@@ -20,6 +20,8 @@ import {
   RevokeWorkspaceInviteRequest,
   UpdateWorkspaceRequest,
   AcceptWorkspaceInviteRequest,
+  RemoveWorkspaceMemberRequest,
+  UpdateWorkspaceMemberRoleRequest,
 } from "../types/workspace.types.ts";
 
 const includeInviteLinksInResponses = env.NODE_ENV !== "production";
@@ -246,6 +248,37 @@ const deleteWorkspace = catchAsync(
   }
 );
 
+const removeWorkspaceMember = catchAsync(
+  async (req: RemoveWorkspaceMemberRequest, res: Response, _next: NextFunction) => {
+    const context = req.workspaceContext;
+
+    if (!context) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
+    }
+
+    await workspaceService.removeWorkspaceMember(context.workspace.id, req.params.memberId);
+
+    res.status(httpStatus.NO_CONTENT).send();
+  }
+);
+
+const updateWorkspaceMemberRole = catchAsync(
+  async (req: UpdateWorkspaceMemberRoleRequest, res: Response, _next: NextFunction) => {
+    const context = req.workspaceContext;
+    if (!context) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
+    }
+
+    const updatedMember = await workspaceService.updateWorkspaceMemberRole(
+      context.workspace.id,
+      req.params.memberId,
+      req.body.role
+    );
+
+    res.status(httpStatus.OK).json({ member: updatedMember });
+  }
+);
+
 export default {
   listWorkspaces,
   createWorkspace,
@@ -258,4 +291,6 @@ export default {
   acceptWorkspaceInvite,
   updateWorkspace,
   deleteWorkspace,
+  removeWorkspaceMember,
+  updateWorkspaceMemberRole,
 };
