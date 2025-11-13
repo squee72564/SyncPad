@@ -8,6 +8,12 @@ import { listShareLinks } from "@/lib/share-links";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
+
+const pageTextData = {
+  title: "Share Links",
+  description: "Manage Share Links for Your Documents.",
+};
 
 type ShareLinksPageProps = {
   searchParams?: Record<string, string | string[] | undefined>;
@@ -39,8 +45,8 @@ export default async function ShareLinksPage({ searchParams }: ShareLinksPagePro
   if (!activeWorkspace) {
     return (
       <WorkspaceSelectionPrompt
-        title="Share Links"
-        description="Choose a workspace before managing share tokens."
+        title={pageTextData.title}
+        description={pageTextData.description}
         body="Share links are scoped to a workspace. Pick one from the sidebar or create a new workspace to begin."
       />
     );
@@ -54,14 +60,11 @@ export default async function ShareLinksPage({ searchParams }: ShareLinksPagePro
 
   if (documents.length === 0) {
     return (
-    <div className="flex flex-col gap-6 p-6 w-full">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Share Links</h1>
-        <p className="text-sm text-muted-foreground">
-          Generate and revoke document-level tokens for guests. Links can be set to expire and
-          support view, comment, or edit permissions.
-        </p>
-      </div>
+    <div className="flex flex-col gap-4 p-6 w-full">
+      <PageHeader
+        header={pageTextData.title}
+        body={pageTextData.description}
+      />
       <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-muted-foreground/40 p-10 text-center w-full">
         <h3 className="text-base font-semibold">No documents yet</h3>
         <p className="max-w-sm text-sm text-muted-foreground">
@@ -89,15 +92,11 @@ export default async function ShareLinksPage({ searchParams }: ShareLinksPagePro
   );
 
   return (
-    <div className="flex flex-col gap-6 p-6 w-full">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Share Links</h1>
-        <p className="text-sm text-muted-foreground">
-          Generate and revoke document-level tokens for guests. Links can be set to expire and
-          support view, comment, or edit permissions.
-        </p>
-      </div>
-
+    <div className="flex flex-col gap-4 p-6 w-full">
+      <PageHeader
+        header={pageTextData.title}
+        body={pageTextData.description}
+      />
       <DocumentSelector
         documents={documents.map((doc) => ({ id: doc.id, title: doc.title }))}
         selectedDocumentId={selectedDocument.id}

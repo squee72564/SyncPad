@@ -2,6 +2,12 @@ import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { listDocuments } from "@/lib/documents";
 import DocumentList from "./DocumentList";
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
+import PageHeader from "@/components/PageHeader";
+
+const pageTextData = {
+  title: "All Documents",
+  description: "Browse All Documents.",
+};
 
 export default async function DocumentsPage() {
   const { activeWorkspace } = await resolveActiveWorkspace();
@@ -9,8 +15,8 @@ export default async function DocumentsPage() {
   if (!activeWorkspace) {
     return (
       <WorkspaceSelectionPrompt
-        title="All Documents"
-        description="Select a workspace to browse its documents or create a new one to get started."
+        title={pageTextData.title}
+        description={pageTextData.description}
         body="You do not have an active workspace. Choose one from the sidebar or create a new workspace to begin organizing documents."
       />
     );
@@ -21,15 +27,11 @@ export default async function DocumentsPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6 p-6 w-full">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">All Documents</h1>
-        <p className="text-sm text-muted-foreground">
-          Browse every document within{" "}
-          <span className="font-medium">{activeWorkspace.workspace.name}</span>, grouped by
-          hierarchy and status.
-        </p>
-      </div>
+    <div className="flex flex-col gap-4 p-6 w-full">
+      <PageHeader
+        header={pageTextData.title}
+        body={pageTextData.description}
+      />
       <DocumentList documents={documents} />
     </div>
   );

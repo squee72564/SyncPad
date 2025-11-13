@@ -2,6 +2,12 @@ import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { listDocuments } from "@/lib/documents";
 import DocumentList from "../DocumentList";
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
+import PageHeader from "@/components/PageHeader";
+
+const pageTextData = {
+  title: "Drafts Under Review",
+  description: "Browse Documents That Are In Review.",
+};
 
 export default async function DocumentDraftsPage() {
   const { activeWorkspace } = await resolveActiveWorkspace();
@@ -9,8 +15,8 @@ export default async function DocumentDraftsPage() {
   if (!activeWorkspace) {
     return (
       <WorkspaceSelectionPrompt
-        title="Drafts Under Review"
-        description="Select a workspace to review documents under review."
+        title={pageTextData.title}
+        description={pageTextData.description}
         body="Archives are scoped to a workspace. Pick one from the sidebar or create a new workspace to continue."
       />
     );
@@ -26,13 +32,10 @@ export default async function DocumentDraftsPage() {
 
   return (
     <div className="flex flex-col gap-4 p-6 w-full">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">In Review</h1>
-        <p className="text-sm text-muted-foreground">
-          Track documents in review within{" "}
-          <span className="font-medium">{activeWorkspace.workspace.name}</span>.
-        </p>
-      </div>
+      <PageHeader
+        header={pageTextData.title}
+        body={pageTextData.description}
+      />
       <DocumentList documents={inReview} />
     </div>
   );

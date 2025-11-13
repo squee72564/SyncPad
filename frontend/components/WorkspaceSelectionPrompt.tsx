@@ -1,6 +1,9 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import PageHeader from "./PageHeader";
 
 type WorkspaceSelectionPromptProps = {
   title: string;
@@ -15,20 +18,29 @@ export default function WorkspaceSelectionPrompt({
   description,
   body,
   ctaHref = "/dashboard/workspaces/new",
-  ctaLabel = "Create workspace",
+  ctaLabel = "Start a workspace",
 }: WorkspaceSelectionPromptProps) {
   return (
     <div className="flex flex-col gap-4 p-6 w-full">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </div>
-      <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        <p className="mb-4">{body}</p>
-        <Button asChild size="sm">
-          <Link href={ctaHref}>{ctaLabel}</Link>
-        </Button>
-      </div>
+      <PageHeader
+        header={title}
+        body={description}
+      />
+      <Card className="border-dashed">
+        <CardHeader>
+          <CardTitle>No workspaces yet</CardTitle>
+          <CardDescription>
+            {body}
+          </CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <Button asChild>
+            <Link href={ctaHref} className="inline-flex items-center gap-2">
+              <Plus className="h-4 w-4" /> {ctaLabel}
+            </Link>
+          </Button>
+        </CardFooter>
+      </Card> 
     </div>
   );
 }

@@ -2,6 +2,12 @@ import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { listDocuments } from "@/lib/documents";
 import DocumentList from "../DocumentList";
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
+import PageHeader from "@/components/PageHeader";
+
+const pageTextData = {
+  title: "Published Documents",
+  description: "Browse Published Documents.",
+};
 
 export default async function PublishedDocumentsPage() {
   const { activeWorkspace } = await resolveActiveWorkspace();
@@ -9,8 +15,8 @@ export default async function PublishedDocumentsPage() {
   if (!activeWorkspace) {
     return (
       <WorkspaceSelectionPrompt
-        title="Published Documents"
-        description="Choose a workspace to review the documents that are published and ready for your team."
+        title={pageTextData.title}
+        description={pageTextData.description}
         body="To see published docs, pick a workspace from the sidebar or create one to start publishing content."
       />
     );
@@ -26,13 +32,10 @@ export default async function PublishedDocumentsPage() {
 
   return (
     <div className="flex flex-col gap-4 p-6 w-full">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Published Documents</h1>
-        <p className="text-sm text-muted-foreground">
-          Browse content that&apos;s published within{" "}
-          <span className="font-medium">{activeWorkspace.workspace.name}</span>.
-        </p>
-      </div>
+      <PageHeader
+        header={pageTextData.title}
+        body={pageTextData.description}
+      />
       <DocumentList documents={published} />
     </div>
   );

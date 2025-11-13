@@ -3,8 +3,14 @@ import { getWorkspaceInvites, type WorkspaceInviteRecord } from "@/lib/invites";
 import InviteComposer from "./InviteComposer";
 import InviteList from "./InviteList";
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
+import PageHeader from "@/components/PageHeader";
 
 const INVITE_ROLES = new Set(["OWNER", "ADMIN", "SUPERADMIN"]);
+
+const pageTextData = {
+  title: "Invites & Access",
+  description: "Manage workspace invitations and monitor pending access requests.",
+};
 
 export default async function InvitesPage() {
   const { activeWorkspace } = await resolveActiveWorkspace();
@@ -12,8 +18,8 @@ export default async function InvitesPage() {
   if (!activeWorkspace) {
     return (
       <WorkspaceSelectionPrompt
-        title="Invites &amp; Access"
-        description="Choose a workspace to manage invitations and monitor pending access requests."
+        title={pageTextData.title}
+        description={pageTextData.description}
         body="You do not have an active workspace. Choose one from the sidebar or create a new workspace to begin inviting collaborators."
       />
     );
@@ -38,14 +44,10 @@ export default async function InvitesPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6 w-full">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Invites &amp; Access</h1>
-        <p className="text-sm text-muted-foreground">
-          {canManageInvites
-            ? `Manage invitations for ${activeWorkspace.workspace.name}. Send new invites, resend links, or revoke access as needed.`
-            : "You need an owner or admin role in this workspace to send or manage invites."}
-        </p>
-      </div>
+      <PageHeader
+        header={pageTextData.title}
+        body={pageTextData.description}
+      />
 
       {canManageInvites ? (
         <InviteComposer workspaceId={workspaceId} />

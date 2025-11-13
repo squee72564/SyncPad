@@ -4,6 +4,13 @@ import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { getWorkspaceMembersAction } from "../workspaces/actions";
 import MembersActions from "./MembersActions";
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
+import PageHeader from "@/components/PageHeader";
+
+const pageTextData = {
+  title: "Members & Roles",
+  description:
+    "Review workspace membership, assign roles, and track invitations tied to each seat.",
+};
 
 export default async function MembersPage() {
   const { activeWorkspace } = await resolveActiveWorkspace();
@@ -11,8 +18,8 @@ export default async function MembersPage() {
   if (!activeWorkspace) {
     return (
       <WorkspaceSelectionPrompt
-        title="Members &amp; Roles"
-        description="Review workspace membership, assign roles, and track invitations tied to each seat."
+        title={pageTextData.title}
+        description={pageTextData.description}
         body="You do not have an active workspace. Choose one from the sidebar or create a new workspace to begin organizing documents."
       />
     );
@@ -23,12 +30,10 @@ export default async function MembersPage() {
 
   return (
     <div className="flex flex-col gap-4 p-6 w-full">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Members &amp; Roles</h1>
-        <p className="text-sm text-muted-foreground">
-          Review workspace membership, assign roles, and track invitations tied to each seat.
-        </p>
-      </div>
+      <PageHeader
+        header={pageTextData.title}
+        body={pageTextData.description}
+      />
       <div className="overflow-hidden rounded-lg border">
         <div className="bg-muted/40 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-4 border-b px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           <span>User</span>
