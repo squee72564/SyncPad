@@ -15,10 +15,7 @@ const ensureDocumentBelongsToWorkspace = async (workspaceId: string, documentId:
   }
 };
 
-const ensureActivityLogBelongsToWorkspace = async (
-  workspaceId: string,
-  activityLogId: string
-) => {
+const ensureActivityLogBelongsToWorkspace = async (workspaceId: string, activityLogId: string) => {
   const activityLog = await prisma.activityLog.findFirst({
     where: { id: activityLogId, workspaceId },
     select: { id: true },
@@ -36,7 +33,10 @@ type CreateActivityLogInput = {
   actorId?: string | null;
 };
 
-const createActivityLog = async (workspaceId: string, input: Omit<CreateActivityLogArgs, "workspaceId">) => {
+const createActivityLog = async (
+  workspaceId: string,
+  input: Omit<CreateActivityLogArgs, "workspaceId">
+) => {
   if (input.documentId) {
     await ensureDocumentBelongsToWorkspace(workspaceId, input.documentId);
   }

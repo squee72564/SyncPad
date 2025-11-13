@@ -58,9 +58,7 @@ vi.mock("../middleware/workspace.js", () => ({
   attachWorkspaceContext: () => (req: Request, _res: Response, next: NextFunction) => {
     req.workspaceContext = {
       workspace: { ...workspaceContext.workspace },
-      membership: workspaceContext.membership
-        ? { ...workspaceContext.membership }
-        : undefined,
+      membership: workspaceContext.membership ? { ...workspaceContext.membership } : undefined,
       effectiveRole: workspaceContext.effectiveRole,
       permissions: [...workspaceContext.permissions],
     };

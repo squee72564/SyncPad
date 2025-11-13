@@ -4,8 +4,8 @@ import activityLogValidations from "@/validations/activity-log.validations.js";
 export type CreateActivityLogRequest = ZodRequest<
   typeof activityLogValidations.CreateActivityLogRequestSchema
 >;
-export type CreateActivityLogArgs =
-  CreateActivityLogRequest["params"] & CreateActivityLogRequest["body"];
+export type CreateActivityLogArgs = CreateActivityLogRequest["params"] &
+  CreateActivityLogRequest["body"];
 
 export type DeleteActivityLogRequest = ZodRequest<
   typeof activityLogValidations.DeleteActivityLogRequestSchema

@@ -4,17 +4,14 @@ import httpStatus from "http-status";
 import activityLogService from "../services/activity-log.service.js";
 import ApiError from "../utils/ApiError.js";
 import catchAsync from "../utils/catchAsync.js";
-import {
-  CreateActivityLogRequest,
-  DeleteActivityLogRequest,
-} from "../types/activity-log.types.ts";
+import { CreateActivityLogRequest, DeleteActivityLogRequest } from "../types/activity-log.types.ts";
 
 const createActivityLog = catchAsync(
   async (req: CreateActivityLogRequest, res: Response, _next: NextFunction) => {
     const context = req.workspaceContext;
 
     if (!req.user) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized")
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
     if (!context) {
@@ -37,7 +34,7 @@ const deleteActivityLog = catchAsync(
     const context = req.workspaceContext;
 
     if (!req.user) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized")
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
     if (!context) {
