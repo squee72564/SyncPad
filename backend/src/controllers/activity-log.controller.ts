@@ -25,7 +25,7 @@ const createActivityLog = catchAsync(
       actorId: req.user.id,
     });
 
-    res.status(httpStatus.CREATED).json({ activityLog });
+    res.status(httpStatus.CREATED).json({ activityLog: activityLog });
   }
 );
 
