@@ -1,6 +1,7 @@
 {
 	"scripts": {
-		"prepare": "husky install"
+		"prepare": "husky install",
+		"pretty": "pnpm --filter ./frontend pretty --write && pnpm --filter ./backend pretty --write"
 	},
 	"devDependencies": {
 		"husky": "^9.1.7",
@@ -9,11 +10,11 @@
 	"lint-staged": {
 		"frontend/**/*.{ts,tsx,js,jsx}": [
 			"pnpm --filter ./frontend eslint --fix",
-			"pnpm --filter ./frontend prettier --write"
+			"pnpm --filter ./frontend pretty --write"
 		],
 		"backend/src/**/*.{ts,js}": [
 			"pnpm --filter ./backend eslint --fix",
-			"pnpm --filter ./backend prettier --write"
+			"pnpm --filter ./backend pretty --write"
 		]
 	}
 }
