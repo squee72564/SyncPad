@@ -16,7 +16,7 @@
 - [in-progress] Replace dashboard placeholders with API-driven data once backend routes are ready (documents now integrate with the API; members + invites are live, AI views still pending).
 - [done] Introduce a workspace selector/context provider so dashboard pages query the active workspace consistently.
 - Begin prototyping the collaborative editor UI (CRDT integration, comment threads, presence indicators) and associated panels.
-- Tighten invite UX polish: add share-link management, invite previews for logged-out users, Copy-to-clipboard hints, and broaden dashboard tests around invite flows.
+- [done] Tighten invite/share-link UX: add dashboard share-link management (document picker, creator form, copy/regenerate/revoke), invite previews for logged-out users, copy-to-clipboard hints, and broaden dashboard tests around invite/share flows.
 - Expand component tests to cover new dashboard screens and stateful hooks as they ship.
 
 ## Infrastructure & QE
