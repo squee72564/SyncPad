@@ -7,6 +7,7 @@ import workspaceRoute from "./workspace.route.js";
 import documentRoute from "./document.route.js";
 import shareLinkRoute from "./share-link.route.js";
 import shareLinkPublicRoute from "./share-link.public.route.js";
+import activityLogRoute from "./activity-log.route.js";
 
 const router: Router = express.Router();
 
@@ -30,6 +31,10 @@ const defaultRoutes = [
   {
     path: "/workspaces/:workspaceId/documents",
     route: documentRoute,
+  },
+  {
+    path: "/workspaces/:workspaceId/activity-logs",
+    route: activityLogRoute,
   },
   {
     path: "/workspaces/:workspaceId/documents/:documentId/share-links",

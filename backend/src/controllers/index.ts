@@ -3,6 +3,7 @@ import adminController from "../controllers/admin.controller.js";
 import workspaceController from "../controllers/workspace.controller.js";
 import documentController from "../controllers/document.controller.js";
 import shareLinkController from "../controllers/share-link.controller.js";
+import activityLogController from "../controllers/activity-log.controller.js";
 
 export {
   userController,
@@ -10,4 +11,5 @@ export {
   workspaceController,
   documentController,
   shareLinkController,
+  activityLogController,
 };
