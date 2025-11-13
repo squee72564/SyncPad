@@ -3,6 +3,7 @@ import adminValidations from "./admin.validations.js";
 import workspaceValidations from "./workspace.validations.js";
 import documentValidations from "./document.validations.js";
 import shareLinkValidations from "./share-link.validations.js";
+import activityLogValidations from "./activity-log.validations.js";
 
 export {
   userValidations,
@@ -10,4 +11,5 @@ export {
   workspaceValidations,
   documentValidations,
   shareLinkValidations,
+  activityLogValidations,
 };
