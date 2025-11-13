@@ -31,7 +31,7 @@ type MembersActionsProps = getWorkspaceMembersResult & {
   workspaceId: string;
 };
 
-export default function MembersActions({ user, role, id, workspaceId }: MembersActionsProps) {
+export default function MembersActions({ role, id, workspaceId }: MembersActionsProps) {
   const [open, setOpen] = useState(false);
   const [formState, setFormState] = useState({
     role: role,

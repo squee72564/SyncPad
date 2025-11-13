@@ -12,13 +12,16 @@ import {
   ShareLinkTokenRequest,
   UpdateShareLinkRequest,
 } from "../types/share-link.types.ts";
+import { DocumentShareLink } from "../../prisma/generated/prisma-postgres/index.js";
 
 const buildShareLinkUrl = (token: string) => {
   const url = new URL(`/share-links/${token}`, env.APP_BASE_URL);
   return url.toString();
 };
 
-const serializeShareLink = (link: any) => ({
+const serializeShareLink = (
+  link: DocumentShareLink & { createdBy: { email: string; name: string; id: string } | null }
+) => ({
   id: link.id,
   permission: link.permission,
   expiresAt: link.expiresAt,
@@ -85,8 +88,8 @@ const updateShareLink = catchAsync(
       req.body.expiresAt === undefined
         ? undefined
         : req.body.expiresAt === null
-        ? null
-        : new Date(req.body.expiresAt);
+          ? null
+          : new Date(req.body.expiresAt);
 
     const shareLink = await shareLinkService.updateShareLink(
       context.workspace.id,

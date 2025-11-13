@@ -48,15 +48,14 @@ export default async function DashboardPage() {
       <PageHeader
         header="Workspace Overview"
         body="Access the workspaces you belong to, review your role, and jump into the areas you manage."
-        children={
-          <Button asChild>
-            <Link href="/dashboard/workspaces/new" className="inline-flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Create workspace
-            </Link>
-          </Button>
-        }
-      />
+      >
+        <Button asChild>
+          <Link href="/dashboard/workspaces/new" className="inline-flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Create workspace
+          </Link>
+        </Button>
+      </PageHeader>
       <div className="grid gap-4">
         {workspaces.map((entry) => {
           const createdAt = new Date(entry.workspace.createdAt);

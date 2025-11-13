@@ -2,7 +2,7 @@ import request from "supertest";
 import httpStatus from "http-status";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Request, Response, NextFunction } from "express";
-import { email, type User } from "better-auth";
+import { type User } from "better-auth";
 import type { UserWithRole } from "better-auth/plugins";
 
 import type { WorkspaceContext } from "../types/workspace.types.ts";

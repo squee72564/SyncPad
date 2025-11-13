@@ -29,10 +29,7 @@ export default async function NewDocumentPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6 w-full">
-      <PageHeader
-        header={pageTextData.title}
-        body={pageTextData.description}
-      />
+      <PageHeader header={pageTextData.title} body={pageTextData.description} />
       <CreateDocumentForm documents={existingDocuments} />
     </div>
   );

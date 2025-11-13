@@ -2,17 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-import {
-  createShareLink,
-  deleteShareLink,
-  updateShareLink,
-} from "@/lib/share-links";
+import { createShareLink, deleteShareLink, updateShareLink } from "@/lib/share-links";
 
 const SHARE_LINKS_PATH = "/dashboard/documents/share-links";
 
-type ActionResult<T = undefined> =
-  | { success: true; data?: T }
-  | { success: false; error: string };
+type ActionResult<T = undefined> = { success: true; data?: T } | { success: false; error: string };
 
 export async function createShareLinkAction(input: {
   workspaceId: string;

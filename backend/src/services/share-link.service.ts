@@ -7,8 +7,7 @@ import httpStatus from "http-status";
 
 const SHARE_LINK_TOKEN_LENGTH = 32;
 
-const generateShareLinkToken = () =>
-  crypto.randomBytes(SHARE_LINK_TOKEN_LENGTH).toString("hex");
+const generateShareLinkToken = () => crypto.randomBytes(SHARE_LINK_TOKEN_LENGTH).toString("hex");
 
 const ensureDocumentBelongsToWorkspace = async (workspaceId: string, documentId: string) => {
   const document = await prisma.document.findFirst({

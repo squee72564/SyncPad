@@ -44,10 +44,7 @@ export default async function InvitesPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6 w-full">
-      <PageHeader
-        header={pageTextData.title}
-        body={pageTextData.description}
-      />
+      <PageHeader header={pageTextData.title} body={pageTextData.description} />
 
       {canManageInvites ? (
         <InviteComposer workspaceId={workspaceId} />

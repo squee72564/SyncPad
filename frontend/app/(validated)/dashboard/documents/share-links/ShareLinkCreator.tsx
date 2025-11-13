@@ -22,7 +22,10 @@ type ShareLinkCreatorProps = {
 };
 
 export default function ShareLinkCreator({ workspaceId, documentId }: ShareLinkCreatorProps) {
-  const [formState, setFormState] = useState<{ permission: ShareLinkPermission; expiresAt: string }>({
+  const [formState, setFormState] = useState<{
+    permission: ShareLinkPermission;
+    expiresAt: string;
+  }>({
     permission: "VIEW",
     expiresAt: "",
   });
@@ -52,12 +55,15 @@ export default function ShareLinkCreator({ workspaceId, documentId }: ShareLinkC
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-border bg-card p-4 shadow-sm space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-lg border border-border bg-card p-4 shadow-sm space-y-4"
+    >
       <div className="space-y-1">
         <Label>Permission</Label>
         <Select
-        value={formState.permission}
-        onValueChange={(value: ShareLinkPermission) =>
+          value={formState.permission}
+          onValueChange={(value: ShareLinkPermission) =>
             setFormState((prev) => ({ ...prev, permission: value }))
           }
           disabled={isPending}
@@ -79,9 +85,7 @@ export default function ShareLinkCreator({ workspaceId, documentId }: ShareLinkC
           id="share-link-expires"
           type="datetime-local"
           value={formState.expiresAt}
-          onChange={(event) =>
-            setFormState((prev) => ({ ...prev, expiresAt: event.target.value }))
-          }
+          onChange={(event) => setFormState((prev) => ({ ...prev, expiresAt: event.target.value }))}
           disabled={isPending}
         />
         <p className="text-xs text-muted-foreground">Leave blank for no expiration.</p>

@@ -30,10 +30,7 @@ export default async function MembersPage() {
 
   return (
     <div className="flex flex-col gap-4 p-6 w-full">
-      <PageHeader
-        header={pageTextData.title}
-        body={pageTextData.description}
-      />
+      <PageHeader header={pageTextData.title} body={pageTextData.description} />
       <div className="overflow-hidden rounded-lg border">
         <div className="bg-muted/40 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-4 border-b px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           <span>User</span>

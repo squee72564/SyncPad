@@ -19,9 +19,7 @@ type ShareLinksPageProps = {
   searchParams?: Record<string, string | string[] | undefined>;
 };
 
-const getDocumentIdFromParams = (
-  searchParams: ShareLinksPageProps["searchParams"] | undefined
-) => {
+const getDocumentIdFromParams = (searchParams: ShareLinksPageProps["searchParams"] | undefined) => {
   if (!searchParams) {
     return undefined;
   }
@@ -60,43 +58,33 @@ export default async function ShareLinksPage({ searchParams }: ShareLinksPagePro
 
   if (documents.length === 0) {
     return (
-    <div className="flex flex-col gap-4 p-6 w-full">
-      <PageHeader
-        header={pageTextData.title}
-        body={pageTextData.description}
-      />
-      <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-muted-foreground/40 p-10 text-center w-full">
-        <h3 className="text-base font-semibold">No documents yet</h3>
-        <p className="max-w-sm text-sm text-muted-foreground">
-          Create your first document to capture knowledge, collaborate with teammates, and unlock AI
-          insights for your workspace.
-        </p>
-        <Button asChild size="sm" className="mt-2">
-          <Link href="/dashboard/documents/new">
-            Create document
-            <ArrowUpRight className="ml-1 h-4 w-4" />
-          </Link>
-        </Button>
+      <div className="flex flex-col gap-4 p-6 w-full">
+        <PageHeader header={pageTextData.title} body={pageTextData.description} />
+        <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-muted-foreground/40 p-10 text-center w-full">
+          <h3 className="text-base font-semibold">No documents yet</h3>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            Create your first document to capture knowledge, collaborate with teammates, and unlock
+            AI insights for your workspace.
+          </p>
+          <Button asChild size="sm" className="mt-2">
+            <Link href="/dashboard/documents/new">
+              Create document
+              <ArrowUpRight className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </div>
-    </div>
     );
   }
 
   const requestedDocumentId = getDocumentIdFromParams(searchParams);
-  const selectedDocument =
-    documents.find((doc) => doc.id === requestedDocumentId) ?? documents[0];
+  const selectedDocument = documents.find((doc) => doc.id === requestedDocumentId) ?? documents[0];
 
-  const shareLinks = await listShareLinks(
-    activeWorkspace.workspace.id,
-    selectedDocument.id
-  );
+  const shareLinks = await listShareLinks(activeWorkspace.workspace.id, selectedDocument.id);
 
   return (
     <div className="flex flex-col gap-4 p-6 w-full">
-      <PageHeader
-        header={pageTextData.title}
-        body={pageTextData.description}
-      />
+      <PageHeader header={pageTextData.title} body={pageTextData.description} />
       <DocumentSelector
         documents={documents.map((doc) => ({ id: doc.id, title: doc.title }))}
         selectedDocumentId={selectedDocument.id}
@@ -105,8 +93,8 @@ export default async function ShareLinksPage({ searchParams }: ShareLinksPagePro
       <div className="space-y-2">
         <h2 className="text-xl font-semibold tracking-tight">{selectedDocument.title}</h2>
         <p className="text-sm text-muted-foreground">
-          Manage public access for this document. Only users with share permissions can modify
-          these tokens.
+          Manage public access for this document. Only users with share permissions can modify these
+          tokens.
         </p>
       </div>
 

@@ -22,16 +22,11 @@ export default function WorkspaceSelectionPrompt({
 }: WorkspaceSelectionPromptProps) {
   return (
     <div className="flex flex-col gap-4 p-6 w-full">
-      <PageHeader
-        header={title}
-        body={description}
-      />
+      <PageHeader header={title} body={description} />
       <Card className="border-dashed">
         <CardHeader>
           <CardTitle>No workspaces yet</CardTitle>
-          <CardDescription>
-            {body}
-          </CardDescription>
+          <CardDescription>{body}</CardDescription>
         </CardHeader>
         <CardFooter>
           <Button asChild>
@@ -40,7 +35,7 @@ export default function WorkspaceSelectionPrompt({
             </Link>
           </Button>
         </CardFooter>
-      </Card> 
+      </Card>
     </div>
   );
 }

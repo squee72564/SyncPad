@@ -73,9 +73,7 @@ const workspaceContext: WorkspaceContext = {
 
 const cloneContext = (): WorkspaceContext => ({
   workspace: { ...workspaceContext.workspace },
-  membership: workspaceContext.membership
-    ? { ...workspaceContext.membership }
-    : undefined,
+  membership: workspaceContext.membership ? { ...workspaceContext.membership } : undefined,
   effectiveRole: workspaceContext.effectiveRole,
   permissions: [...workspaceContext.permissions],
 });

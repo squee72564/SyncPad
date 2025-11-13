@@ -10,14 +10,12 @@ export type ListShareLinksArgs = ListShareLinksRequest["params"];
 export type CreateShareLinkRequest = ZodRequest<
   typeof shareLinkValidations.CreateShareLinkRequestSchema
 >;
-export type CreateShareLinkArgs = CreateShareLinkRequest["params"] &
-  CreateShareLinkRequest["body"];
+export type CreateShareLinkArgs = CreateShareLinkRequest["params"] & CreateShareLinkRequest["body"];
 
 export type UpdateShareLinkRequest = ZodRequest<
   typeof shareLinkValidations.UpdateShareLinkRequestSchema
 >;
-export type UpdateShareLinkArgs = UpdateShareLinkRequest["params"] &
-  UpdateShareLinkRequest["body"];
+export type UpdateShareLinkArgs = UpdateShareLinkRequest["params"] & UpdateShareLinkRequest["body"];
 
 export type DeleteShareLinkRequest = ZodRequest<
   typeof shareLinkValidations.DeleteShareLinkRequestSchema

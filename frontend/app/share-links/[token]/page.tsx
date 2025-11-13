@@ -15,7 +15,9 @@ export default async function ShareLinkLanding({ params }: ShareLinkLandingProps
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 text-center">
         <div className="rounded-xl border border-dashed border-destructive/40 bg-destructive/5 p-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-destructive">Link unavailable</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-destructive">
+            Link unavailable
+          </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             This share link is invalid or has expired. Ask the document owner for a fresh invite.
           </p>
@@ -44,7 +46,9 @@ export default async function ShareLinkLanding({ params }: ShareLinkLandingProps
           <p>
             Token: <span className="font-mono text-xs">{token}</span>
           </p>
-          <p>Expires {preview.expiresAt ? new Date(preview.expiresAt).toLocaleString() : "Never"}</p>
+          <p>
+            Expires {preview.expiresAt ? new Date(preview.expiresAt).toLocaleString() : "Never"}
+          </p>
         </div>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button asChild>
