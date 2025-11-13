@@ -21,11 +21,11 @@ export type CreateActivityLogRecord = {
 
 export type CreateActivityLogResponse = {
   activityLog: CreateActivityLogRecord;
-}
+};
 
 export const createActivityLog = async (
   workspaceId: string,
-  payload: CreateActivityLogPayload,
+  payload: CreateActivityLogPayload
 ): Promise<CreateActivityLogRecord> => {
   const response = await authorizedFetch(`/v1/workspaces/${workspaceId}/activity-logs`, {
     method: "POST",
@@ -41,10 +41,9 @@ export const createActivityLog = async (
 
 export const deleteActivityLog = async (
   workspaceId: string,
-  activityLogId: string,
+  activityLogId: string
 ): Promise<void> => {
   await authorizedFetch(`/v1/workspaces/${workspaceId}/activity-logs/${activityLogId}`, {
-    method: "DELETE"
+    method: "DELETE",
   });
 };
-

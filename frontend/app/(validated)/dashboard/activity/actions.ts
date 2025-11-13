@@ -6,7 +6,7 @@ import {
   createActivityLog,
   deleteActivityLog,
   CreateActivityLogPayload,
-  CreateActivityLogRecord
+  CreateActivityLogRecord,
 } from "@/lib/activity-log";
 
 const ACTIVITY_LOG_PATH = "/dashboard/activity";
@@ -27,22 +27,19 @@ export const createActivityLogAction = async (
 
     return {
       success: true,
-      data
+      data,
     };
-
   } catch (error) {
-
     return {
       success: false,
       error: formatError(error, "Failed to create Activity Log"),
-    }
-    
+    };
   }
-}
+};
 
 export const deleteActivityLogAction = async (
   workspaceId: string,
-  activityLogId: string,
+  activityLogId: string
 ): Promise<ActionResult> => {
   try {
     await deleteActivityLog(workspaceId, activityLogId);
@@ -50,15 +47,12 @@ export const deleteActivityLogAction = async (
     revalidatePath(ACTIVITY_LOG_PATH);
 
     return {
-      success: true
+      success: true,
     };
-
   } catch (error) {
-
     return {
       success: false,
-      error: formatError(error, "Failed to delete Activity Log")
-    }
-
+      error: formatError(error, "Failed to delete Activity Log"),
+    };
   }
-}
+};
