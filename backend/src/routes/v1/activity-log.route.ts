@@ -11,6 +11,13 @@ const router: Router = Router({ mergeParams: true });
 
 router
   .route("/")
+  .get(
+    auth([...defaultRoles, ...adminRoles]),
+    validate(activityLogValidations.ListActivityLogsRequestSchema),
+    attachWorkspaceContext(),
+    requireWorkspacePermission("workspace:manage"),
+    activityLogController.listActivityLogs
+  )
   .post(
     auth([...defaultRoles, ...adminRoles]),
     validate(activityLogValidations.CreateActivityLogRequestSchema),
