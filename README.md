@@ -13,10 +13,30 @@ SyncPad is an emerging collaborative knowledge base that blends team wikis with 
 - **Backend**: Express 5 TypeScript service in `backend/` handling REST APIs, auth, workspace-aware middleware, rate limiting, logging, and Prisma integration.
 - **Documents, Invites & Share Links**: Workspace-scoped document CRUD lives under `v1/workspaces/:workspaceId/documents`, workspace invites under `/v1/workspaces/:workspaceId/invites` (list/create/resend/revoke) plus `/v1/workspaces/invites/:token/accept`, and document share links under `/v1/workspaces/:workspaceId/documents/:documentId/share-links` (list/create/update/delete) with token preview at `/v1/share-links/:token`. Share-link mutations now emit activity logs for auditing.
 - **Activity Logs**: Workspace timelines can now be read and written via `/v1/workspaces/:workspaceId/activity-logs` (GET with cursor filters, POST to append) plus `DELETE /v1/workspaces/:workspaceId/activity-logs/:activityLogId`. Backend controllers log document CRUD, workspace membership/invite changes, and share-link actions so the feed stays authoritative.
-- **Dashboard UX**: Next.js dashboard now includes a workspace switcher, API-backed document listings (all, drafts, published), invite management (composer, pending list, copy/resend/revoke actions), document share-link management (document picker, creator form, pending list with copy/regenerate/revoke), forms for creating/updating document metadata, and a new Activity timeline at `/dashboard/activity` that renders the server-fetched log with delete controls. Public invite/share-link acceptance lives under `/invites/:token` and `/share-links/:token` with auth-aware redirects.
+- **Dashboard UX**: Next.js dashboard now includes a workspace switcher, API-backed document listings (all, drafts, published), invite management (composer, pending list, copy/resend/revoke actions), document share-link management (document picker, creator form, pending list with copy/regenerate/revoke), forms for creating/updating document metadata, and a new Activity timeline at `/dashboard/activity` that renders the server-fetched log with delete controls. Public invite/share-link acceptance lives under `/invites/:token` and `/share-links/:token` with auth-aware redirects. An AI Jobs screen will expose queued workloads alongside status/latency once the worker lands.
 - **Data Layer**: PostgreSQL via Prisma ORM. The schema now models workspaces, membership roles, documents, revisions, comments, share links, embeddings, activity logs, and AI jobs. The roadmap still includes a vector store (pgvector, Pinecone, etc.) for retrieval-augmented generation.
 - **Gateway & Integration**: API gateway layer to broker frontend requests, enforce rate limiting, and host future service-to-service calls.
 - **Collaboration Stack**: Planned WebSocket broker with CRDT-powered document state and optional pub/sub bridge for horizontal scaling.
+
+## AI Job Strategy
+SyncPad’s AI orchestration hinges on the `AiJob` table plus a worker service that consumes queued jobs and writes results back to Prisma. The plan evolves through three tiers so we can ship practical wins and graduate toward a differentiated “workspace intelligence” narrative.
+
+### Tier 1 – Practical Foundations
+- **Embeddings & Search (`EMBED_DOCUMENT`)**: queue jobs on document changes, chunk content, call embedding APIs, and persist vectors for semantic search/RAG.
+- **Summaries & Digests (`SUMMARIZE_DOCUMENT`, `WORKSPACE_DIGEST`)**: periodically summarize documents or activity-log windows to power dashboard cards, share links, and email/Slack digests.
+- **Outline Assistance (`DRAFT_OUTLINE`)**: server actions queue outline/draft requests; workers return structured suggestions the editor can surface for manual insertion.
+
+### Tier 2 – Collaborative Coauthors
+- **Guided Co-editing (`COLLAB_EDIT`)**: workers compute diff proposals and store them as suggestions/tracked changes so humans can accept or reject AI-generated edits.
+- **Contextual Advisors (`INSIGHT_GENERATOR`)**: on publish or explicit triggers, AI inspects documents + recent activity to flag risks, missing approvals, or similar past work.
+- **Comment Intelligence (`COMMENT_SUMMARY`, `RESOLUTION_PROPOSAL`)**: summarize long threads, propose resolutions, and post system comments to keep teams aligned.
+
+### Tier 3 – Autonomous Operational Memory
+- **Multi-Agent Workshops (`COAUTHOR_ROOM`)**: orchestrate specialized AI agents (researcher/editor/PM) that collaborate via structured suggestions while respecting RBAC/share-link scopes.
+- **Decision Graph Builder (`DECISION_TIMELINE`)**: transform activity logs + document revisions into a linked decision graph so users and AI can trace “why” behind changes.
+- **Workspace Brainstorm Sprints (`IDEATION_SPRINT`)**: AI aggregates relevant docs, drafts proposals, and schedules follow-up jobs/tasks, logging every action for auditability.
+
+Each tier builds atop the same primitives (AiJob records, Prisma-backed storage, activity logs, and RBAC-aware context) so we can iterate incrementally without rewriting the pipeline.
 
 ## Core Use Cases & Feature Ideas
 - **Document Lifecycle**: Create, version, and archive pages with role-based access and granular sharing links.

@@ -10,6 +10,39 @@
 - [done] Wire email delivery + frontend UX for invites (Resend-backed email queue with dev logging, dashboard invite composer/list with copyable links, and `/invites/:token` acceptance flow that handles login/signup redirects).
 - [done] Implement document share link APIs under `/v1/workspaces/:workspaceId/documents/:documentId/share-links` (list/create/update/delete) plus `/v1/share-links/:token` preview, with dedicated controllers/services/validators and route tests.
 - [done] Add workspace activity log API for creating and deleting logs via `/v1/workspaces/:workspaceId/activity-logs`, wiring controllers, services, validators, and route tests.
+- [ ] Implement Tier 1 AI jobs: `EMBED_DOCUMENT` vector generation on document changes, `SUMMARIZE_DOCUMENT` / `WORKSPACE_DIGEST` summarization, and `DRAFT_OUTLINE` assistance with persisted results.
+- [ ] Prototype Tier 2 AI collaborators: tracked-change `COLLAB_EDIT` suggestions, `INSIGHT_GENERATOR` risk cards tied to document publishing, and comment summarization/resolution jobs.
+- [ ] Design Tier 3 autonomous flows: multi-agent `COAUTHOR_ROOM`, decision graph extraction (`DECISION_TIMELINE`), and recurring `IDEATION_SPRINT` jobs that orchestrate follow-up tasks.
+- [ ] Enforce document status semantics: define read/update/comment rules for DRAFT, IN_REVIEW, PUBLISHED, and ARCHIVED documents based on workspace roles (OWNER/ADMIN/EDITOR/COMMENTER/VIEWER) and update middleware/share-link logic accordingly.
+
+### Document Status Semantics (authoritative outline)
+
+- DRAFT
+  - Visibility: OWNER, ADMIN, EDITOR. COMMENTER optionally via explicit invite; VIEWER no access by default.
+  - Editing: OWNER/ADMIN/EDITOR can edit; COMMENTER may comment only if explicitly allowed; VIEWER none.
+  - Share links: Disabled by default (no public access). Overrides require explicit allow and remain comment-only at most.
+
+- IN_REVIEW
+  - Visibility: All roles with `document:read` (OWNER/ADMIN/EDITOR/COMMENTER/VIEWER).
+  - Editing: OWNER/ADMIN can edit; EDITOR can propose changes or edit within policy; COMMENTER can comment; VIEWER view-only.
+  - Share links: Allowed but default to comment-only. External reviewers can comment; no edit tokens.
+  - Transitions: Publish requires `document:publish` (typically OWNER/ADMIN; EDITOR if granted).
+
+- PUBLISHED
+  - Visibility: All roles with `document:read`.
+  - Editing: OWNER/ADMIN can edit/manage; EDITOR can edit with `document:update`; COMMENTER comment-only; VIEWER view-only.
+  - Share links: Default read-only. Edit-capable links require explicit permission and should be rare.
+  - Downstream: Triggers embeddings regeneration, activity announcements, and digest jobs.
+
+- ARCHIVED
+  - Visibility: Hidden from default lists; accessible to OWNER/ADMIN and others only via explicit request.
+  - Editing: Disabled. Unarchive required to modify (returns to DRAFT/IN_REVIEW). EDITOR/COMMENTER view-only; VIEWER typically no access.
+  - Share links: New links blocked; existing links revoked or forced read-only with warning.
+
+Implementation notes
+- Add middleware `requireDocumentStatusAccess` combining `req.workspaceContext.effectiveRole` + document.status to guard read/update/comment routes.
+- Adjust share-link creation/update rules per status (block for DRAFT/ARCHIVED; comment-only for IN_REVIEW; read-only default for PUBLISHED).
+- Surface status-aware UI cues (read-only banners, disabled editors) and emit activity logs on status transitions.
 - Cover the workspace/document middleware, validators, and service flows with Vitest + Supertest (membership, share links, permission failures, happy paths).
 - Seed or fixture sample workspace data to accelerate local testing and future Playwright flows.
 
@@ -19,10 +52,11 @@
 - [done] Build the `/dashboard/activity` timeline UI powered by the GET `/v1/workspaces/:workspaceId/activity-logs` endpoint, including log deletion and empty/error states.
 - [done] Introduce a workspace selector/context provider so dashboard pages query the active workspace consistently.
 - Begin prototyping the collaborative editor UI (CRDT integration, comment threads, presence indicators) and associated panels.
+- [ ] Surface AI job results: build `/dashboard/ai/jobs` list views, outline suggestion panels, digest cards, and tracked-change review UI for Tier 1+2 workflows.
 - [done] Tighten invite/share-link UX: add dashboard share-link management (document picker, creator form, copy/regenerate/revoke), invite previews for logged-out users, copy-to-clipboard hints, and broaden dashboard tests around invite/share flows.
 - Expand component tests to cover new dashboard screens and stateful hooks as they ship.
 
 ## Infrastructure & QE
 - Stand up Playwright (or similar) in `tests/e2e` once auth + workspace flows are stable; wire to a seeded local environment.
-- Define background worker infrastructure for AI jobs (queue, worker process, error handling) even if the first iteration is a stub.
+- Define background worker infrastructure for AI jobs (queue, worker process, error handling) even if the first iteration is a stub, then extend it with scheduling/retry logic for tiered workloads.
 - Document deployment guidelines for local Docker Compose and outline the path to AWS CDK/Terraform-based environments.
