@@ -27,6 +27,7 @@ type DocumentListResponse = {
 
 type DocumentResponse = {
   document: DocumentRecord;
+  collabState?: DocumentCollabStateRecord | null;
 };
 
 export type ListDocumentsOptions = {
@@ -128,6 +129,31 @@ export async function getDocument(
   return data.document;
 }
 
+export type DocumentCollabStateRecord = {
+  documentId: string;
+  workspaceId: string;
+  snapshot: unknown;
+  version: number;
+  updatedAt: string;
+};
+
+export async function getDocumentWithCollabState(
+  workspaceId: string | undefined,
+  workspaceSlug: string | undefined,
+  documentId: string
+): Promise<{ document: DocumentRecord; collabState: DocumentCollabStateRecord | null }> {
+  const identifier = await workspacePath(workspaceId, workspaceSlug);
+  const response = await authorizedFetch(
+    `/v1/workspaces/${identifier}/documents/${documentId}?includeCollabState=true`
+  );
+
+  const data = (await response.json()) as DocumentResponse;
+  return {
+    document: data.document,
+    collabState: data.collabState ?? null,
+  };
+}
+
 export async function updateDocument(
   workspaceId: string | undefined,
   workspaceSlug: string | undefined,
@@ -154,4 +180,34 @@ export async function deleteDocument(
   await authorizedFetch(`/v1/workspaces/${identifier}/documents/${documentId}`, {
     method: "DELETE",
   });
+}
+
+export type SaveDocumentCollabStateInput = {
+  documentId: string;
+  snapshot: unknown;
+  version?: number;
+};
+
+export async function saveDocumentCollabState(
+  workspaceId: string | undefined,
+  workspaceSlug: string | undefined,
+  input: SaveDocumentCollabStateInput
+): Promise<DocumentCollabStateRecord> {
+  const identifier = await workspacePath(workspaceId, workspaceSlug);
+  const response = await authorizedFetch(
+    `/v1/workspaces/${identifier}/documents/${input.documentId}/collab-state`,
+    {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        snapshot: input.snapshot,
+        version: input.version,
+      }),
+    }
+  );
+
+  const data = (await response.json()) as { collabState: DocumentCollabStateRecord };
+  return data.collabState;
 }

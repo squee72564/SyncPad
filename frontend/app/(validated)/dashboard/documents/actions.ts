@@ -1,7 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createDocument, deleteDocument, updateDocument } from "@/lib/documents";
+import {
+  createDocument,
+  deleteDocument,
+  updateDocument,
+  saveDocumentCollabState,
+} from "@/lib/documents";
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 
 export type CreateDocumentInput = {
@@ -17,6 +22,9 @@ export type CreateDocumentInput = {
 
 export type DocumentActionResult =
   | { success: true; documentId: string }
+  | { success: false; error: string };
+type CollabStateActionResult =
+  | { success: true; version: number }
   | { success: false; error: string };
 
 function sanitizeSlug(slug?: string | null) {
@@ -199,6 +207,33 @@ export async function updateDocumentAction(
     return { success: true, documentId: document.id };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to update document";
+    return { success: false, error: message };
+  }
+}
+
+export async function saveDocumentCollabStateAction(input: {
+  documentId: string;
+  snapshot: unknown;
+  version?: number;
+}): Promise<CollabStateActionResult> {
+  let workspace;
+  try {
+    workspace = await ensureWorkspace();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Select a workspace first";
+    return { success: false, error: message };
+  }
+
+  if (!input.documentId) {
+    return { success: false, error: "Document id is required" };
+  }
+
+  try {
+    const collabState = await saveDocumentCollabState(workspace.id, workspace.slug, input);
+
+    return { success: true, version: collabState.version };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to save document";
     return { success: false, error: message };
   }
 }
