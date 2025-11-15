@@ -13,6 +13,7 @@ import {
   CardAction,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -140,9 +141,9 @@ export default function ActivityTimeline({ workspaceId, activityLogs }: Activity
                 </CardContent>
 
                 {documentLabel ? (
-                  <div className="mt-3 inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium">
-                    Document: {documentLabel}
-                  </div>
+                  <CardFooter>
+                    <Badge variant={"secondary"}>Document: {documentLabel}</Badge>
+                  </CardFooter>
                 ) : null}
               </Card>
             </li>
