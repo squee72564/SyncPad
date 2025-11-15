@@ -4,6 +4,7 @@
 - [done] Implement foundational `v1/workspaces` CRUD routes that load context via `attachWorkspaceContext` and enforce `requireWorkspaceRole` / `requireWorkspacePermission`. Follow up with routes for members, invites, documents, comments, share links, and AI jobs.
 - [done] Add document validations, types, services, controller, and `v1/workspaces/:workspaceId/documents` routes with workspace-aware permissions, slug uniqueness handling, and publish guards.
 - Add controllers/services that mirror the remaining Prisma schema (member role changes, invite acceptance, comment resolution, AI job queue operations). Workspace & document scaffolding now exist—extend it for additional resources.
+- [done] Wire activity-log creation into workspace, document, and share-link controllers so backend actions automatically record auditable events.
 - [done] Extend Zod request validation using `workspaceValidations` helpers so every workspace-scoped route validates `workspaceId` + payload shape before hitting controllers.
 - [done] Add workspace invite functionality based on the `WorkspaceInvite` table in `backend/prisma/schema.prisma`. Workspace invitations are now managed at `/v1/workspaces/:workspaceId/invites` (list/create/resend/revoke) plus `/v1/workspaces/invites/:token/accept`, enforcing `member:invite`, token expiry, duplicate checks, and membership creation on acceptance.
 - [done] Wire email delivery + frontend UX for invites (Resend-backed email queue with dev logging, dashboard invite composer/list with copyable links, and `/invites/:token` acceptance flow that handles login/signup redirects).
@@ -15,6 +16,7 @@
 
 ## Frontend
 - [in-progress] Replace dashboard placeholders with API-driven data once backend routes are ready (documents now integrate with the API; members + invites are live, AI views still pending).
+- [done] Build the `/dashboard/activity` timeline UI powered by the GET `/v1/workspaces/:workspaceId/activity-logs` endpoint, including log deletion and empty/error states.
 - [done] Introduce a workspace selector/context provider so dashboard pages query the active workspace consistently.
 - Begin prototyping the collaborative editor UI (CRDT integration, comment threads, presence indicators) and associated panels.
 - [done] Tighten invite/share-link UX: add dashboard share-link management (document picker, creator form, copy/regenerate/revoke), invite previews for logged-out users, copy-to-clipboard hints, and broaden dashboard tests around invite/share flows.
