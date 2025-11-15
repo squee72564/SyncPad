@@ -51,7 +51,7 @@ Implementation notes
 - [in-progress] Replace dashboard placeholders with API-driven data once backend routes are ready (documents now integrate with the API; members + invites are live, AI views still pending).
 - [done] Build the `/dashboard/activity` timeline UI powered by the GET `/v1/workspaces/:workspaceId/activity-logs` endpoint, including log deletion and empty/error states.
 - [done] Introduce a workspace selector/context provider so dashboard pages query the active workspace consistently.
-- Begin prototyping the collaborative editor UI (CRDT integration, comment threads, presence indicators) and associated panels.
+- [done] Integrate a TipTap-based editor for DRAFT documents with autosave to `DocumentCollabState`; next, layer CRDT/WebSocket syncing plus commenting/presence.
 - [ ] Surface AI job results: build `/dashboard/ai/jobs` list views, outline suggestion panels, digest cards, and tracked-change review UI for Tier 1+2 workflows.
 - [done] Tighten invite/share-link UX: add dashboard share-link management (document picker, creator form, copy/regenerate/revoke), invite previews for logged-out users, copy-to-clipboard hints, and broaden dashboard tests around invite/share flows.
 - Expand component tests to cover new dashboard screens and stateful hooks as they ship.

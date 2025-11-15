@@ -56,3 +56,4 @@ Recent commits use short, Title Case subjects (for example, `Add signin/up page`
 
 ## Environment & Tooling Tips
 Copy the appropriate `.env.*` file into each package before running commands; Prisma scripts read `.env.development` by default. Docker compose files in `backend/` spin up Postgres with `pnpm --filter ./backend docker:dev`. PM2 ecosystem configuration handles production restarts—modify it only for deployment-related changes.
+- Draft documents now render via TipTap (MIT core) in `/dashboard/documents/[id]`, storing structured JSON snapshots in `DocumentCollabState` via `saveDocumentCollabStateAction`. Keep content in sync with `Document.content`, and plan to swap the snapshot storage for a Yjs/ProseMirror CRDT state when the realtime service is ready.
