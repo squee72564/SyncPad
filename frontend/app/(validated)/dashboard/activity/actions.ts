@@ -6,7 +6,7 @@ import {
   createActivityLog,
   deleteActivityLog,
   CreateActivityLogPayload,
-  CreateActivityLogRecord,
+  ActivityLogRecord,
 } from "@/lib/activity-log";
 
 const ACTIVITY_LOG_PATH = "/dashboard/activity";
@@ -19,7 +19,7 @@ const formatError = (error: unknown, fallback: string) =>
 export const createActivityLogAction = async (
   workspaceId: string,
   payload: CreateActivityLogPayload
-): Promise<ActionResult<CreateActivityLogRecord>> => {
+): Promise<ActionResult<ActivityLogRecord>> => {
   try {
     const data = await createActivityLog(workspaceId, payload);
 
