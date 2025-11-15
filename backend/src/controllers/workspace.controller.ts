@@ -6,6 +6,7 @@ import catchAsync from "../utils/catchAsync.js";
 import ApiError from "../utils/ApiError.js";
 import workspaceService from "../services/workspace.service.js";
 import emailService from "../services/email.service.js";
+import activityLogService from "../services/activity-log.service.js";
 import {
   CreateWorkspaceArgs,
   CreateWorkspaceRequest,
@@ -78,6 +79,16 @@ const createWorkspace = catchAsync(
 
     const args: CreateWorkspaceArgs = req.body;
     const workspace = await workspaceService.createWorkspace(args, userId);
+
+    await activityLogService.createActivityLog(workspace.workspace.id, {
+      event: "workspace.created",
+      actorId: userId,
+      metadata: {
+        name: workspace.workspace.name,
+        slug: workspace.workspace.slug,
+      },
+    });
+
     res.status(httpStatus.CREATED).json(workspace);
   }
 );
@@ -155,6 +166,16 @@ const createWorkspaceInvite = catchAsync(
       acceptUrl,
     });
 
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "workspace.invite.created",
+      actorId: req.user.id,
+      metadata: {
+        inviteId: invite.id,
+        email: invite.email,
+        role: invite.role,
+      },
+    });
+
     res.status(httpStatus.CREATED).json({
       invite: serializeInvite(invite, { acceptUrl }),
     });
@@ -186,6 +207,16 @@ const resendWorkspaceInvite = catchAsync(
       acceptUrl,
     });
 
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "workspace.invite.resent",
+      actorId: req.user.id,
+      metadata: {
+        inviteId: invite.id,
+        email: invite.email,
+        role: invite.role,
+      },
+    });
+
     res.status(httpStatus.OK).json({
       invite: serializeInvite(invite, { acceptUrl }),
     });
@@ -202,6 +233,14 @@ const revokeWorkspaceInvite = catchAsync(
 
     await workspaceService.revokeWorkspaceInvite(context.workspace.id, req.params.inviteId);
 
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "workspace.invite.revoked",
+      actorId: req.user?.id ?? null,
+      metadata: {
+        inviteId: req.params.inviteId,
+      },
+    });
+
     res.status(httpStatus.NO_CONTENT).send();
   }
 );
@@ -213,6 +252,16 @@ const acceptWorkspaceInvite = catchAsync(
     }
 
     const result = await workspaceService.acceptWorkspaceInvite(req.params.token, req.user.id);
+
+    await activityLogService.createActivityLog(result.invite.workspaceId, {
+      event: "workspace.invite.accepted",
+      actorId: req.user.id,
+      metadata: {
+        inviteId: result.invite.id,
+        membershipId: result.membership.id,
+        role: result.membership.role,
+      },
+    });
 
     res.status(httpStatus.OK).json({
       workspaceId: result.invite.workspaceId,
@@ -231,6 +280,13 @@ const updateWorkspace = catchAsync(
     }
 
     const workspace = await workspaceService.updateWorkspace(context.workspace.id, req.body);
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "workspace.updated",
+      actorId: req.user?.id ?? null,
+      metadata: {
+        updatedFields: Object.keys(req.body),
+      },
+    });
     res.status(httpStatus.OK).json({ workspace });
   }
 );
@@ -258,6 +314,14 @@ const removeWorkspaceMember = catchAsync(
 
     await workspaceService.removeWorkspaceMember(context.workspace.id, req.params.memberId);
 
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "workspace.member.removed",
+      actorId: req.user?.id ?? null,
+      metadata: {
+        memberId: req.params.memberId,
+      },
+    });
+
     res.status(httpStatus.NO_CONTENT).send();
   }
 );
@@ -274,6 +338,15 @@ const updateWorkspaceMemberRole = catchAsync(
       req.params.memberId,
       req.body.role
     );
+
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "workspace.member.role-updated",
+      actorId: req.user?.id ?? null,
+      metadata: {
+        memberId: req.params.memberId,
+        role: req.body.role,
+      },
+    });
 
     res.status(httpStatus.OK).json({ member: updatedMember });
   }

@@ -13,6 +13,7 @@ import {
   UpdateShareLinkRequest,
 } from "../types/share-link.types.ts";
 import { DocumentShareLink } from "../../prisma/generated/prisma-postgres/index.js";
+import activityLogService from "../services/activity-log.service.js";
 
 const buildShareLinkUrl = (token: string) => {
   const url = new URL(`/share-links/${token}`, env.APP_BASE_URL);
@@ -70,6 +71,17 @@ const createShareLink = catchAsync(
       req.user?.id
     );
 
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "shareLink.created",
+      documentId: req.params.documentId,
+      actorId: req.user?.id ?? null,
+      metadata: {
+        shareLinkId: shareLink.id,
+        permission: shareLink.permission,
+        expiresAt: shareLink.expiresAt ? shareLink.expiresAt.toISOString() : null,
+      },
+    });
+
     res.status(httpStatus.CREATED).json({
       shareLink: serializeShareLink(shareLink),
     });
@@ -102,6 +114,18 @@ const updateShareLink = catchAsync(
       }
     );
 
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "shareLink.updated",
+      documentId: req.params.documentId,
+      actorId: req.user?.id ?? null,
+      metadata: {
+        shareLinkId: shareLink.id,
+        permission: shareLink.permission,
+        expiresAt: shareLink.expiresAt ? shareLink.expiresAt.toISOString() : null,
+        regenerateToken: Boolean(req.body.regenerateToken),
+      },
+    });
+
     res.status(httpStatus.OK).json({
       shareLink: serializeShareLink(shareLink),
     });
@@ -121,6 +145,15 @@ const deleteShareLink = catchAsync(
       req.params.documentId,
       req.params.shareLinkId
     );
+
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "shareLink.deleted",
+      documentId: req.params.documentId,
+      actorId: req.user?.id ?? null,
+      metadata: {
+        shareLinkId: req.params.shareLinkId,
+      },
+    });
 
     res.status(httpStatus.NO_CONTENT).send();
   }

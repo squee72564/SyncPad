@@ -4,6 +4,7 @@ import httpStatus from "http-status";
 import catchAsync from "../utils/catchAsync.js";
 import ApiError from "../utils/ApiError.js";
 import documentService from "../services/document.service.js";
+import activityLogService from "../services/activity-log.service.js";
 import {
   type CreateDocumentRequest,
   type DeleteDocumentRequest,
@@ -46,6 +47,16 @@ const createDocument = catchAsync(
     }
 
     const document = await documentService.createDocument(context.workspace.id, userId, req.body);
+
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "document.created",
+      documentId: document.id,
+      metadata: {
+        title: document.title,
+        status: document.status,
+      },
+      actorId: userId,
+    });
 
     res.status(httpStatus.CREATED).json({ document });
   }
@@ -104,6 +115,16 @@ const updateDocument = catchAsync(
       updates
     );
 
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "document.updated",
+      documentId: document.id,
+      metadata: {
+        updatedFields: Object.keys(updates),
+        status: document.status,
+      },
+      actorId: userId,
+    });
+
     res.status(httpStatus.OK).json({ document });
   }
 );
@@ -118,6 +139,12 @@ const deleteDocument = catchAsync(
     }
 
     await documentService.deleteDocument(context.workspace.id, req.params.documentId);
+
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "document.deleted",
+      documentId: req.params.documentId,
+      actorId: req.user?.id ?? null,
+    });
 
     res.status(httpStatus.NO_CONTENT).send();
   }
