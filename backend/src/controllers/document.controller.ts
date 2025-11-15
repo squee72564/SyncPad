@@ -195,14 +195,14 @@ const saveDocumentCollabState = catchAsync(
       req.body.version
     );
 
-    await activityLogService.createActivityLog(context.workspace.id, {
-      event: "document.collab-saved",
-      documentId: document.id,
-      actorId: req.user.id,
-      metadata: {
-        version: collabState.version,
-      },
-    });
+    // await activityLogService.createActivityLog(context.workspace.id, {
+    //   event: "document.collab-saved",
+    //   documentId: document.id,
+    //   actorId: req.user.id,
+    //   metadata: {
+    //     version: collabState.version,
+    //   },
+    // });
 
     res.status(httpStatus.OK).json({ collabState });
   }
