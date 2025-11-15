@@ -20,6 +20,12 @@ type DocumentServiceMock = {
   deleteDocument: ReturnType<typeof vi.fn>;
 };
 
+type ActivityLogServiceMock = {
+  createActivityLog: ReturnType<typeof vi.fn>;
+  deleteActivityLog: ReturnType<typeof vi.fn>;
+  listActivityLogs: ReturnType<typeof vi.fn>;
+};
+
 const TEST_USER_ID = "user_document";
 const WORKSPACE_ID = "ckzbqk5pq0000s8n1x9cbk8w1";
 const WORKSPACE_SLUG = "workspace-doc";
@@ -111,6 +117,12 @@ const documentServiceMock = vi.hoisted(() => ({
   deleteDocument: vi.fn(),
 })) as DocumentServiceMock;
 
+const activityLogServiceMock = vi.hoisted(() => ({
+  createActivityLog: vi.fn().mockResolvedValue(undefined),
+  deleteActivityLog: vi.fn().mockResolvedValue(undefined),
+  listActivityLogs: vi.fn().mockResolvedValue({ activityLogs: [], nextCursor: null }),
+})) as ActivityLogServiceMock;
+
 vi.mock("../middleware/auth.js", () => ({
   __esModule: true,
   default: () => (req: Request, _res: Response, next: NextFunction) => {
@@ -140,6 +152,11 @@ vi.mock("../services/document.service.js", () => ({
   default: documentServiceMock,
 }));
 
+vi.mock("../services/activity-log.service.js", () => ({
+  __esModule: true,
+  default: activityLogServiceMock,
+}));
+
 import app from "../app.js";
 
 describe("Document routes", () => {
@@ -149,6 +166,9 @@ describe("Document routes", () => {
     documentServiceMock.getDocumentById.mockReset();
     documentServiceMock.updateDocument.mockReset();
     documentServiceMock.deleteDocument.mockReset();
+    activityLogServiceMock.createActivityLog.mockClear();
+    activityLogServiceMock.deleteActivityLog.mockClear();
+    activityLogServiceMock.listActivityLogs.mockClear();
 
     baseContext.workspace = { ...baseWorkspace };
     baseContext.membership = { ...baseMembership };

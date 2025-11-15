@@ -20,6 +20,12 @@ type ShareLinkServiceMock = {
   getShareLinkByToken: ReturnType<typeof vi.fn>;
 };
 
+type ActivityLogServiceMock = {
+  createActivityLog: ReturnType<typeof vi.fn>;
+  deleteActivityLog: ReturnType<typeof vi.fn>;
+  listActivityLogs: ReturnType<typeof vi.fn>;
+};
+
 const TEST_USER_ID = "user_share_link";
 const WORKSPACE_ID = "cw_1234567890123456789012345";
 const DOCUMENT_ID = "cd_1234567890123456789012345";
@@ -86,6 +92,12 @@ const shareLinkServiceMock = vi.hoisted(() => ({
   getShareLinkByToken: vi.fn(),
 })) as ShareLinkServiceMock;
 
+const activityLogServiceMock = vi.hoisted(() => ({
+  createActivityLog: vi.fn().mockResolvedValue(undefined),
+  deleteActivityLog: vi.fn().mockResolvedValue(undefined),
+  listActivityLogs: vi.fn().mockResolvedValue({ activityLogs: [], nextCursor: null }),
+})) as ActivityLogServiceMock;
+
 vi.mock("../middleware/auth.js", () => ({
   __esModule: true,
   default: () => (req: Request, _res: Response, next: NextFunction) => {
@@ -113,6 +125,11 @@ vi.mock("../services/share-link.service.js", () => ({
   default: shareLinkServiceMock,
 }));
 
+vi.mock("../services/activity-log.service.js", () => ({
+  __esModule: true,
+  default: activityLogServiceMock,
+}));
+
 vi.mock("../config/index.js", () => ({
   __esModule: true,
   default: {
@@ -129,6 +146,9 @@ describe("Share link routes", () => {
     shareLinkServiceMock.updateShareLink.mockReset();
     shareLinkServiceMock.deleteShareLink.mockReset();
     shareLinkServiceMock.getShareLinkByToken.mockReset();
+    activityLogServiceMock.createActivityLog.mockClear();
+    activityLogServiceMock.deleteActivityLog.mockClear();
+    activityLogServiceMock.listActivityLogs.mockClear();
 
     workspaceContext.workspace = { ...baseWorkspace };
     workspaceContext.membership = { ...baseMembership };
