@@ -18,6 +18,8 @@ type DocumentServiceMock = {
   getDocumentById: ReturnType<typeof vi.fn>;
   updateDocument: ReturnType<typeof vi.fn>;
   deleteDocument: ReturnType<typeof vi.fn>;
+  getDocumentCollabState: ReturnType<typeof vi.fn>;
+  upsertDocumentCollabState: ReturnType<typeof vi.fn>;
 };
 
 type ActivityLogServiceMock = {
@@ -115,6 +117,8 @@ const documentServiceMock = vi.hoisted(() => ({
   getDocumentById: vi.fn(),
   updateDocument: vi.fn(),
   deleteDocument: vi.fn(),
+  getDocumentCollabState: vi.fn(),
+  upsertDocumentCollabState: vi.fn(),
 })) as DocumentServiceMock;
 
 const activityLogServiceMock = vi.hoisted(() => ({
@@ -166,6 +170,8 @@ describe("Document routes", () => {
     documentServiceMock.getDocumentById.mockReset();
     documentServiceMock.updateDocument.mockReset();
     documentServiceMock.deleteDocument.mockReset();
+    documentServiceMock.getDocumentCollabState.mockReset();
+    documentServiceMock.upsertDocumentCollabState.mockReset();
     activityLogServiceMock.createActivityLog.mockClear();
     activityLogServiceMock.deleteActivityLog.mockClear();
     activityLogServiceMock.listActivityLogs.mockClear();

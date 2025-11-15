@@ -20,6 +20,8 @@ const DocumentParamsSchema = z.object({
   workspaceId: workspaceValidations.workspaceIdentifier,
 });
 
+const booleanQueryParam = z.union([z.boolean(), z.enum(["true", "false"])]);
+
 const ListDocumentsRequestSchema = z.object({
   params: z.object({
     workspaceId: workspaceValidations.workspaceIdentifier,
@@ -28,7 +30,7 @@ const ListDocumentsRequestSchema = z.object({
     .object({
       parentId: z.cuid({ message: "parentId must be a valid CUID" }).optional(),
       status: documentStatus.optional(),
-      includeContent: z.union([z.boolean(), z.enum(["true", "false"])]).optional(),
+      includeContent: booleanQueryParam.optional(),
     })
     .optional(),
 });
@@ -81,10 +83,23 @@ const UpdateDocumentRequestSchema = z.object({
 
 const GetDocumentRequestSchema = z.object({
   params: DocumentParamsSchema,
+  query: z
+    .object({
+      includeCollabState: booleanQueryParam.optional(),
+    })
+    .optional(),
 });
 
 const DeleteDocumentRequestSchema = z.object({
   params: DocumentParamsSchema,
+});
+
+const UpdateDocumentCollabStateRequestSchema = z.object({
+  params: DocumentParamsSchema,
+  body: z.object({
+    snapshot: z.any(),
+    version: z.number().int().nonnegative().optional(),
+  }),
 });
 
 export default {
@@ -96,4 +111,5 @@ export default {
   UpdateDocumentRequestSchema,
   GetDocumentRequestSchema,
   DeleteDocumentRequestSchema,
+  UpdateDocumentCollabStateRequestSchema,
 };

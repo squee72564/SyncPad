@@ -50,4 +50,13 @@ router
     documentController.deleteDocument
   );
 
+router.patch(
+  "/:documentId/collab-state",
+  auth([...defaultRoles, ...adminRoles]),
+  validate(documentValidations.UpdateDocumentCollabStateRequestSchema),
+  attachWorkspaceContext(),
+  requireWorkspacePermission("document:update"),
+  documentController.saveDocumentCollabState
+);
+
 export default router;

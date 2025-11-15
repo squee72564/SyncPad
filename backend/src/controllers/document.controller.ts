@@ -11,6 +11,7 @@ import {
   type GetDocumentRequest,
   type ListDocumentsRequest,
   type UpdateDocumentRequest,
+  type UpdateDocumentCollabStateRequest,
 } from "../types/document.types.ts";
 
 // Return all documents in a workspace, optionally filtered by parent/status, respecting permission scope.
@@ -80,7 +81,19 @@ const getDocument = catchAsync(
       throw new ApiError(httpStatus.NOT_FOUND, "Document not found");
     }
 
-    res.status(httpStatus.OK).json({ document });
+    const includeCollab =
+      req.query?.includeCollabState === true || req.query?.includeCollabState === "true";
+
+    const payload: Record<string, unknown> = { document };
+
+    if (includeCollab) {
+      payload.collabState = await documentService.getDocumentCollabState(
+        context.workspace.id,
+        document.id
+      );
+    }
+
+    res.status(httpStatus.OK).json(payload);
   }
 );
 
@@ -150,10 +163,56 @@ const deleteDocument = catchAsync(
   }
 );
 
+const saveDocumentCollabState = catchAsync(
+  async (req: UpdateDocumentCollabStateRequest, res: Response, _next: NextFunction) => {
+    const context = req.workspaceContext;
+
+    if (!context) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
+    }
+
+    if (!req.user) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
+    }
+
+    const document = await documentService.getDocumentById(
+      context.workspace.id,
+      req.params.documentId
+    );
+
+    if (!document) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Document not found");
+    }
+
+    if (document.status !== "DRAFT") {
+      throw new ApiError(httpStatus.FORBIDDEN, "Only draft documents can be edited");
+    }
+
+    const collabState = await documentService.upsertDocumentCollabState(
+      context.workspace.id,
+      document.id,
+      req.body.snapshot,
+      req.body.version
+    );
+
+    await activityLogService.createActivityLog(context.workspace.id, {
+      event: "document.collab-saved",
+      documentId: document.id,
+      actorId: req.user.id,
+      metadata: {
+        version: collabState.version,
+      },
+    });
+
+    res.status(httpStatus.OK).json({ collabState });
+  }
+);
+
 export default {
   listDocuments,
   createDocument,
   getDocument,
   updateDocument,
   deleteDocument,
+  saveDocumentCollabState,
 };

@@ -39,6 +39,7 @@
 - `POST` `/v1/workspaces/:workspaceId/documents` creates a new document under the workspace with slug/permission validation (backend/src/routes/v1/document.route.ts).
 - `GET` `/v1/workspaces/:workspaceId/documents/:documentId` fetches a single document; it optionally trusts share-link tokens via allowShareLinks for public previews (backend/src/routes/v1/ document.route.ts).
 - `PATCH` `/v1/workspaces/:workspaceId/documents/:documentId` updates metadata/content for authorized members; DELETE removes the document when document:delete is granted (backend/src/routes/v1/document.route.ts).
+- `PATCH` `/v1/workspaces/:workspaceId/documents/:documentId/collab-state` saves the latest draft collaboration snapshot (structured JSON today, future CRDT state) and is limited to users with `document:update` permission while the document is in DRAFT status.
 
 ## Share Links
 

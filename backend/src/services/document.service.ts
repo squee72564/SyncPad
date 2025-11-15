@@ -67,6 +67,37 @@ const getDocumentById = async (workspaceId: string, documentId: string) => {
   });
 };
 
+const getDocumentCollabState = async (workspaceId: string, documentId: string) => {
+  return prisma.documentCollabState.findFirst({
+    where: {
+      documentId,
+      workspaceId,
+    },
+  });
+};
+
+const upsertDocumentCollabState = async (
+  workspaceId: string,
+  documentId: string,
+  snapshot: Prisma.JsonValue | undefined,
+  version?: number
+) => {
+  return prisma.documentCollabState.upsert({
+    where: { documentId },
+    update: {
+      snapshot: snapshot ?? Prisma.JsonNull,
+      version: version !== undefined ? version : { increment: 1 },
+      workspaceId,
+    },
+    create: {
+      documentId,
+      workspaceId,
+      snapshot: snapshot ?? Prisma.JsonNull,
+      version: version ?? 1,
+    },
+  });
+};
+
 // Return workspace documents filtering by parent/status and optionally omitting content payloads.
 const listDocuments = async (workspaceId: string, query?: ListDocumentsQuery) => {
   const where: Prisma.DocumentWhereInput = {
@@ -229,6 +260,8 @@ export default {
   listDocuments,
   createDocument,
   getDocumentById,
+  getDocumentCollabState,
+  upsertDocumentCollabState,
   updateDocument,
   deleteDocument,
 };

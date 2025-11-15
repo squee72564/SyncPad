@@ -15,6 +15,7 @@ export type CreateDocumentParams = CreateDocumentRequest["params"];
 
 export type GetDocumentRequest = ZodRequest<typeof documentValidations.GetDocumentRequestSchema>;
 export type GetDocumentParams = GetDocumentRequest["params"];
+export type GetDocumentQuery = GetDocumentRequest["query"];
 
 export type UpdateDocumentRequest = ZodRequest<
   typeof documentValidations.UpdateDocumentRequestSchema
@@ -26,3 +27,7 @@ export type DeleteDocumentRequest = ZodRequest<
   typeof documentValidations.DeleteDocumentRequestSchema
 >;
 export type DeleteDocumentParams = DeleteDocumentRequest["params"];
+
+export type UpdateDocumentCollabStateRequest = ZodRequest<
+  typeof documentValidations.UpdateDocumentCollabStateRequestSchema
+>;
