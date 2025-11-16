@@ -1,5 +1,6 @@
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
-import { getDocumentWithCollabState } from "@/lib/documents";
+import { getDocument } from "@/lib/documents";
+import getSession from "@/lib/getSession";
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { DocumentStatusBadge } from "../DocumentStatusBadge";
 import DocumentEditor from "./DocumentEditor";
@@ -19,7 +20,14 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
     );
   }
 
-  const { document, collabState } = await getDocumentWithCollabState(
+  const session = await getSession();
+
+  const currentUser = {
+    id: session.user.id ?? ("12345" as string),
+    name: session.user.name ?? ("Unknown" as string),
+  };
+
+  const document = await getDocument(
     activeWorkspace.workspace.id,
     activeWorkspace.workspace.slug,
     id
@@ -48,7 +56,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
         ) : null}
       </div>
 
-      <DocumentEditor document={document} collabState={collabState} readOnly={!isDraft} />
+      <DocumentEditor document={document} currentUser={currentUser} readOnly={!isDraft} />
     </div>
   );
 }

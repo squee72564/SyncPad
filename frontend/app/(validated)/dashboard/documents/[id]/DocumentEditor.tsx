@@ -4,29 +4,68 @@ import { useEffect, useMemo } from "react";
 import { useEditor, EditorContent, EditorContext } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Collaboration from "@tiptap/extension-collaboration";
-import * as Y from "yjs";
-import { HocuspocusProvider } from "@hocuspocus/provider";
+import CollaborationCaret from "@tiptap/extension-collaboration-caret";
 
 import type { DocumentCollabStateRecord, DocumentRecord } from "@/lib/documents";
+import useCollaborationProvider from "@/hooks/use-collaborationProvider";
+
+type EditorUser = {
+  id: string;
+  name: string;
+};
 
 type DocumentEditorProps = {
   document: DocumentRecord;
-  collabState: DocumentCollabStateRecord | null;
   readOnly: boolean;
+  currentUser: EditorUser;
 };
 
-export default function DocumentEditor({ document, collabState, readOnly }: DocumentEditorProps) {
-  const ydoc = useMemo(() => new Y.Doc(), [document.id]);
+export default function DocumentEditor({ document, readOnly, currentUser }: DocumentEditorProps) {
+  const { ydoc, provider, cursorColor } = useCollaborationProvider(document.id, currentUser);
 
-  const provider = useMemo(() => {
-    const p = new HocuspocusProvider({
-      url: `ws://localhost:3001/v1/collaboration?document=${document.id}`,
-      name: `${document.title}-${document.id}`,
+  const cursorName = currentUser.name;
+
+  const collaborationExtension = useMemo(() => {
+    return Collaboration.configure({
       document: ydoc,
-    });
-    p.connect();
-    return p;
-  }, [document.id, ydoc]);
+      field: "content",
+    }).extend({ priority: 200 });
+  }, [ydoc]);
+
+  const collaborationCursorExtension = useMemo(() => {
+    return CollaborationCaret.configure({
+      provider,
+      user: {
+        name: cursorName,
+        color: cursorColor,
+      },
+    }).extend({ priority: 150 });
+  }, [provider, cursorColor, cursorName]);
+
+  const editor = useEditor(
+    {
+      extensions: [
+        StarterKit.configure({
+          undoRedo: false,
+        }),
+        collaborationExtension,
+        collaborationCursorExtension,
+      ],
+      editable: !readOnly,
+      immediatelyRender: false,
+    },
+    [collaborationCursorExtension, collaborationExtension, readOnly]
+  );
+
+  useEffect(() => {
+    if (!editor || !provider) {
+      return;
+    }
+
+    editor.commands.updateUser({ name: cursorName, color: cursorColor });
+  }, [cursorColor, cursorName, editor, provider]);
+
+  const providerValue = useMemo(() => ({ editor }), [editor]);
 
   useEffect(() => {
     return () => {
@@ -35,22 +74,6 @@ export default function DocumentEditor({ document, collabState, readOnly }: Docu
       ydoc.destroy();
     };
   }, [provider, ydoc]);
-
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        undoRedo: false,
-      }),
-      Collaboration.configure({
-        document: ydoc,
-        field: "content",
-      }),
-    ],
-    editable: !readOnly,
-    immediatelyRender: false,
-  });
-
-  const providerValue = useMemo(() => ({ editor }), [editor]);
 
   if (!editor) {
     return (

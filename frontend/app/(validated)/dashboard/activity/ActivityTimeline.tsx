@@ -7,7 +7,6 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ActivityLogRecord } from "@/lib/activity-log";
 import { deleteActivityLogAction } from "./actions";
-import { cn } from "@/lib/utils";
 import {
   Card,
   CardAction,
