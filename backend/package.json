@@ -61,6 +61,7 @@
     "pm2": "^6.0.13",
     "winston": "^3.18.3",
     "xss-filters": "^1.2.7",
+    "yjs": "^13.6.27",
     "zod": "^4.1.12"
   },
   "devDependencies": {

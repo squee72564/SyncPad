@@ -1,4 +1,4 @@
-import express, { type Request, type Response, type NextFunction, type Express } from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 import expressWebsockets from "express-ws";
 
 import httpStatus from "http-status";
