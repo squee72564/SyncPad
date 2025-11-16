@@ -1,4 +1,5 @@
 import express, { type Request, type Response, type NextFunction, type Express } from "express";
+import expressWebsockets from "express-ws";
 
 import httpStatus from "http-status";
 
@@ -17,7 +18,9 @@ import routes from "./routes/v1/index.js";
 import ApiError from "./utils/ApiError.js";
 import { errorConverter, errorHandler } from "./middleware/errors.js";
 
-const app: Express = express();
+import hocuspocusServer from "./config/hocuspocus.ts";
+
+const { app }: { app: expressWebsockets.Application } = expressWebsockets(express());
 
 if (env.NODE_ENV !== "test") {
   app.use(morgan.successHandler);
@@ -63,6 +66,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // api routes
 app.use("/v1", routes.default);
+
+// websocket route for HocusPocus
+app.ws("/v1/collaboration", (websocket, request) => {
+  hocuspocusServer.handleConnection(websocket, request);
+});
 
 // Send a 404 error for unknown api requests
 app.use((_req: Request, _res: Response, next: NextFunction) => {

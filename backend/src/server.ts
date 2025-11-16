@@ -2,8 +2,7 @@ import app from "./app.js";
 import env from "./config/index.js";
 import logger from "./config/logger.js";
 import { disconnectPrisma } from "./lib/prisma.js";
-
-// Maybe handle db connection here?
+import hocuspocusServer, { shutdownHocuspocus } from "./config/hocuspocus.js";
 
 const server = app.listen(env.PORT, () => {
   logger.info(`Listening to port ${env.PORT}`);
@@ -15,6 +14,11 @@ const exitHandler = async (exitCode = 0) => {
       await new Promise<void>((resolve) => server.close(() => resolve()));
       logger.info("Server closed");
     }
+
+    if (hocuspocusServer) {
+      await shutdownHocuspocus();
+    }
+
     await disconnectPrisma();
   } catch (err) {
     logger.error("Error during shutdown", err);
