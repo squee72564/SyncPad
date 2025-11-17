@@ -7,7 +7,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
+    volumes:
+      - ./postgres:/etc/postgresql:ro
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+      
   pgbouncer:
     image: edoburu/pgbouncer:v1.24.1-p0
     container_name: syncpad_pgbouncer
