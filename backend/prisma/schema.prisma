@@ -153,6 +153,7 @@ model Workspace {
   DocumentCollabState DocumentCollabState[]
 
   @@map("workspace")
+  @@index([createdAt])
 }
 
 model WorkspaceMember {
@@ -167,6 +168,7 @@ model WorkspaceMember {
   user      User      @relation("WorkspaceMembers", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, userId])
+  @@index([userId])
   @@map("workspace_member")
 }
 
