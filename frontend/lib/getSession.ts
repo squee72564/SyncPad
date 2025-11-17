@@ -1,15 +1,13 @@
-import { cookies } from "next/headers";
-//import { redirect } from "next/navigation";
+"use server";
 
-export default async function getSession() {
+import { cookies } from "next/headers";
+import { cache } from "react";
+
+async function _getSession() {
   const cookieStore = await cookies();
   const sessionCookie =
     cookieStore.get("__Secure-better-auth.session_token")?.value ??
     cookieStore.get("better-auth.session_token")?.value;
-
-  // if (!sessionCookie) {
-  //   redirect("/signin");
-  // }
 
   const res = await fetch("http://localhost:3001/v1/user/self", {
     headers: {
@@ -20,3 +18,5 @@ export default async function getSession() {
 
   return res.json();
 }
+
+export default cache(_getSession);
