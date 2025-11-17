@@ -22,18 +22,15 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
     );
   }
 
-  const session = await getSession();
+  const [session, document] = await Promise.all([
+    getSession(),
+    getDocument(activeWorkspace.workspace.id, activeWorkspace.workspace.slug, id),
+  ]);
 
   const currentUser = {
     id: session.user.id ?? ("12345" as string),
     name: session.user.name ?? ("Unknown" as string),
   };
-
-  const document = await getDocument(
-    activeWorkspace.workspace.id,
-    activeWorkspace.workspace.slug,
-    id
-  );
 
   const isDraft = document.status === "DRAFT";
 
