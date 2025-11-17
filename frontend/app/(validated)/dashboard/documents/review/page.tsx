@@ -1,3 +1,5 @@
+"use server";
+
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { listDocuments } from "@/lib/documents";
 import DocumentList from "../DocumentList";
@@ -9,7 +11,7 @@ const pageTextData = {
   description: "Browse Documents That Are In Review.",
 };
 
-export default async function DocumentDraftsPage() {
+export default async function DocumentReviewPage() {
   const { activeWorkspace } = await resolveActiveWorkspace();
 
   if (!activeWorkspace) {

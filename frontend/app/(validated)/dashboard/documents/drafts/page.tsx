@@ -1,3 +1,5 @@
+"use server";
+
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { listDocuments } from "@/lib/documents";
 import DocumentList from "../DocumentList";

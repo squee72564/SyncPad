@@ -1,4 +1,6 @@
-export default function DocumentReviewsPage() {
+"use server";
+
+export default async function DocumentReviewThreadPage() {
   return (
     <div className="flex flex-col gap-4 p-6 w-full">
       <div>

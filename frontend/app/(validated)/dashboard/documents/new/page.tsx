@@ -1,3 +1,5 @@
+"use server";
+
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { listDocuments } from "@/lib/documents";
 import { CreateDocumentForm } from "../CreateDocumentForm";

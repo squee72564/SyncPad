@@ -1,3 +1,5 @@
+"use server";
+
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { listDocuments } from "@/lib/documents";
 import DocumentList from "../DocumentList";
@@ -9,7 +11,7 @@ const pageTextData = {
   description: "Browse Archived Documents.",
 };
 
-export default async function DocumentDraftsPage() {
+export default async function DocumentArchivePage() {
   const { activeWorkspace } = await resolveActiveWorkspace();
 
   if (!activeWorkspace) {

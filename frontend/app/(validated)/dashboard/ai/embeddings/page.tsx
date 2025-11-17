@@ -1,4 +1,6 @@
-export default function AiEmbeddingsPage() {
+"use server";
+
+export default async function AiEmbeddingsPage() {
   return (
     <div className="flex flex-col gap-4 p-6">
       <div>

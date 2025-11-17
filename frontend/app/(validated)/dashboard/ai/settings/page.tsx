@@ -1,4 +1,6 @@
-export default function AiSettingsPage() {
+"use server";
+
+export default async function AiSettingsPage() {
   return (
     <div className="flex flex-col gap-4 p-6">
       <div>

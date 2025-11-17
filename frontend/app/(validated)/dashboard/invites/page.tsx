@@ -1,3 +1,5 @@
+"use server";
+
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { getWorkspaceInvites, type WorkspaceInviteRecord } from "@/lib/invites";
 import InviteComposer from "./InviteComposer";

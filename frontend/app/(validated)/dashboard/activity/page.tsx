@@ -1,3 +1,5 @@
+"use server";
+
 import PageHeader from "@/components/PageHeader";
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
 import ActivityTimeline from "./ActivityTimeline";

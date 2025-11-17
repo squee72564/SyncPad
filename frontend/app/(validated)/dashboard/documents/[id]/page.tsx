@@ -1,3 +1,5 @@
+"use server";
+
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
 import { getDocument } from "@/lib/documents";
 import getSession from "@/lib/getSession";

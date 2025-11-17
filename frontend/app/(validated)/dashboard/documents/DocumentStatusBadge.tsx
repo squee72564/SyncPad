@@ -1,4 +1,4 @@
-"use client";
+"use server";
 
 import { cn } from "@/lib/utils";
 
@@ -11,7 +11,7 @@ const STATUS_STYLES: Record<DocumentStatus, string> = {
   ARCHIVED: "bg-slate-200 text-slate-700 dark:bg-slate-800/70 dark:text-slate-200",
 };
 
-export function DocumentStatusBadge({ status }: { status: DocumentStatus }) {
+export async function DocumentStatusBadge({ status }: { status: DocumentStatus }) {
   return (
     <span
       className={cn(
