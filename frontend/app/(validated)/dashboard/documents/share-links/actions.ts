@@ -6,7 +6,7 @@ import { createShareLink, deleteShareLink, updateShareLink } from "@/lib/share-l
 
 const SHARE_LINKS_PATH = "/dashboard/documents/share-links";
 
-type ActionResult<T = undefined> = { success: true; data?: T } | { success: false; error: string };
+import { ActionResult, formatError } from "@/lib/utils";
 
 export async function createShareLinkAction(input: {
   workspaceId: string;
@@ -24,7 +24,7 @@ export async function createShareLinkAction(input: {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to create share link",
+      error: formatError(error, "Failed to create share link"),
     };
   }
 }
@@ -48,7 +48,7 @@ export async function updateShareLinkAction(input: {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to update share link",
+      error: formatError(error, "Failed to update share link"),
     };
   }
 }
@@ -65,7 +65,7 @@ export async function deleteShareLinkAction(input: {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to delete share link",
+      error: formatError(error, "Failed to delete share link"),
     };
   }
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { acceptWorkspaceInvite } from "@/lib/invites";
+import { formatError, ActionResult } from "@/lib/utils";
 import { getWorkspaces, type WorkspaceSummary } from "@/lib/workspaces";
 
 export type AcceptInviteResult =
@@ -14,7 +15,9 @@ export type AcceptInviteResult =
       error: string;
     };
 
-export async function acceptInviteAction(token: string): Promise<AcceptInviteResult> {
+export async function acceptInviteAction(
+  token: string
+): Promise<ActionResult<{ workspaceName: string | null; workspaceId: string }>> {
   try {
     const acceptResult = await acceptWorkspaceInvite(token);
 
@@ -25,11 +28,12 @@ export async function acceptInviteAction(token: string): Promise<AcceptInviteRes
 
     return {
       success: true,
-      workspaceName: joinedWorkspace?.workspace.name ?? null,
-      workspaceId: acceptResult.workspaceId,
+      data: {
+        workspaceName: joinedWorkspace?.workspace.name ?? null,
+        workspaceId: acceptResult.workspaceId,
+      },
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to accept invite";
-    return { success: false, error: message };
+    return { success: false, error: formatError(error, "Failed to accept invite") };
   }
 }

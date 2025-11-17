@@ -36,7 +36,7 @@ export default async function InviteAcceptPage({ params }: InvitePageProps) {
   const { workspaces } = await getWorkspaces({ includeMembership: true });
   const workspaceName =
     result.success &&
-    workspaces.find((entry) => entry.workspace.id === result.workspaceId)?.workspace.name;
+    workspaces.find((entry) => entry.workspace.id === result.data?.workspaceId)?.workspace.name;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-background via-background/70 to-muted px-4 py-12">

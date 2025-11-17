@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import {
   createDocument,
   deleteDocument,
@@ -20,12 +19,12 @@ export type CreateDocumentInput = {
   publishedAt?: string;
 };
 
-export type DocumentActionResult =
-  | { success: true; documentId: string }
-  | { success: false; error: string };
-type CollabStateActionResult =
-  | { success: true; version: number }
-  | { success: false; error: string };
+import { ActionResult, formatError } from "@/lib/utils";
+import { revalidatePaths } from "@/lib/api-client";
+
+export type DocumentActionResult = ActionResult<{ documentId: string }>;
+
+type CollabStateActionResult = ActionResult<{ version: number }>;
 
 function sanitizeSlug(slug?: string | null) {
   if (slug === null) {
@@ -66,8 +65,7 @@ export async function createDocumentAction(
   try {
     workspace = await ensureWorkspace();
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Select a workspace first";
-    return { success: false, error: message };
+    return { success: false, error: formatError(error, "Select a workspace first") };
   }
 
   const title = input.title?.trim();
@@ -119,15 +117,16 @@ export async function createDocumentAction(
   try {
     const document = await createDocument(workspace.id, workspace.slug, payload);
 
-    revalidatePath("/dashboard/documents");
-    revalidatePath("/dashboard/documents/drafts");
-    revalidatePath("/dashboard/documents/published");
-    revalidatePath("/dashboard/documents/new");
+    await revalidatePaths([
+      "/dashboard/documents",
+      "/dashboard/documents/drafts",
+      "/dashboard/documents/published",
+      "/dashboard/documents/new",
+    ]);
 
-    return { success: true, documentId: document.id };
+    return { success: true, data: { documentId: document.id } };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to create document";
-    return { success: false, error: message };
+    return { success: false, error: formatError(error, "Failed to create document") };
   }
 }
 
@@ -150,8 +149,7 @@ export async function updateDocumentAction(
   try {
     workspace = await ensureWorkspace();
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Select a workspace first";
-    return { success: false, error: message };
+    return { success: false, error: formatError(error, "Select a workspace first") };
   }
 
   const payload: Record<string, unknown> = {};
@@ -199,15 +197,16 @@ export async function updateDocumentAction(
   try {
     const document = await updateDocument(workspace.id, workspace.slug, input.documentId, payload);
 
-    revalidatePath("/dashboard/documents");
-    revalidatePath("/dashboard/documents/drafts");
-    revalidatePath("/dashboard/documents/published");
-    revalidatePath("/dashboard/documents/new");
+    await revalidatePaths([
+      "/dashboard/documents",
+      "/dashboard/documents/drafts",
+      "/dashboard/documents/published",
+      "/dashboard/documents/new",
+    ]);
 
-    return { success: true, documentId: document.id };
+    return { success: true, data: { documentId: document.id } };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to update document";
-    return { success: false, error: message };
+    return { success: false, error: formatError(error, "Failed to update document") };
   }
 }
 
@@ -220,8 +219,7 @@ export async function saveDocumentCollabStateAction(input: {
   try {
     workspace = await ensureWorkspace();
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Select a workspace first";
-    return { success: false, error: message };
+    return { success: false, error: formatError(error, "Select a workspace first") };
   }
 
   if (!input.documentId) {
@@ -231,10 +229,9 @@ export async function saveDocumentCollabStateAction(input: {
   try {
     const collabState = await saveDocumentCollabState(workspace.id, workspace.slug, input);
 
-    return { success: true, version: collabState.version };
+    return { success: true, data: { version: collabState.version } };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to save document";
-    return { success: false, error: message };
+    return { success: false, error: formatError(error, "Failed to save document") };
   }
 }
 
@@ -243,20 +240,21 @@ export async function deleteDocumentAction(documentId: string): Promise<Document
   try {
     workspace = await ensureWorkspace();
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Select a workspace first";
-    return { success: false, error: message };
+    return { success: false, error: formatError(error, "Select a workspace first") };
   }
 
   try {
     await deleteDocument(workspace.id, workspace.slug, documentId);
-    revalidatePath("/dashboard/documents");
-    revalidatePath("/dashboard/documents/drafts");
-    revalidatePath("/dashboard/documents/published");
-    revalidatePath("/dashboard/documents/new");
 
-    return { success: true, documentId };
+    await revalidatePaths([
+      "/dashboard/documents",
+      "/dashboard/documents/drafts",
+      "/dashboard/documents/published",
+      "/dashboard/documents/new",
+    ]);
+
+    return { success: true, data: { documentId } };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to delete document";
-    return { success: false, error: message };
+    return { success: false, error: formatError(error, "Failed to delete document") };
   }
 }

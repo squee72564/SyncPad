@@ -3,6 +3,7 @@ import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
 import ActivityTimeline from "./ActivityTimeline";
 import { listActivityLogs } from "@/lib/activity-log";
 import { resolveActiveWorkspace } from "@/lib/workspaces";
+import { formatError } from "@/lib/utils";
 
 const pageTextData = {
   title: "Activity Log",
@@ -28,7 +29,7 @@ export default async function ActivityPage() {
   try {
     activityData = await listActivityLogs(activeWorkspace.workspace.id, { limit: 50 });
   } catch (error) {
-    fetchError = error instanceof Error ? error.message : "Unable to load activity log";
+    fetchError = formatError(error, "Unable to load activity log");
   }
 
   return (

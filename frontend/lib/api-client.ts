@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
@@ -45,4 +46,8 @@ export async function authorizedFetch(path: string, init: RequestInit = {}) {
   }
 
   return response;
+}
+
+export async function revalidatePaths(paths: string[]): Promise<void> {
+  paths.forEach((path) => revalidatePath(path));
 }

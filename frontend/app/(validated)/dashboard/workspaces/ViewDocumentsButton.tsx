@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import type { WorkspaceSummary } from "@/lib/workspaces";
 import { setActiveWorkspaceAction } from "./actions";
+import { formatError } from "@/lib/utils";
 
 type ViewDocumentsButtonProps = {
   workspace: WorkspaceSummary["workspace"];
@@ -18,24 +19,24 @@ export default function ViewDocumentsButton({ workspace }: ViewDocumentsButtonPr
   const [isPending, startTransition] = useTransition();
 
   const handleClick = () => {
-    startTransition(() => {
-      setActiveWorkspaceAction(workspace.id)
-        .then((result) => {
-          if (!result.success) {
-            toast.error(result.error);
-            return;
-          }
+    startTransition(async () => {
+      try {
+        const result = await setActiveWorkspaceAction(workspace.id);
 
-          toast.success("Workspace switched", {
-            description: `Now viewing ${workspace.name}`,
-          });
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
 
-          router.push("/dashboard/documents");
-        })
-        .catch((error) => {
-          const message = error instanceof Error ? error.message : "Failed to open documents";
-          toast.error(message);
+        toast.success("Workspace switched", {
+          description: `Now viewing ${workspace.name}`,
         });
+
+        router.push("/dashboard/documents");
+      } catch (error) {
+        const message = formatError(error, "Failed to open documents");
+        toast.error(message);
+      }
     });
   };
 

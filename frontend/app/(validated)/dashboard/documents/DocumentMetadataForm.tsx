@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { DocumentRecord } from "@/lib/documents";
 import { updateDocumentAction, deleteDocumentAction } from "./actions";
+import { formatError } from "@/lib/utils";
 
 const DOCUMENT_STATUSES = [
   { value: "DRAFT", label: "Draft" },
@@ -72,50 +73,49 @@ export function DocumentMetadataForm({ document, allDocuments }: DocumentMetadat
       return;
     }
 
-    startTransition(() => {
+    startTransition(async () => {
       const nextSlug = slug.trim();
-      updateDocumentAction({
-        documentId: document.id,
-        title: nextTitle,
-        slug: nextSlug.length > 0 ? nextSlug : null,
-        headline,
-        summary,
-        parentId: parentId ? parentId : null,
-        status: status as DocumentRecord["status"],
-      })
-        .then((result) => {
-          if (!result.success) {
-            toast.error(result.error);
-            return;
-          }
 
-          toast.success("Document updated");
-          router.refresh();
-        })
-        .catch((error) => {
-          const message = error instanceof Error ? error.message : "Failed to update document";
-          toast.error(message);
+      try {
+        const result = await updateDocumentAction({
+          documentId: document.id,
+          title: nextTitle,
+          slug: nextSlug.length > 0 ? nextSlug : null,
+          headline,
+          summary,
+          parentId: parentId ? parentId : null,
+          status: status as DocumentRecord["status"],
         });
+
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
+
+        toast.success("Document updated");
+        router.refresh();
+      } catch (error) {
+        toast.error(formatError(error, "Failed to update document"));
+      }
     });
   };
 
   const handleDelete = () => {
-    startTransition(() => {
-      deleteDocumentAction(document.id)
-        .then((result) => {
-          if (!result.success) {
-            toast.error(result.error);
-            return;
-          }
+    startTransition(async () => {
+      try {
+        const result = await deleteDocumentAction(document.id);
 
-          toast.success("Document deleted");
-          router.push("/dashboard/documents");
-          router.refresh();
-        })
-        .catch((error) => {
-          const message = error instanceof Error ? error.message : "Failed to delete document";
-          toast.error(message);
-        });
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
+
+        toast.success("Document deleted");
+        router.push("/dashboard/documents");
+        router.refresh();
+      } catch (error) {
+        toast.error(formatError(error, "Failed to delete document"));
+      }
     });
   };
 

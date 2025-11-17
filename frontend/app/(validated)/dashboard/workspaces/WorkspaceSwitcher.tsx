@@ -14,6 +14,7 @@ import {
 import type { WorkspaceSummary } from "@/lib/workspaces";
 import { setActiveWorkspaceAction } from "./actions";
 import { toast } from "sonner";
+import { formatError } from "@/lib/utils";
 
 type WorkspaceSwitcherProps = {
   workspaces: WorkspaceSummary[];
@@ -35,27 +36,27 @@ export default function WorkspaceSwitcher({
       return;
     }
 
-    startTransition(() => {
-      setActiveWorkspaceAction(workspaceId)
-        .then((result) => {
-          if (!result.success) {
-            toast.error(result.error);
-            return;
-          }
+    startTransition(async () => {
+      try {
+        const result = await setActiveWorkspaceAction(workspaceId);
 
-          const label =
-            workspaces.find((entry) => entry.workspace.id === result.workspaceId)?.workspace.name ??
-            result.slug;
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
 
-          toast.success("Workspace switched", {
-            description: `Now viewing ${label}`,
-          });
-          router.refresh();
-        })
-        .catch((error) => {
-          const message = error instanceof Error ? error.message : "Failed to switch workspace";
-          toast.error(message);
+        const label =
+          workspaces.find((entry) => entry.workspace.id === result.workspaceId)?.workspace.name ??
+          result.slug;
+
+        toast.success("Workspace switched", {
+          description: `Now viewing ${label}`,
         });
+        router.refresh();
+      } catch (error) {
+        const message = formatError(error, "Failed to switch workspace");
+        toast.error(message);
+      }
     });
   };
 

@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import {
   clearActiveWorkspaceSelection,
   createWorkspace,
@@ -13,9 +12,8 @@ import {
   getWorkspaceMembersResult,
 } from "@/lib/workspaces";
 
-function revalidatePaths(paths: string[]): void {
-  paths.forEach((path) => revalidatePath(path));
-}
+import { formatError } from "@/lib/utils";
+import { revalidatePaths } from "@/lib/api-client";
 
 export type CreateWorkspaceInput = {
   name: string;
@@ -55,7 +53,7 @@ export async function createWorkspaceAction(
       description: input.description ?? null,
     });
 
-    revalidatePaths(["/dashboard"]);
+    await await revalidatePaths(["/dashboard"]);
 
     return {
       success: true,
@@ -63,10 +61,9 @@ export async function createWorkspaceAction(
       slug: result.workspace.slug,
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to create workspace";
     return {
       success: false,
-      error: message,
+      error: formatError(error, "Failed to create workspace"),
     };
   }
 }
@@ -104,7 +101,7 @@ export async function updateWorkspaceAction(
   try {
     const result = await updateWorkspace(workspaceId, updates);
 
-    revalidatePaths(["/dashboard"]);
+    await revalidatePaths(["/dashboard"]);
 
     return {
       success: true,
@@ -112,10 +109,9 @@ export async function updateWorkspaceAction(
       slug: result.workspace.slug,
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to update workspace";
     return {
       success: false,
-      error: message,
+      error: formatError(error, "Failed to update workspace"),
     };
   }
 }
@@ -129,7 +125,7 @@ export async function deleteWorkspaceAction(workspaceId: string): Promise<Create
       await clearActiveWorkspaceSelection();
     }
 
-    revalidatePaths([
+    await revalidatePaths([
       "/dashboard",
       "/dashboard/documents",
       "/dashboard/documents/new",
@@ -145,10 +141,9 @@ export async function deleteWorkspaceAction(workspaceId: string): Promise<Create
       slug: "",
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to delete workspace";
     return {
       success: false,
-      error: message,
+      error: formatError(error, "Failed to delete workspace"),
     };
   }
 }
@@ -170,7 +165,7 @@ export async function setActiveWorkspaceAction(
 
   await setActiveWorkspaceSelection(match.workspace);
 
-  revalidatePaths([
+  await revalidatePaths([
     "/dashboard",
     "/dashboard/documents",
     "/dashboard/documents/new",

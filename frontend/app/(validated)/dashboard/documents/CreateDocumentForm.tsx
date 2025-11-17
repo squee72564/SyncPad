@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { DocumentRecord } from "@/lib/documents";
 import { createDocumentAction } from "./actions";
+import { formatError } from "@/lib/utils";
 
 const DOCUMENT_STATUSES = [
   { value: "DRAFT", label: "Draft" },
@@ -59,29 +60,29 @@ export function CreateDocumentForm({ documents }: CreateDocumentFormProps) {
       return;
     }
 
-    startTransition(() => {
-      createDocumentAction({
-        title: formTitle,
-        slug: slug.trim() || undefined,
-        headline: headline.trim() || undefined,
-        summary: summary.trim() || undefined,
-        parentId: parentId ? parentId : null,
-        status: status as DocumentRecord["status"],
-      })
-        .then((result) => {
-          if (!result.success) {
-            toast.error(result.error);
-            return;
-          }
-
-          toast.success("Document created");
-          router.push(`/dashboard/documents`);
-          router.refresh();
-        })
-        .catch((error) => {
-          const message = error instanceof Error ? error.message : "Failed to create document";
-          toast.error(message);
+    startTransition(async () => {
+      try {
+        const result = await createDocumentAction({
+          title: formTitle,
+          slug: slug.trim() || undefined,
+          headline: headline.trim() || undefined,
+          summary: summary.trim() || undefined,
+          parentId: parentId ? parentId : null,
+          status: status as DocumentRecord["status"],
         });
+
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
+
+        toast.success("Document created");
+        router.push(`/dashboard/documents`);
+        router.refresh();
+      } catch (error) {
+        const message = formatError(error, "Failed to create document");
+        toast.error(message);
+      }
     });
   };
 

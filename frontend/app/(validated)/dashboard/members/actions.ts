@@ -4,9 +4,9 @@ import { revalidatePath } from "next/cache";
 
 import { removeWorkspaceMemberApi, updateWorkspaceMemberRoleApi } from "@/lib/workspaces";
 
-const MEMBERS_PATH = "/dashboard/members";
+import { ActionResult, formatError } from "@/lib/utils";
 
-type ActionResult<T = undefined> = { success: true; data?: T } | { success: false; error: string };
+const MEMBERS_PATH = "/dashboard/members";
 
 export async function updateWorkspaceMemberRoleAction(input: {
   workspaceId: string;
@@ -27,7 +27,7 @@ export async function updateWorkspaceMemberRoleAction(input: {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to update member role",
+      error: formatError(error, "Failed to update member role"),
     };
   }
 }
@@ -43,7 +43,7 @@ export async function removeWorkspaceMemberAction(input: {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to remove member",
+      error: formatError(error, "Failed to remove member"),
     };
   }
 }

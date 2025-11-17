@@ -4,6 +4,7 @@ import InviteComposer from "./InviteComposer";
 import InviteList from "./InviteList";
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
 import PageHeader from "@/components/PageHeader";
+import { formatError } from "@/lib/utils";
 
 const INVITE_ROLES = new Set(["OWNER", "ADMIN", "SUPERADMIN"]);
 
@@ -35,8 +36,7 @@ export default async function InvitesPage() {
     try {
       invites = await getWorkspaceInvites(workspaceId);
     } catch (error) {
-      invitesError =
-        error instanceof Error ? error.message : "Unable to load pending invites right now.";
+      invitesError = formatError(error, "Unable to load pending invites right now.");
     }
   }
 
