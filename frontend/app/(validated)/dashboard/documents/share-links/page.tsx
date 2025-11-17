@@ -16,25 +16,7 @@ const pageTextData = {
 };
 
 type ShareLinksPageProps = {
-  searchParams?: Record<string, string | string[] | undefined>;
-};
-
-const getDocumentIdFromParams = (searchParams: ShareLinksPageProps["searchParams"] | undefined) => {
-  if (!searchParams) {
-    return undefined;
-  }
-
-  const raw = searchParams.documentId;
-
-  if (!raw) {
-    return undefined;
-  }
-
-  if (Array.isArray(raw)) {
-    return raw[0];
-  }
-
-  return raw;
+  searchParams: Promise<{ documentId: string | undefined }>;
 };
 
 export default async function ShareLinksPage({ searchParams }: ShareLinksPageProps) {
@@ -76,9 +58,11 @@ export default async function ShareLinksPage({ searchParams }: ShareLinksPagePro
       </div>
     );
   }
+  const { documentId: requestedDocumentId } = await searchParams;
 
-  const requestedDocumentId = getDocumentIdFromParams(searchParams);
-  const selectedDocument = documents.find((doc) => doc.id === requestedDocumentId) ?? documents[0];
+  const selectedDocument = requestedDocumentId
+    ? (documents.find((doc) => doc.id === requestedDocumentId) ?? documents[0])
+    : documents[0];
 
   const shareLinks = await listShareLinks(activeWorkspace.workspace.id, selectedDocument.id);
 
