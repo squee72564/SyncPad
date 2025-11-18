@@ -34,6 +34,4 @@ services:
       - redis
     env_file:
       - ./.env.development
-    command: pnpm worker
-
   
