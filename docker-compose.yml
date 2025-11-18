@@ -37,7 +37,7 @@ services:
       - pgbouncer
       - redis
     env_file:
-      - ./embedding_worker/.env.development
+      - ./.env.development
     command: pnpm worker
 
   
