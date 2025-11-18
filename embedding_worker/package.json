@@ -25,7 +25,9 @@
     "vitest": "^4.0.10"
   },
   "dependencies": {
+    "dotenv": "^17.2.3",
     "node": "^25.2.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "zod": "^4.1.12"
   }
 }
