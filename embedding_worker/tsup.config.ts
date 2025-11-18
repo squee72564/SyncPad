@@ -23,5 +23,5 @@ export default defineConfig({
   // Node.js Specific
   platform: "node", // Optimize for Node.js
 
-  external: ['@prisma/client'],
+  external: ["@prisma/client"],
 });
