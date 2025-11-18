@@ -158,3 +158,6 @@ Session.vim
 .netrwhist
 # auto-generated tag files
 tags
+
+# Do not commit dev db migrations or database
+/prisma/generated
