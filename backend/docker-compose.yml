@@ -23,3 +23,21 @@ services:
       - "5432:5432"
     depends_on:
       - postgres
+
+  redis:
+    image: redis:8.4-rc1-alpine
+    container_name: syncpad_redis
+    ports:
+      - "6379:6379"
+
+  embedding-worker:
+    build: ./embedding-worker
+    container_name: syncpad_embedding_worker
+    depends_on:
+      - pgbouncer
+      - redis
+    env_file:
+      - ./embedding-worker/.env.development
+    command: pnpm worker
+
+  

@@ -16,5 +16,9 @@ services:
     env_file:
       - .env.production
 
+  embedding-worker:
+    env_file:
+      - ./embedding-worker/.env.production
+
 volumes:
   postgres_data:
