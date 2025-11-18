@@ -1,7 +1,7 @@
 services:
   postgres:
     env_file:
-      - .env.development
+      - ./backend/.env.development
     ports:
       - "6432:5432"
     volumes:
@@ -9,7 +9,7 @@ services:
 
   pgbouncer:
     env_file:
-      - .env.development
+      - ./backend/.env.development
 
 volumes:
   postgres_data_dev:

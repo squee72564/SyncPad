@@ -31,13 +31,13 @@ services:
       - "6379:6379"
 
   embedding-worker:
-    build: ./embedding-worker
+    build: ./embedding_worker
     container_name: syncpad_embedding_worker
     depends_on:
       - pgbouncer
       - redis
     env_file:
-      - ./embedding-worker/.env.development
+      - ./embedding_worker/.env.development
     command: pnpm worker
 
   
