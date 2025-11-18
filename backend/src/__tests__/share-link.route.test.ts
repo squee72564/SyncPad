@@ -10,7 +10,7 @@ import type {
   DocumentShareLink,
   Workspace,
   WorkspaceMember,
-} from "../../prisma/generated/prisma-postgres/index.js";
+} from "../../../prisma/generated/prisma-postgres/index.js";
 
 type ShareLinkServiceMock = {
   listShareLinks: ReturnType<typeof vi.fn>;

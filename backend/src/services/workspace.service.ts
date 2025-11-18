@@ -15,7 +15,7 @@ import {
   Workspace,
   WorkspaceMember,
   WorkspaceRole,
-} from "../../prisma/generated/prisma-postgres/index.js";
+} from "../../../prisma/generated/prisma-postgres/index.js";
 import ApiError from "@/utils/ApiError.ts";
 import httpStatus from "http-status";
 

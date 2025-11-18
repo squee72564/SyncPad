@@ -7,7 +7,7 @@ import type {
   ListDocumentsQuery,
   UpdateDocumentBody,
 } from "@/types/document.types.ts";
-import { Prisma } from "../../prisma/generated/prisma-postgres/index.js";
+import { Prisma } from "../../../prisma/generated/prisma-postgres/index.js";
 
 // Align slug format for uniqueness checks.
 const normalizeSlug = (slug?: string) => slug?.trim().toLowerCase();

@@ -4,7 +4,7 @@ import {
   DocumentShareLink,
   WorkspaceRole,
   SharePermission,
-} from "../../prisma/generated/prisma-postgres/index.js";
+} from "../../../prisma/generated/prisma-postgres/index.js";
 
 import { Request } from "express";
 import workspaceValidations from "@/validations/workspace.validations.js";

@@ -1,4 +1,4 @@
-import { SharePermission } from "../../prisma/generated/prisma-postgres/index.js";
+import { SharePermission } from "../../../prisma/generated/prisma-postgres/index.js";
 import { ZodRequest } from "../utils/zodReqeust.ts";
 import shareLinkValidations from "@/validations/share-link.validations.js";
 

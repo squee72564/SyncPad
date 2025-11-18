@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Request, Response, NextFunction } from "express";
 
 import type { WorkspaceContext } from "../types/workspace.types.ts";
-import type { ActivityLog } from "../../prisma/generated/prisma-postgres/index.js";
+import type { ActivityLog } from "../../../prisma/generated/prisma-postgres/index.js";
 
 const TEST_USER_ID = "cmhwwuyen000004l14krg6kzj";
 const TEST_WORKSPACE_ID = "cmhwwv4ah000104l1e7p58wow";
