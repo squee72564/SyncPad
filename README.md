@@ -9,7 +9,7 @@ SyncPad is an emerging collaborative knowledge base that blends team wikis with 
 - **Cloud-Ready Foundation**: Early development runs locally via Docker Compose, with abstractions that let us swap in managed services and IaC (AWS CDK, Terraform) as the platform matures.
 
 ## Current Architecture (In Progress)
-- **Frontend**: Next.js 15 (React 19) application in `frontend/` with a refreshed landing page, auth flows, dashboard shells, and Vitest/Testing Library coverage.
+- **Frontend**: Next.js 15 (React 19) application in `frontend/` with a landing page, auth flows, dashboard, and Vitest/Testing Library coverage.
 - **Backend**: Express 5 TypeScript service in `backend/` handling REST APIs, auth, workspace-aware middleware, rate limiting, logging, and Prisma integration.
 - **Documents, Invites & Share Links**: Workspace-scoped document CRUD lives under `v1/workspaces/:workspaceId/documents`, workspace invites under `/v1/workspaces/:workspaceId/invites` (list/create/resend/revoke) plus `/v1/workspaces/invites/:token/accept`, and document share links under `/v1/workspaces/:workspaceId/documents/:documentId/share-links` (list/create/update/delete) with token preview at `/v1/share-links/:token`. Share-link mutations now emit activity logs for auditing.
 - **Activity Logs**: Workspace timelines can now be read and written via `/v1/workspaces/:workspaceId/activity-logs` (GET with cursor filters, POST to append) plus `DELETE /v1/workspaces/:workspaceId/activity-logs/:activityLogId`. Backend controllers log document CRUD, workspace membership/invite changes, and share-link actions so the feed stays authoritative.
@@ -51,8 +51,7 @@ Each tier builds atop the same primitives (AiJob records, Prisma-backed storage,
 - [x] Define workspace data model (users, teams, permissions, documents, revisions, embeddings).
 - [x] Stand up auth flows (email/password, OAuth providers, session management, RBAC via better-auth).
 - [x] Introduce workspace-aware middleware and validation helpers for request handling.
-- [ ] Implement collaborative document editor with CRDT state propagation and optimistic UI updates.
-- [ ] Wire document storage + version history via Prisma/PostgreSQL.
+- [x] Implement collaborative document editor with CRDT state propagation and optimistic UI updates.
 - [ ] Introduce background job pipeline for embedding generation and vector upserts.
 - [ ] Add semantic search endpoints and AI assistant orchestration (RAG, prompt templates, rate limiting).
 - [ ] Harden API gateway with monitoring, structured logging, and pagination standards.

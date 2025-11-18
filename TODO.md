@@ -10,6 +10,8 @@
 - [done] Wire email delivery + frontend UX for invites (Resend-backed email queue with dev logging, dashboard invite composer/list with copyable links, and `/invites/:token` acceptance flow that handles login/signup redirects).
 - [done] Implement document share link APIs under `/v1/workspaces/:workspaceId/documents/:documentId/share-links` (list/create/update/delete) plus `/v1/share-links/:token` preview, with dedicated controllers/services/validators and route tests.
 - [done] Add workspace activity log API for creating and deleting logs via `/v1/workspaces/:workspaceId/activity-logs`, wiring controllers, services, validators, and route tests.
+- [ ] Research Embedding models that can be used to create vectorized embeddings for documents
+- [ ] Implement service / endpoint for embedding model
 - [ ] Implement Tier 1 AI jobs: `EMBED_DOCUMENT` vector generation on document changes, `SUMMARIZE_DOCUMENT` / `WORKSPACE_DIGEST` summarization, and `DRAFT_OUTLINE` assistance with persisted results.
 - [ ] Prototype Tier 2 AI collaborators: tracked-change `COLLAB_EDIT` suggestions, `INSIGHT_GENERATOR` risk cards tied to document publishing, and comment summarization/resolution jobs.
 - [ ] Design Tier 3 autonomous flows: multi-agent `COAUTHOR_ROOM`, decision graph extraction (`DECISION_TIMELINE`), and recurring `IDEATION_SPRINT` jobs that orchestrate follow-up tasks.
