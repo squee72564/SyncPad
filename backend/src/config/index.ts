@@ -12,7 +12,7 @@ dotenv.config({ path: envFile });
 
 const envSchema = z.object({
   // App
-  PORT: z.string().default("3000"),
+  EXPRESS_PORT: z.string().default("3001"),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   APP_BASE_URL: z.url().default("http://localhost:3000"),
 
