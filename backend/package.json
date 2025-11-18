@@ -27,13 +27,7 @@
     "prisma:migrate:prod": "dotenv -e .env.production -- prisma migrate dev",
     "prisma:migrate:deploy": "dotenv -e .env.$NODE_ENV -- prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "prisma:push": "prisma db push",
-    "docker:dev": "docker compose up -d",
-    "docker:dev:logs": "docker compose logs -f postgres",
-    "docker:dev:down": "docker compose down",
-    "docker:prod": "docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d",
-    "docker:prod:logs": "docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f postgres",
-    "docker:prod:down": "docker compose -f docker-compose.yml -f docker-compose.prod.yml down"
+    "prisma:push": "prisma db push"
   },
   "keywords": [
     "expressjs",

@@ -1,7 +1,14 @@
 {
 	"scripts": {
 		"prepare": "husky install",
-		"pretty": "pnpm --filter ./frontend pretty --write && pnpm --filter ./backend pretty --write && pnpm --filter ./embedding_worker pretty --write"
+		"pretty": "pnpm --filter ./frontend pretty --write && pnpm --filter ./backend pretty --write && pnpm --filter ./embedding_worker pretty --write",
+		"docker:dev": "docker compose up -d",
+		"docker:dev:logs": "docker compose logs -f postgres",
+		"docker:dev:down": "docker compose down",
+		"docker:prod": "docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d",
+		"docker:prod:logs": "docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f postgres",
+		"docker:prod:down": "docker compose -f docker-compose.yml -f docker-compose.prod.yml down"
+
 	},
 	"devDependencies": {
 		"husky": "^9.1.7",
