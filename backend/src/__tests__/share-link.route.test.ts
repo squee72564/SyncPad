@@ -133,7 +133,7 @@ vi.mock("../services/activity-log.service.js", () => ({
 vi.mock("../config/index.js", () => ({
   __esModule: true,
   default: {
-    APP_BASE_URL: "http://localhost:3000",
+    NEXT_NEXT_APP_BASE_URL: "http://localhost:3000",
   },
 }));
 

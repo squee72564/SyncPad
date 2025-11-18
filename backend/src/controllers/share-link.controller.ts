@@ -16,7 +16,7 @@ import { DocumentShareLink } from "../../../prisma/generated/prisma-postgres/ind
 import activityLogService from "../services/activity-log.service.js";
 
 const buildShareLinkUrl = (token: string) => {
-  const url = new URL(`/share-links/${token}`, env.APP_BASE_URL);
+  const url = new URL(`/share-links/${token}`, env.NEXT_NEXT_APP_BASE_URL);
   return url.toString();
 };
 
