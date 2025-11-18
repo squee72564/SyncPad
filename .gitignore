@@ -109,10 +109,9 @@ typings/
 .yarn-integrity
 
 # dotenv environment variables file
-.env.development
-.env.production
-
-
+.env
+.env.*
+!.env.template
 
 ### SublimeText ###
 # cache files for sublime text
@@ -161,3 +160,29 @@ tags
 
 # Do not commit dev db migrations or database
 /prisma/generated
+
+# testing
+/coverage
+
+# next.js
+.next/
+out/
+
+# production
+/build
+
+# misc
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
