@@ -1,0 +1,25 @@
+{
+  "name": "embedding_worker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "pretty": "npx prettier . --write",
+    "pretty:check": "npx prettier . --check",
+    "lint": "npx eslint . --fix",
+    "lint:check": "npx eslint ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.17.1",
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "vitest": "^4.0.10"
+  },
+  "dependencies": {
+    "node": "^25.2.1"
+  }
+}

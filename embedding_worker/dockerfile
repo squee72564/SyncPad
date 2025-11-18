@@ -1,0 +1,39 @@
+# BASE IMAGE
+FROM node:25-alpine3.21 as base
+
+# Set working directory
+WORKDIR /app
+
+# Install pnpm globally
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install deps
+RUN pnpm install --frozen-lockfile
+
+# Copy the rest of the code
+COPY . .
+
+# BUILD STAGE
+FROM base as BUILD
+
+run pnpm build
+
+# Runtime Stage
+FROM node:25-alpine3.21 as RUNTIME
+
+WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy only whats needed for runtime
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --prod --frozen-lockfile
+
+# Copy compiled dist
+COPY --from=BUILD /app/dist ./dist
+
+# Worker entrypoint
+CMD ["node", "dist/embedding-worker/index.js"]
