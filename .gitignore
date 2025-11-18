@@ -1,7 +1,7 @@
 dist/
 
 ## ESLint build artifacts
-eslint.config*.mts
+# eslint.config*.mts
 eslint.config*.mjs
 eslint.config*.map
 
