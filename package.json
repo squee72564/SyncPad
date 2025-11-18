@@ -1,7 +1,7 @@
 {
 	"scripts": {
 		"prepare": "husky install",
-		"pretty": "pnpm --filter ./frontend pretty --write && pnpm --filter ./backend pretty --write"
+		"pretty": "pnpm --filter ./frontend pretty --write && pnpm --filter ./backend pretty --write && pnpm --filter ./embedding_worker pretty --write"
 	},
 	"devDependencies": {
 		"husky": "^9.1.7",
@@ -15,6 +15,10 @@
 		"backend/src/**/*.{ts,js}": [
 			"pnpm --filter ./backend eslint --fix",
 			"pnpm --filter ./backend pretty --write"
+		],
+		"embedding_worker/src/**/*.{ts,js}": [
+			"pnpm --filter ./embedding_worker eslint --fix",
+			"pnpm --filter ./embedding_worker pretty --write"
 		]
 	}
 }
