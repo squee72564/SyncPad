@@ -14,19 +14,22 @@ const envSchema = z.object({
   // App
   EXPRESS_PORT: z.string().default("3001"),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  APP_BASE_URL: z.url().default("http://localhost:3000"),
-
-  // Database
-  DATABASE_URL: z.url(),
-  POSTGRES_USER: z.string(),
-  POSTGRES_PASSWORD: z.string(),
-  POSTGRES_DB: z.string(),
-
-  // Better Auth
-  BETTER_AUTH_SECRET: z.string(),
-  BETTER_AUTH_URL: z.url(),
+  NEXT_NEXT_APP_BASE_URL: z.url().default("http://localhost:3000"),
 
   CORS_ORIGIN: z.string().default("*"),
+
+  // Do we keep these as they are required for the app to run?
+  // The downside is that it exposes these values in the codebase which is not ideal.
+
+  // Database
+  // DATABASE_URL: z.url(),
+  // POSTGRES_USER: z.string(),
+  // POSTGRES_PASSWORD: z.string(),
+  // POSTGRES_DB: z.string(),
+
+  // Better Auth
+  // BETTER_AUTH_SECRET: z.string(),
+  // BETTER_AUTH_URL: z.url(),
 
   GITHUB_CLIENT_ID: z.string().optional(),
   GITHUB_CLIENT_SECRET: z.string().optional(),
