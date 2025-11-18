@@ -1,7 +1,6 @@
 services:
   postgres:
     image: pgvector/pgvector:0.8.1-pg18-trixie
-    container_name: syncpad_postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U dev"]
       interval: 5s
@@ -13,7 +12,6 @@ services:
       
   pgbouncer:
     image: edoburu/pgbouncer:v1.24.1-p0
-    container_name: syncpad_pgbouncer
     environment:
       POOL_MODE: session
       MAX_CLIENT_CONN: 100
@@ -26,13 +24,11 @@ services:
 
   redis:
     image: redis:8.4-rc1-alpine
-    container_name: syncpad_redis
     ports:
       - "6379:6379"
 
   embedding-worker:
     build: ./embedding_worker
-    container_name: syncpad_embedding_worker
     depends_on:
       - pgbouncer
       - redis
