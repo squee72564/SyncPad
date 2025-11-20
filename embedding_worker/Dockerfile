@@ -24,6 +24,10 @@ RUN mkdir -p ./generated/prisma-postgres
 
 RUN /usr/local/bin/npx prisma generate --schema ./schema.prisma
 
+WORKDIR /app
+
+COPY .env.* .
+
 WORKDIR /app/embedding_worker
 
 # BUILD STAGE
@@ -51,6 +55,8 @@ COPY --from=build_stage /app/embedding_worker/dist ./dist
 
 # Copy generated Prisma client files from build stage
 COPY --from=build_stage /app/prisma/generated/prisma-postgres ./generated/prisma-postgres
+
+COPY --from=build_stage /app/.env.* /app/
 
 # Worker entrypoint
 CMD ["node", "dist/index.cjs"]
