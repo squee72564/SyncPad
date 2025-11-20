@@ -1,5 +1,5 @@
 import config from "@/config/config.ts";
-import redisClientFactory from "@/redisClient.ts";
+import redisClientFactory from "@/lib/redisClient.ts";
 import EmbeddingQueue from "@/queue.ts";
 import logger from "@/config/logger.ts";
 import EmbeddingProvider from "@/embed.ts";
