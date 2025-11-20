@@ -1,6 +1,6 @@
 import { RedisClientType } from "redis";
 import { z } from "zod";
-import logger from "./config/logger.ts";
+import logger from "@/config/logger.ts";
 
 const messageSchema = z.object({
   jobId: z.string(),

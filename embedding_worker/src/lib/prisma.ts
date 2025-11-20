@@ -1,6 +1,6 @@
 import { PrismaClient as PrismaClientPostgres } from "../../../prisma/generated/prisma-postgres/index.js";
-import env from "../config/config.ts";
-import logger from "../config/logger.js";
+import env from "@/config/config.js";
+import logger from "@/config/logger.js";
 
 const getPrisma = () =>
   new PrismaClientPostgres({

@@ -1,13 +1,13 @@
-import config from "./config/config.ts";
-import redisClientFactory from "./redisClient.ts";
-import EmbeddingQueue from "./queue.ts";
-import logger from "./config/logger.ts";
-import EmbeddingProvider from "./embed.ts";
-import DocumentChunker from "./chunker.ts";
+import config from "@/config/config.ts";
+import redisClientFactory from "@/redisClient.ts";
+import EmbeddingQueue from "@/queue.ts";
+import logger from "@/config/logger.ts";
+import EmbeddingProvider from "@/embed.ts";
+import DocumentChunker from "@/chunker.ts";
 import { RedisClientType } from "redis";
-import { disconnectPrisma } from "./lib/prisma.ts";
-import documentController from "./controllers/document.controller.ts";
-import documentEmbeddingController from "./controllers/documentEmbedding.controller.ts";
+import { disconnectPrisma } from "@/lib/prisma.ts";
+import documentController from "@/controllers/document.controller.ts";
+import documentEmbeddingController from "@/controllers/documentEmbedding.controller.ts";
 
 type WorkerDependencies = {
   redisClient: RedisClientType;
@@ -42,6 +42,8 @@ export function createWorkerDependencies(): WorkerDependencies {
 export async function runWorker(context: WorkerDependencies) {
   const { redisClient, embeddingQueue, embeddingProvider, documentChunker } = context;
 
+  redisClient.connect();
+
   await embeddingQueue.init();
 
   let shouldExit = false;
@@ -51,6 +53,10 @@ export async function runWorker(context: WorkerDependencies) {
   });
 
   process.on("SIGTERM", () => {
+    shouldExit = true;
+  });
+
+  process.on("exit", () => {
     shouldExit = true;
   });
 

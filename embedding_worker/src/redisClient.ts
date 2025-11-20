@@ -1,10 +1,10 @@
-import { createClient } from "redis";
-import config from "./config/config.ts";
+import { createClient, RedisClientType } from "redis";
+import config from "@/config/config.ts";
 
-export default function redisClientFactory() {
+export default function redisClientFactory(): RedisClientType {
   const client = createClient({
     url: config.REDIS_URL,
-  });
+  }) as RedisClientType;
 
   client.on("error", (err) => console.error("Redis Client Error", err));
 
