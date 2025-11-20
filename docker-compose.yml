@@ -28,7 +28,9 @@ services:
       - "6379:6379"
 
   embedding-worker:
-    build: ./embedding_worker
+    build:
+      context: .
+      dockerfile: ./embedding_worker/Dockerfile
     depends_on:
       - pgbouncer
       - redis
