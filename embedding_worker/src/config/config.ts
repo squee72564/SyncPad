@@ -12,6 +12,11 @@ dotenv.config({ path: envFile });
 const envSchema = z.object({
   // App
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  REDIS_URL: z.url().default("redis://localhost:6379"),
+  REDIS_STREAM_KEY: z.string().default("embedding_tasks"),
+  REDIS_CONSUMER_GROUP: z.string().default("embedding_workers"),
+  EMBEDDING_CHUNK_SIZE: z.coerce.number().default(500),
+  EMBEDDING_CHUNK_OVERLAP: z.coerce.number().default(50),
 });
 
 const parsed = envSchema.safeParse(process.env);
