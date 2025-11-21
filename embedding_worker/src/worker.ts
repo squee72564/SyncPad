@@ -142,7 +142,8 @@ export class EmbeddingWorker {
       throw new Error(`Document ${documentId} not found`);
     }
 
-    const chunks = documentChunker.chunkDocument(document.content?.toString() ?? "");
+    const content = this.normalizeDocumentContent(document.content);
+    const chunks = documentChunker.chunkDocument(content);
 
     if (!chunks.length) {
       logger.warn(`No chunks generated for document ${documentId}`);
@@ -191,6 +192,26 @@ export class EmbeddingWorker {
     );
 
     logger.info(`Stored ${storedCount} embeddings for document ${documentId}`);
+  }
+
+  private normalizeDocumentContent(content: unknown): string {
+    if (content === null || content === undefined) {
+      return "";
+    }
+
+    if (typeof content === "string") {
+      return content;
+    }
+
+    if (typeof content === "object") {
+      try {
+        return JSON.stringify(content);
+      } catch (_error) {
+        return "";
+      }
+    }
+
+    return String(content);
   }
 
   private async handleFailedMessage(message: StreamMessage, error: unknown) {
