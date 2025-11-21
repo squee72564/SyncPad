@@ -13,6 +13,13 @@ This pnpm-managed repo contains a backend API and a Next.js frontend. Work insid
     - `./backend/src/utils`: Helper utility functions like CatchAsync, pick, custom ApiError class for consistent error handling, and ZodRequest to extend Express Request types with zod schemas for required request shape
     - `./backend/src/validations`: Zod Schemas defining expected request shape for routes
 - `backend/prisma`: Prisma schema and migrations; run database tweaks here before committing API changes.
+- `embedding_worker/`: Standalone TS worker that consumes Redis stream jobs (`EmbeddingWorker`), chunks document content, calls the configured embedding provider (OpenAI or self-hosted), and writes vectors to PostgreSQL. Key files:
+    - `src/index.ts` / `src/worker.ts`: worker lifecycle, signal-safe shutdown, pending-claim logic, and per-message processing.
+    - `src/embed.ts`: provider framework with batching, concurrency limits, retries, timeout handling, and multiple provider implementations.
+    - `src/chunker.ts`: paragraph/sentence-aware chunker with token/overlap controls (env-configurable).
+    - `src/services` + `src/controllers`: Prisma-backed document fetch + embedding storage helpers that replace vectors transactionally.
+    - `src/queue.ts`: Redis Streams abstraction shared with the backend producer contract.
+  See `embedding_worker/README.md` for the full breakdown and configuration knobs.
 
 - `frontend/app`: Next.js 15 route segments; shared UI lives in `frontend/components`, hooks in `frontend/hooks`, and typed helpers in `frontend/lib`. The activity timeline at `frontend/app/(validated)/dashboard/activity` is a server component fetching `/v1/workspaces/:workspaceId/activity-logs` (limit 50) and revalidating via server actions after log deletion—extend it with filters/pagination as the API allows.
 - `frontend/public`: static assets. Config files (`tsconfig*.json`, `eslint.config.*`) sit beside each package, and `node_modules/` is hoisted at the repo root.
@@ -29,6 +36,7 @@ Run commands through pnpm to stay inside the correct package context.
 - `pnpm --filter ./frontend build` creates the production bundle; follow with `pnpm --filter ./frontend start` to preview.
 - `pnpm --filter ./backend prisma:migrate:dev` applies migrations using `.env.development`.
 - `pnpm --filter ./backend lint:check` and `pnpm --filter ./frontend lint:check` gate linting without auto-fixing; pair with the `pretty:check` scripts when formatting is the only change.
+- `pnpm --filter ./embedding_worker start:dev` runs the embedding worker with tsx/nodemon; `build` emits `dist/`, matching the backend queue contract.
 
 ## Coding Style & Naming Conventions
 TypeScript is the default language. Prettier (via lint-staged) enforces two-space indentation, double quotes, and trailing commas; run the `pretty` script after sizable refactors. ESLint forbids unused variables unless prefixed with `_`. Backend files stay kebab-case (e.g., `health.route.ts`), and React components use PascalCase default exports. Hooks must start with `use`, and utilities should expose named exports from `lib` folders.
@@ -42,6 +50,12 @@ TypeScript is the default language. Prettier (via lint-staged) enforces two-spac
 - Workspace invite APIs now live under `/v1/workspaces/:workspaceId/invites` (GET/POST for list/create, POST `/:inviteId/resend`, DELETE `/:inviteId`) plus `/v1/workspaces/invites/:token/accept`. These endpoints enforce `member:invite`, normalize emails, ensure invitees aren’t already members, rotate secure tokens, and strip the token from API responses—propagate new behavior if adding UI or notifications. Email delivery is handled via the Resend integration (configure `NEXT_NEXT_APP_BASE_URL`, `INVITE_EMAIL_FROM`, `RESEND_API_KEY`), and `/dashboard/invites` + `/invites/:token` provide the corresponding UI flows (composer, pending list, copy/resend/revoke actions, auth-aware acceptance).
 - Document share links now have a dedicated router under `/v1/workspaces/:workspaceId/documents/:documentId/share-links` (list/create/update/delete) plus `/v1/share-links/:token` for public previews. Use these when exposing read/comment/edit tokens to non-members; they rely on `share:create` / `share:manage` permissions and reuse the middleware’s `allowShareLinks` option for token-based access. The dashboard page at `/dashboard/documents/share-links` surfaces document selection, share-link creation, and management (copy/regenerate/revoke) to mirror the backend capabilities.
 - Activity logs are exposed via `/v1/workspaces/:workspaceId/activity-logs` (GET with cursor filters for the dashboard timeline, POST to append entries, DELETE to prune) and require `workspace:manage`; hook document CRUD, share-link mutations, workspace updates, and invite/member flows into `activityLogService.createActivityLog` so every privileged backend action records metadata for auditing.
+
+## Embedding Pipeline & Document Lifecycle
+- Backend env now includes `REDIS_URL`, `EMBEDDING_REDIS_STREAM_KEY`, and `EMBEDDING_REDIS_CONSUMER_GROUP`. `backend/src/lib/redis.ts` exposes a shared client with reconnect logging; `backend/src/services/embedding-queue.service.ts` writes jobs into the same Redis stream the worker consumes.
+- `document.service.ts` compares old/new statuses during create/update/delete. When a document enters a RAG-eligible state (`PUBLISHED` or `ARCHIVED`), it enqueues an `EMBED_DOCUMENT` job. When it leaves those states or is deleted, `document-embedding.service.ts` removes existing vectors.
+- Jobs flow: API enqueue → Redis stream → worker claim → document fetch/chunk → provider embeddings → transactional replace → `XACK`. Failures are dead-lettered for investigation. Ensure worker config matches backend stream/env settings.
+- When adding new doc states or revise lifecycle rules, update `RAG_ELIGIBLE_STATUSES` in `document.service.ts` and consider whether the worker should embed additional metadata (revisionId, tags, etc.). Update dashboard messaging so users know when embeddings are regenerating.
 
 - **AI Job Strategy**: The `AiJob` table plus worker pipeline should progress through three tiers:
   - *Tier 1 (foundations)*: `EMBED_DOCUMENT` jobs chunk documents and upsert vectors; `SUMMARIZE_DOCUMENT`/`WORKSPACE_DIGEST` jobs produce summaries/digests; `DRAFT_OUTLINE` assists the editor with outline suggestions surfaced via server actions.
