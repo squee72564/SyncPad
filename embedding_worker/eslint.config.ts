@@ -23,7 +23,9 @@ export default defineConfig([
   ...tseslint.configs.recommended,
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
-    plugins: { js },
+    plugins: {
+      js,
+    },
     languageOptions: { globals: globals.browser },
     rules: {
       "@typescript-eslint/no-unused-vars": [
