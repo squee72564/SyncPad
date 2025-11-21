@@ -9,7 +9,11 @@
     "pretty:check": "npx prettier . --check",
     "lint": "npx eslint . --fix",
     "lint:check": "npx eslint .",
-    "build": "rimraf dist && tsup"
+    "build": "rimraf dist && tsup",
+    "test": "NODE_ENV=development vitest run",
+    "test:watch": "NODE_ENV=development vitest",
+    "test:coverage": "vitest run --coverage"
+
   },
   "keywords": [],
   "author": "",
@@ -18,10 +22,13 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@types/node": "^24.10.1",
+    "@types/supertest": "^6.0.3",
+    "@vitest/coverage-v8": "^4.0.12",
     "eslint": "^9.39.1",
     "prettier": "^3.6.2",
     "prisma": "^6.19.0",
     "rimraf": "^6.1.0",
+    "supertest": "^7.1.4",
     "tsup": "^8.5.1",
     "vitest": "^4.0.10"
   },
