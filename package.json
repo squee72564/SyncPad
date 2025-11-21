@@ -2,6 +2,7 @@
 	"scripts": {
 		"prepare": "husky install",
 		"pretty": "pnpm --filter ./frontend pretty --write && pnpm --filter ./backend pretty --write && pnpm --filter ./embedding_worker pretty --write",
+		"lint": "pnpm --filter ./frontend lint && pnpm --filter ./backend lint && pnpm --filter ./embedding_worker lint",
 		"docker:dev": "docker compose up -d",
 		"docker:dev:logs": "docker compose logs -f postgres",
 		"docker:dev:down": "docker compose down",
