@@ -86,99 +86,14 @@ src/
     "pretty:check": "npx prettier ./src --check",
     "lint": "npx eslint . --fix",
     "lint:check": "npx eslint .",
+    "test": "NODE_ENV=development vitest run",
+    "test:watch": "NODE_ENV=development vitest",
+    "test:coverage": "vitest run --coverage",
     "seed:dev": "NODE_ENV=development tsx ./scripts/seed.ts",
     "start": "NODE_ENV=production node dist/server.js",
     "start:dev": "NODE_ENV=development nodemon --watch src --ext ts --exec tsx src/server.ts",
     "start:pm2": "NODE_ENV=production pm2 start dist/server.js --name express-backend",
-    "restart:pm2": "NODE_ENV=production pm2 restart express-backend",
-    "auth:generate": "NODE_ENV=development npx @better-auth/cli generate --config src/lib/auth.ts",
-    "prisma:generate": "pnpm prisma:generate:dev",
-    "prisma:generate:dev": "dotenv -e .env.development -- prisma generate",
-    "prisma:generate:prod": "dotenv -e .env.production -- prisma generate",
-    "prisma:migrate": "pnpm prisma:migrate:dev",
-    "prisma:migrate:dev": "dotenv -e .env.development -- prisma migrate dev",
-    "prisma:migrate:prod": "dotenv -e .env.production -- prisma migrate dev",
-    "prisma:migrate:deploy": "dotenv -e .env.$NODE_ENV -- prisma migrate deploy",
-    "prisma:studio": "prisma studio",
-    "prisma:push": "prisma db push",
-    "docker:dev": "docker compose up -d",
-    "docker:dev:logs": "docker compose logs -f postgres",
-    "docker:dev:down": "docker compose down",
-    "docker:prod": "docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d",
-    "docker:prod:logs": "docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f postgres",
-    "docker:prod:down": "docker compose -f docker-compose.yml -f docker-compose.prod.yml down",
-    "prepare": "husky install"
+    "restart:pm2": "NODE_ENV=production pm2 restart express-backend"
   }
 }
 ```
-
-## Development
-
-1. Install dependencies:
-
-   ```bash
-   pnpm install
-   ```
-
-2. Set up environment variables:
-
-   ```bash
-   cp .env.development .env.production
-   ```
-
-- Change development and production env vars as needed
-
-3. Start the postgres database and pgbouncer:
-
-   ```bash
-   pnpm docker:dev
-   ```
-
-4. Generate Prisma client:
-
-   ```bash
-   pnpm prisma:generate
-   ```
-
-5. Run migrations:
-
-   ```bash
-   pnpm prisma:migrate
-   ```
-
-6. Start development server:
-   ```bash
-   pnpm start:dev
-   ```
-
-## Production
-
-1. Build the application:
-
-   ```bash
-   pnpm build
-   ```
-
-2. Run migrations:
-
-   ```bash
-   pnpm prisma:migrate:deploy
-   ```
-
-3. Start with Node:
-
-   ```bash
-   pnpm start
-   ```
-
-   Or with PM2:
-
-   ```bash
-   pnpm start:pm2
-   ```
-
-   Or with Docker:
-
-   ```bash
-   To Be Added Soon
-   ```
