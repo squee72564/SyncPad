@@ -184,4 +184,33 @@ describe("EmbeddingQueue", () => {
     expect(redisClient.xPending).toHaveBeenCalledWith("test-stream", "test-group");
     expect(summary).toEqual({ pending: 3 });
   });
+
+  it("sends invalid messages to dead letter during readNext", async () => {
+    redisClient.xReadGroup.mockResolvedValue([
+      {
+        messages: [
+          {
+            id: "bad-1",
+            message: {
+              workspaceId: "workspace",
+            },
+          },
+        ],
+      },
+    ]);
+
+    const messages = await queue.readNext();
+
+    expect(messages).toEqual([]);
+    expect(redisClient.xAdd).toHaveBeenCalledWith(
+      "test-stream:dead",
+      "*",
+      expect.objectContaining({
+        workspaceId: "workspace",
+        originalId: "bad-1",
+        error: expect.any(String),
+      })
+    );
+    expect(redisClient.xAck).toHaveBeenCalledWith("test-stream", "test-group", "bad-1");
+  });
 });

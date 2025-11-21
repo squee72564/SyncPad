@@ -181,4 +181,25 @@ describe("EmbeddingWorker", () => {
     await vi.waitFor(() => expect(embeddingQueue.readNext).toHaveBeenCalledTimes(3));
     expect(delaySpy).toHaveBeenCalled();
   });
+
+  it("normalizes JSON document content before chunking", async () => {
+    const { worker, embeddingQueue, documentChunker, embeddingProvider } = createWorker();
+    const message = createMessage();
+
+    embeddingQueue.readNext
+      .mockImplementationOnce(async () => [message])
+      .mockImplementationOnce(async () => []);
+    getDocumentByIdMock.mockResolvedValue({
+      content: { blocks: [{ type: "paragraph", data: "hi" }] },
+    });
+    documentChunker.chunkDocument.mockReturnValue(["serialized"]);
+    embeddingProvider.generateEmbeddings.mockResolvedValue([[0.5]]);
+    storeDocumentEmbeddingsMock.mockResolvedValue(1);
+
+    worker.start();
+    await vi.waitFor(() =>
+      expect(documentChunker.chunkDocument).toHaveBeenCalledWith(expect.stringContaining("blocks"))
+    );
+    await worker.stop();
+  });
 });
