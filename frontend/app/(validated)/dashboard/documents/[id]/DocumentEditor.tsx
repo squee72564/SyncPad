@@ -6,7 +6,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Collaboration from "@tiptap/extension-collaboration";
 import CollaborationCaret from "@tiptap/extension-collaboration-caret";
 
-import type { DocumentCollabStateRecord, DocumentRecord } from "@/lib/documents";
+import type { DocumentRecord } from "@/lib/documents";
 import useCollaborationProvider from "@/hooks/use-collaborationProvider";
 
 type EditorUser = {

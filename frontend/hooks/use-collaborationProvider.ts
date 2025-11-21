@@ -19,7 +19,7 @@ const pickCursorColor = (seed?: string | null) => {
 };
 
 export default function useCollaborationProvider(documentId: string, currentUser: EditorUser) {
-  const ydoc = useMemo(() => new Y.Doc(), [documentId]);
+  const ydoc = useMemo(() => new Y.Doc(), []);
 
   const cursorColor = useMemo(() => pickCursorColor(currentUser.id), [currentUser.id]);
 
@@ -31,7 +31,7 @@ export default function useCollaborationProvider(documentId: string, currentUser
     });
 
     return p;
-  }, [documentId, ydoc, currentUser.id, currentUser.name, cursorColor]);
+  }, [documentId, ydoc]);
 
   useEffect(() => {
     if (!provider || !ydoc) {
@@ -51,7 +51,7 @@ export default function useCollaborationProvider(documentId: string, currentUser
       provider.destroy();
       ydoc.destroy();
     };
-  }, [provider, ydoc]);
+  }, [provider, ydoc, currentUser.id, currentUser.name, cursorColor]);
 
   return { ydoc, provider, cursorColor };
 }
