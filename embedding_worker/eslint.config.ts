@@ -1,6 +1,6 @@
 import js from "@eslint/js";
 import globals from "globals";
-import tseslint, {} from "typescript-eslint";
+import tseslint from "typescript-eslint";
 import prettier from "eslint-config-prettier";
 import { defineConfig } from "eslint/config";
 export default defineConfig([
@@ -12,9 +12,9 @@ export default defineConfig([
       "src/db/generated/**",
       "prisma/generated/**",
       "coverage/**",
-      "*.config.js",              // ecosystem.config.js, etc.
-      "**/*.log",                 // Log files
-      ".husky/**",                // Git hooks
+      "*.config.js", // ecosystem.config.js, etc.
+      "**/*.log", // Log files
+      ".husky/**", // Git hooks
       "pnpm-lock.yaml",
       "package-lock.json",
     ],
@@ -31,12 +31,12 @@ export default defineConfig([
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
-          "argsIgnorePattern": "^_",
-          "varsIgnorePattern": "^_",
-          "caughtErrorsIgnorePattern": "^_",
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
         },
       ],
-    }
+    },
   },
   prettier,
 ]);
