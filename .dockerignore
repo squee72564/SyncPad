@@ -1,0 +1,15 @@
+**
+
+!.env.*
+
+!docker-compose*
+
+!prisma
+prisma/generated
+
+!embedding_worker/src
+!embedding_worker/Dockerfile
+!embedding_worker/tsconfig*
+!embedding_worker/tsup*
+!embedding_worker/pnpm-lock.yaml
+!embedding_worker/package.json

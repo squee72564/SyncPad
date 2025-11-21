@@ -10,7 +10,7 @@ import type {
   Workspace,
   WorkspaceMember,
   WorkspaceInvite,
-} from "../../prisma/generated/prisma-postgres/index.js";
+} from "../../../prisma/generated/prisma-postgres/index.js";
 
 type WorkspaceServiceMock = {
   listUserWorkspaces: ReturnType<typeof vi.fn>;

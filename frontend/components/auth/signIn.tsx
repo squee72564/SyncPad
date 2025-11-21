@@ -41,8 +41,11 @@ export default function SignIn({
           },
           onResponse: async (ctx) => {
             setLoading(false);
+
+            const cloned = ctx.response.clone();
+
             if (!ctx.response.ok) {
-              const error: { code: string; message: string } = await ctx.response.json();
+              const error: { code: string; message: string } = await cloned.json();
               toast.error(`${ctx.response.statusText}: ${error.message}`);
               return;
             }

@@ -5,28 +5,35 @@ import logger from "./logger.js";
 
 const envFile =
   process.env.NODE_ENV === "development"
-    ? path.resolve(process.cwd(), ".env.development")
-    : path.resolve(process.cwd(), ".env");
+    ? path.resolve(process.cwd(), "../.env.development")
+    : path.resolve(process.cwd(), "../.env.production");
 
 dotenv.config({ path: envFile });
 
 const envSchema = z.object({
   // App
-  PORT: z.string().default("3000"),
+  EXPRESS_PORT: z.string().default("3001"),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  APP_BASE_URL: z.url().default("http://localhost:3000"),
-
-  // Database
-  DATABASE_URL: z.url(),
-  POSTGRES_USER: z.string(),
-  POSTGRES_PASSWORD: z.string(),
-  POSTGRES_DB: z.string(),
-
-  // Better Auth
-  BETTER_AUTH_SECRET: z.string(),
-  BETTER_AUTH_URL: z.url(),
+  NEXT_NEXT_APP_BASE_URL: z.url().default("http://localhost:3000"),
 
   CORS_ORIGIN: z.string().default("*"),
+
+  REDIS_URL: z.string().url().default("redis://redis:6379"),
+  EMBEDDING_REDIS_STREAM_KEY: z.string().default("embedding_tasks"),
+  EMBEDDING_REDIS_CONSUMER_GROUP: z.string().default("embedding_workers"),
+
+  // Do we keep these as they are required for the app to run?
+  // The downside is that it exposes these values in the codebase which is not ideal.
+
+  // Database
+  // DATABASE_URL: z.url(),
+  // POSTGRES_USER: z.string(),
+  // POSTGRES_PASSWORD: z.string(),
+  // POSTGRES_DB: z.string(),
+
+  // Better Auth
+  // BETTER_AUTH_SECRET: z.string(),
+  // BETTER_AUTH_URL: z.url(),
 
   GITHUB_CLIENT_ID: z.string().optional(),
   GITHUB_CLIENT_SECRET: z.string().optional(),

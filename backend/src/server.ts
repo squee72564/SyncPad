@@ -4,8 +4,8 @@ import logger from "./config/logger.js";
 import { disconnectPrisma } from "./lib/prisma.js";
 import hocuspocusServer, { shutdownHocuspocus } from "./config/hocuspocus.js";
 
-const server = app.listen(env.PORT, () => {
-  logger.info(`Listening to port ${env.PORT}`);
+const server = app.listen(env.EXPRESS_PORT, () => {
+  logger.info(`Listening to port ${env.EXPRESS_PORT}`);
 });
 
 const exitHandler = async (exitCode = 0) => {

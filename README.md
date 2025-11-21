@@ -9,10 +9,11 @@ SyncPad is an emerging collaborative knowledge base that blends team wikis with 
 - **Cloud-Ready Foundation**: Early development runs locally via Docker Compose, with abstractions that let us swap in managed services and IaC (AWS CDK, Terraform) as the platform matures.
 
 ## Current Architecture (In Progress)
-- **Frontend**: Next.js 15 (React 19) application in `frontend/` with a refreshed landing page, auth flows, dashboard shells, and Vitest/Testing Library coverage.
+- **Frontend**: Next.js 15 (React 19) application in `frontend/` with a landing page, auth flows, dashboard, and Vitest/Testing Library coverage.
 - **Backend**: Express 5 TypeScript service in `backend/` handling REST APIs, auth, workspace-aware middleware, rate limiting, logging, and Prisma integration.
 - **Documents, Invites & Share Links**: Workspace-scoped document CRUD lives under `v1/workspaces/:workspaceId/documents`, workspace invites under `/v1/workspaces/:workspaceId/invites` (list/create/resend/revoke) plus `/v1/workspaces/invites/:token/accept`, and document share links under `/v1/workspaces/:workspaceId/documents/:documentId/share-links` (list/create/update/delete) with token preview at `/v1/share-links/:token`. Share-link mutations now emit activity logs for auditing.
 - **Activity Logs**: Workspace timelines can now be read and written via `/v1/workspaces/:workspaceId/activity-logs` (GET with cursor filters, POST to append) plus `DELETE /v1/workspaces/:workspaceId/activity-logs/:activityLogId`. Backend controllers log document CRUD, workspace membership/invite changes, and share-link actions so the feed stays authoritative.
+- **Embedding Worker**: The `embedding_worker/` service consumes Redis stream jobs, chunks document content, generates embeddings through a configurable provider (OpenAI/self-hosted), and stores vectors in PostgreSQL. The Express API now enqueues jobs whenever a document enters/exits `PUBLISHED`/`ARCHIVED` status and deletes vectors when it becomes draft again.
 - **Dashboard UX**: Next.js dashboard now includes a workspace switcher, API-backed document listings (all, drafts, published), invite management (composer, pending list, copy/resend/revoke actions), document share-link management (document picker, creator form, pending list with copy/regenerate/revoke), forms for creating/updating document metadata, and a new Activity timeline at `/dashboard/activity` that renders the server-fetched log with delete controls. Public invite/share-link acceptance lives under `/invites/:token` and `/share-links/:token` with auth-aware redirects. Draft documents now render a TipTap-powered rich-text editor that autosaves structured JSON snapshots through the collab-state API, while non-draft statuses stay read-only. An AI Jobs screen will expose queued workloads alongside status/latency once the worker lands.
 - **Data Layer**: PostgreSQL via Prisma ORM. The schema now models workspaces, membership roles, documents, revisions, comments, share links, embeddings, activity logs, and AI jobs. The roadmap still includes a vector store (pgvector, Pinecone, etc.) for retrieval-augmented generation.
 - **Gateway & Integration**: API gateway layer to broker frontend requests, enforce rate limiting, and host future service-to-service calls.
@@ -22,7 +23,7 @@ SyncPad is an emerging collaborative knowledge base that blends team wikis with 
 SyncPad’s AI orchestration hinges on the `AiJob` table plus a worker service that consumes queued jobs and writes results back to Prisma. The plan evolves through three tiers so we can ship practical wins and graduate toward a differentiated “workspace intelligence” narrative.
 
 ### Tier 1 – Practical Foundations
-- **Embeddings & Search (`EMBED_DOCUMENT`)**: queue jobs on document changes, chunk content, call embedding APIs, and persist vectors for semantic search/RAG.
+- **Embeddings & Search (`EMBED_DOCUMENT`)**: queue jobs on document status changes, chunk content, call embedding APIs, and persist vectors for semantic search/RAG. This pipeline is live: the backend enqueues jobs for published/archived docs, the worker handles batching/concurrency/retries, and embeddings are replaced transactionally.
 - **Summaries & Digests (`SUMMARIZE_DOCUMENT`, `WORKSPACE_DIGEST`)**: periodically summarize documents or activity-log windows to power dashboard cards, share links, and email/Slack digests.
 - **Outline Assistance (`DRAFT_OUTLINE`)**: server actions queue outline/draft requests; workers return structured suggestions the editor can surface for manual insertion.
 
@@ -51,9 +52,8 @@ Each tier builds atop the same primitives (AiJob records, Prisma-backed storage,
 - [x] Define workspace data model (users, teams, permissions, documents, revisions, embeddings).
 - [x] Stand up auth flows (email/password, OAuth providers, session management, RBAC via better-auth).
 - [x] Introduce workspace-aware middleware and validation helpers for request handling.
-- [ ] Implement collaborative document editor with CRDT state propagation and optimistic UI updates.
-- [ ] Wire document storage + version history via Prisma/PostgreSQL.
-- [ ] Introduce background job pipeline for embedding generation and vector upserts.
+- [x] Implement collaborative document editor with CRDT state propagation and optimistic UI updates.
+- [x] Introduce background job pipeline for embedding generation and vector upserts (Redis streams + embedding worker).
 - [ ] Add semantic search endpoints and AI assistant orchestration (RAG, prompt templates, rate limiting).
 - [ ] Harden API gateway with monitoring, structured logging, and pagination standards.
 - [ ] Build responsive UI shell, document browsing, invite management polish (share links, invite previews), and editor experience in Next.js.

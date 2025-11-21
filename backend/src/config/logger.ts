@@ -13,15 +13,15 @@ const logger = createLogger({
     format.json()
   ),
   defaultMeta: {
-    service: "express-template",
+    service: "syncpad_backend",
     ...(isDocker && { container: process.env.HOSTNAME }),
   },
   transports: [
     new transports.File({
-      filename: "express-template-error.log",
+      filename: "syncpad_backend.log",
       level: "error",
     }),
-    new transports.File({ filename: "express-template-error-combined.log" }),
+    new transports.File({ filename: "syncpad_backend_combined.log" }),
   ],
 });
 
@@ -29,13 +29,13 @@ const logger = createLogger({
 if (isDevelopment) {
   logger.add(
     new transports.File({
-      filename: "express-template-error.log",
+      filename: "syncpad_backend.log",
       level: "error",
     })
   );
   logger.add(
     new transports.File({
-      filename: "express-template-error-combined.log",
+      filename: "syncpad_backend_combined.log",
     })
   );
 }

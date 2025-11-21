@@ -14,7 +14,11 @@ services:
 
   pgbouncer:
     env_file:
-      - .env.production
+      - ./backend/.env.production
+
+  embedding-worker:
+    env_file:
+      - ./embedding_worker/.env.production
 
 volumes:
   postgres_data:

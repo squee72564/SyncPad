@@ -1,0 +1,25 @@
+# Dependency and build files
+node_modules/
+dist/
+build/
+
+# Lockfiles
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+package.json
+
+# Env/config
+.env
+.env.*
+
+# Other
+coverage/
+/build/coverage
+
+eslint.config.mjs
+postcss.config.mjs
+tsconfig.json
+.prettierrc
+
+README*

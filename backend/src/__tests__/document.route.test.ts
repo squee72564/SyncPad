@@ -10,7 +10,7 @@ import type {
   Document,
   Workspace,
   WorkspaceMember,
-} from "../../prisma/generated/prisma-postgres/index.js";
+} from "../../../prisma/generated/prisma-postgres/index.js";
 
 type DocumentServiceMock = {
   listDocuments: ReturnType<typeof vi.fn>;

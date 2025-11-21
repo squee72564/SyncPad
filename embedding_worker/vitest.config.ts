@@ -1,0 +1,25 @@
+import { defineConfig } from "vitest/config";
+import path from "node:path";
+
+export default defineConfig({
+  test: {
+    environment: "node",
+    globals: true,
+    include: ["src/**/*.spec.ts", "src/**/*.test.ts", "src/__tests__/**/*.ts"],
+    coverage: {
+      reporter: ["text", "lcov"],
+      exclude: [
+        "src/config/**",
+        "src/lib/prisma.ts",
+        "src/lib/redisClient.ts",
+        "src/config/logger.ts",
+        "src/config/config.ts",
+      ],
+    },
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    },
+  },
+});
