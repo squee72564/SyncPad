@@ -18,8 +18,19 @@ const envSchema = z.object({
   REDIS_URL: z.url().default("redis://redis:6379"),
   REDIS_STREAM_KEY: z.string().default("embedding_tasks"),
   REDIS_CONSUMER_GROUP: z.string().default("embedding_workers"),
-  EMBEDDING_CHUNK_SIZE: z.coerce.number().default(500),
-  EMBEDDING_CHUNK_OVERLAP: z.coerce.number().default(50),
+  EMBEDDING_PROVIDER: z.enum(["openai", "azure", "voyage", "self_hosted"]).default("openai"),
+  EMBEDDING_MODEL: z.string().default("text-embedding-3-large"),
+  EMBEDDING_BASE_URL: z.url().transform((value) => value?.replace(/\/+$/, "")),
+  EMBEDDING_API_KEY: z.string(),
+  EMBEDDING_TIMEOUT_MS: z.coerce.number().int().positive().default(60_000),
+  EMBEDDING_MAX_BATCH: z.coerce.number().int().positive().default(16),
+  EMBEDDING_CONCURRENCY: z.coerce.number().int().positive().default(4),
+  EMBEDDING_MAX_TOKENS_PER_INPUT: z.coerce.number().int().positive().default(8000),
+  EMBEDDING_MAX_RETRIES: z.coerce.number().int().min(0).default(5),
+  EMBEDDING_CHUNK_TARGET_TOKENS: z.coerce.number().int().positive().default(800),
+  EMBEDDING_CHUNK_MIN_TOKENS: z.coerce.number().int().positive().default(200),
+  EMBEDDING_CHUNK_OVERLAP_TOKENS: z.coerce.number().int().nonnegative().default(200),
+  EMBEDDING_CHUNK_AVG_CHARS_PER_TOKEN: z.coerce.number().positive().default(4),
 });
 
 const parsed = envSchema.safeParse(process.env);
