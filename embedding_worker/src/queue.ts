@@ -91,10 +91,20 @@ export default class EmbeddingQueue {
     }
 
     const streamMessages = response.flatMap((stream) => stream.messages);
-    return streamMessages.map((msg) => ({
-      id: msg.id,
-      payload: this.deserializeMessage(msg.message),
-    }));
+    const validMessages: StreamMessage[] = [];
+
+    for (const msg of streamMessages) {
+      try {
+        validMessages.push({
+          id: msg.id,
+          payload: this.deserializeMessage(msg.message),
+        });
+      } catch (error) {
+        await this.handleInvalidMessage(msg.id, msg.message, error);
+      }
+    }
+
+    return validMessages;
   }
 
   async claimPending(): Promise<StreamMessage[]> {
@@ -115,12 +125,22 @@ export default class EmbeddingQueue {
 
     logger.debug("Deleted Messages:", deletedMessages);
 
-    return messages
-      .filter((msg) => msg !== null)
-      .map((msg) => ({
-        id: msg.id,
-        payload: this.deserializeMessage(msg.message),
-      }));
+    const parsed: StreamMessage[] = [];
+    for (const msg of messages) {
+      if (!msg) {
+        continue;
+      }
+      try {
+        parsed.push({
+          id: msg.id,
+          payload: this.deserializeMessage(msg.message),
+        });
+      } catch (error) {
+        await this.handleInvalidMessage(msg.id, msg.message, error);
+      }
+    }
+
+    return parsed;
   }
 
   async acknowledge(messageIds: string | string[]) {
@@ -183,6 +203,20 @@ export default class EmbeddingQueue {
       if (!(error instanceof Error) || !error.message.includes("BUSYGROUP")) {
         throw error;
       }
+    }
+  }
+
+  private async handleInvalidMessage(id: string, raw: Record<string, string>, error: unknown) {
+    logger.error(`Invalid queue message ${id}:`, error);
+    try {
+      await this.redisClient.xAdd(this.deadLetterStream, "*", {
+        ...raw,
+        originalId: id,
+        error: error instanceof Error ? error.message : "Invalid message",
+      });
+      await this.redisClient.xAck(this.streamKey, this.groupName, id);
+    } catch (deadLetterError) {
+      logger.error(`Failed to move invalid message ${id} to dead letter stream`, deadLetterError);
     }
   }
 }
