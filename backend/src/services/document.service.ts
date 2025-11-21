@@ -8,6 +8,9 @@ import type {
   UpdateDocumentBody,
 } from "@/types/document.types.ts";
 import { Prisma } from "../../../prisma/generated/prisma-postgres/index.js";
+import embeddingQueueService from "./embedding-queue.service.js";
+import documentEmbeddingService from "./document-embedding.service.js";
+import logger from "../config/logger.js";
 
 // Align slug format for uniqueness checks.
 const normalizeSlug = (slug?: string) => slug?.trim().toLowerCase();
@@ -29,6 +32,50 @@ const parsePublishedAt = (value: string | null) => {
     return null;
   }
   return new Date(value);
+};
+
+const RAG_ELIGIBLE_STATUSES = new Set(["PUBLISHED", "ARCHIVED"]);
+
+const isRagEligibleStatus = (status?: string | null) => {
+  if (!status) {
+    return false;
+  }
+  return RAG_ELIGIBLE_STATUSES.has(status);
+};
+
+const enqueueDocumentEmbeddingJob = async (workspaceId: string, documentId: string) => {
+  try {
+    await embeddingQueueService.enqueueEmbeddingJob({
+      workspaceId,
+      documentId,
+    });
+  } catch (error) {
+    logger.error("Failed to enqueue document embedding job", { workspaceId, documentId, error });
+  }
+};
+
+const removeDocumentEmbeddings = async (documentId: string) => {
+  try {
+    await documentEmbeddingService.deleteDocumentEmbeddings(documentId);
+  } catch (error) {
+    logger.error("Failed to delete document embeddings", { documentId, error });
+  }
+};
+
+const handleEmbeddingStatusTransition = async (
+  workspaceId: string,
+  documentId: string,
+  previousStatus?: string | null,
+  nextStatus?: string | null
+) => {
+  const wasEligible = isRagEligibleStatus(previousStatus);
+  const isEligible = isRagEligibleStatus(nextStatus);
+
+  if (!wasEligible && isEligible) {
+    await enqueueDocumentEmbeddingJob(workspaceId, documentId);
+  } else if (wasEligible && !isEligible) {
+    await removeDocumentEmbeddings(documentId);
+  }
 };
 
 // Validate parent-child relationships stay within the workspace and are not cyclical
@@ -156,9 +203,13 @@ const createDocument = async (workspaceId: string, userId: string, payload: Crea
   }
 
   try {
-    return await prisma.document.create({
+    const document = await prisma.document.create({
       data,
     });
+
+    await handleEmbeddingStatusTransition(workspaceId, document.id, null, document.status);
+
+    return document;
   } catch (error: unknown) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       throw new ApiError(httpStatus.CONFLICT, "Document slug must be unique within the workspace");
@@ -228,10 +279,19 @@ const updateDocument = async (
   }
 
   try {
-    return await prisma.document.update({
+    const document = await prisma.document.update({
       where: { id: documentId },
       data,
     });
+
+    await handleEmbeddingStatusTransition(
+      workspaceId,
+      document.id,
+      existing.status,
+      document.status
+    );
+
+    return document;
   } catch (error: unknown) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       throw new ApiError(httpStatus.CONFLICT, "Document slug must be unique within the workspace");
@@ -254,6 +314,8 @@ const deleteDocument = async (workspaceId: string, documentId: string) => {
       id: documentId,
     },
   });
+
+  await removeDocumentEmbeddings(documentId);
 };
 
 export default {

@@ -18,6 +18,10 @@ const envSchema = z.object({
 
   CORS_ORIGIN: z.string().default("*"),
 
+  REDIS_URL: z.string().url().default("redis://redis:6379"),
+  EMBEDDING_REDIS_STREAM_KEY: z.string().default("embedding_tasks"),
+  EMBEDDING_REDIS_CONSUMER_GROUP: z.string().default("embedding_workers"),
+
   // Do we keep these as they are required for the app to run?
   // The downside is that it exposes these values in the codebase which is not ideal.
 
