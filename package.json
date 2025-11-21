@@ -17,7 +17,8 @@
 		"prisma:migrate:prod": "dotenv -e .env.production -- prisma migrate dev",
 		"prisma:migrate:deploy": "dotenv -e .env.$NODE_ENV -- prisma migrate deploy",
 		"prisma:studio": "dotenv -e .env.development prisma studio",
-		"prisma:push": "prisma db push"
+		"prisma:push": "prisma db push",
+		"test": "pnpm --filter ./backend test && pnpm --filter ./embedding_worker test"
 	},
 	"lint-staged": {
 		"frontend/**/*.{ts,tsx,js,jsx}": [
