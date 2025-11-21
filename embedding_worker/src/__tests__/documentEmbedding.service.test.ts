@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma.ts";
 vi.mock("@/lib/prisma.ts", () => {
   const deleteMany = vi.fn();
   const $queryRaw = vi.fn();
-  const $transaction = vi.fn((callback: (tx: any) => Promise<unknown>) =>
+  const $transaction = vi.fn((callback: (tx: unknown) => Promise<unknown>) =>
     callback({ documentEmbedding: { deleteMany }, $queryRaw })
   );
 

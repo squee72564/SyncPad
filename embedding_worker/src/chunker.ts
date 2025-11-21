@@ -63,6 +63,7 @@ export default class DocumentChunker {
       content
         // Normalize Windows line endings and strip null chars
         .replace(/\r\n/g, "\n")
+        // eslint-disable-next-line no-control-regex
         .replace(/\u0000/g, "")
         // Normalize tabs and repeated spaces but keep paragraph/newline boundaries
         .replace(/\t+/g, " ")

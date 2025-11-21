@@ -244,7 +244,7 @@ export class EmbeddingWorker {
     logger.info("Worker shut down gracefully");
   }
 
-  private delay(ms: number) {
+  protected async delay(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

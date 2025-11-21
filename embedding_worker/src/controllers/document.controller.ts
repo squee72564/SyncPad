@@ -1,12 +1,9 @@
 import { documentService } from "@/services/index.ts";
 
 const getDocumentById = async (documentId: string) => {
-  try {
-    const document = await documentService.getById(documentId);
-    return document;
-  } catch (error) {
-    throw error;
-  }
+  const document = await documentService.getById(documentId);
+  if (!document) throw new Error("No document found");
+  return document;
 };
 
 export default {

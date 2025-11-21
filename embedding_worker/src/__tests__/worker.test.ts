@@ -1,6 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { EmbeddingWorker } from "@/worker.ts";
 import type { StreamMessage } from "@/queue.ts";
+import { RedisClientType } from "redis";
+import EmbeddingQueue from "@/queue.ts";
+import DocumentChunker from "@/chunker.ts";
+import { EmbeddingProvider } from "@/embed.ts";
 
 vi.mock("@/lib/prisma.ts", () => ({
   disconnectPrisma: vi.fn().mockResolvedValue(undefined),
@@ -70,10 +74,10 @@ const createWorker = () => {
   };
 
   const worker = new EmbeddingWorker({
-    redisClient: redisClient as any,
-    embeddingQueue: embeddingQueue as any,
-    embeddingProvider: embeddingProvider as any,
-    documentChunker: documentChunker as any,
+    redisClient: redisClient as unknown as RedisClientType,
+    embeddingQueue: embeddingQueue as unknown as EmbeddingQueue,
+    embeddingProvider: embeddingProvider as unknown as EmbeddingProvider,
+    documentChunker: documentChunker as unknown as DocumentChunker,
   });
 
   return {
@@ -174,6 +178,7 @@ describe("EmbeddingWorker", () => {
       });
 
     const delaySpy = vi
+      // eslint-disable-next-line
       .spyOn(EmbeddingWorker.prototype as any, "delay")
       .mockResolvedValue(undefined);
 

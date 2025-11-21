@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import EmbeddingQueue, { type EmbeddingQueueMessage } from "@/queue.ts";
+import { RedisClientType } from "redis";
 
 const createRedisMock = () => {
   const client = {
@@ -39,7 +40,7 @@ describe("EmbeddingQueue", () => {
 
   beforeEach(() => {
     redisClient = createRedisMock();
-    queue = new EmbeddingQueue(redisClient as any, baseOptions);
+    queue = new EmbeddingQueue(redisClient as unknown as RedisClientType, baseOptions);
   });
 
   it("connects and creates consumer group on init when client not open", async () => {
