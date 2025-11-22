@@ -273,6 +273,7 @@ class OpenAIEmbeddingProvider extends BaseEmbeddingProvider {
       body: JSON.stringify({
         model: this.config.model,
         input: batch,
+        encoding_format: "float",
       }),
       signal: createTimeoutSignal(this.config.timeoutMs),
     });
