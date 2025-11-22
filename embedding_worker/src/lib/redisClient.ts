@@ -5,15 +5,21 @@ import logger from "@/config/logger.ts";
 const MAX_RECONNECT_DELAY = 5000;
 const INITIAL_RECONNECT_DELAY = 200;
 
+const resolveReconnectDelay = (retries: number) => {
+  const attempt = Number.isFinite(retries) && retries > 0 ? retries : 1;
+  return Math.min(INITIAL_RECONNECT_DELAY * attempt, MAX_RECONNECT_DELAY);
+};
+
 export default function redisClientFactory(): RedisClientType {
   const client = createClient({
-    url: config.REDIS_URL,
+    url: config.BACKEND_REDIS_URL,
     disableOfflineQueue: true,
     socket: {
       connectTimeout: 10000,
       keepAlive: true,
       reconnectStrategy: (retries) => {
-        const delay = Math.min(INITIAL_RECONNECT_DELAY * retries, MAX_RECONNECT_DELAY);
+        const delay = resolveReconnectDelay(retries);
+        logger.warn(`Redis reconnect scheduled in ${delay}ms (attempt ${retries})`);
         return delay;
       },
     },
@@ -27,10 +33,6 @@ export default function redisClientFactory(): RedisClientType {
 
   client.on("ready", () => {
     logger.info("Redis connection ready");
-  });
-
-  client.on("reconnecting", (delay) => {
-    logger.warn(`Redis reconnect scheduled in ${delay}ms`);
   });
 
   client.on("end", () => {
