@@ -14,11 +14,12 @@ const envSchema = z.object({
   // App
   EXPRESS_PORT: z.string().default("3001"),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  NEXT_NEXT_APP_BASE_URL: z.url().default("http://localhost:3000"),
+  NEXT_APP_BASE_URL: z.url().default("http://localhost:3000"),
 
   CORS_ORIGIN: z.string().default("*"),
 
-  REDIS_URL: z.string().url().default("redis://redis:6379"),
+  REDIS_URL: z.url().default("redis://localhost:6379"),
+  BACKEND_REDIS_URL: z.url().default("redis://localhost:6379"),
   EMBEDDING_REDIS_STREAM_KEY: z.string().default("embedding_tasks"),
   EMBEDDING_REDIS_CONSUMER_GROUP: z.string().default("embedding_workers"),
 
