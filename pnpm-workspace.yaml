@@ -1,6 +1,5 @@
 packages:
   - shared/*
-  - shared/*
   - backend
   - embedding_worker
   - frontend
@@ -12,3 +11,5 @@ ignoredBuiltDependencies:
   - prisma
   - sharp
   - unrs-resolver
+
+nodeLinker: isolated
