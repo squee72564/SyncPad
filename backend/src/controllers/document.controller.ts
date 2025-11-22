@@ -125,7 +125,8 @@ const updateDocument = catchAsync(
     const document = await documentService.updateDocument(
       context.workspace.id,
       req.params.documentId,
-      updates
+      updates,
+      userId
     );
 
     await activityLogService.createActivityLog(context.workspace.id, {

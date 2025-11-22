@@ -1,14 +1,14 @@
 import { randomUUID } from "node:crypto";
 import env from "../config/index.js";
 import logger from "../config/logger.js";
-import getRedisClient from "../lib/redis.js";
+import { getRedisClient } from "@syncpad/redis-client";
 
 type EmbeddingJobPayload = {
   jobId?: string;
   workspaceId: string;
   documentId: string;
-  revisionId?: string;
-  type?: "EMBED_DOCUMENT";
+  revisionId?: string | null;
+  type?: "EMBEDDING";
   payload?: string;
 };
 
@@ -22,13 +22,13 @@ const serializePayload = (payload: EmbeddingJobPayload): Record<string, string> 
     workspaceId: payload.workspaceId,
     documentId: payload.documentId,
     ...(payload.revisionId ? { revisionId: payload.revisionId } : {}),
-    type: payload.type ?? "EMBED_DOCUMENT",
+    type: payload.type ?? "EMBEDDING",
     ...(payload.payload ? { payload: payload.payload } : {}),
   };
 };
 
 const enqueueEmbeddingJob = async (payload: EmbeddingJobPayload) => {
-  const client = getRedisClient();
+  const client = getRedisClient(env.REDIS_URL, logger);
 
   if (!client.isOpen) {
     await client.connect();

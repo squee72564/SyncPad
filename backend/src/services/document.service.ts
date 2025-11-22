@@ -7,10 +7,11 @@ import type {
   ListDocumentsQuery,
   UpdateDocumentBody,
 } from "@/types/document.types.ts";
-import { Prisma } from "../../../prisma/generated/prisma-postgres/index.js";
+import { Prisma, AiJobType } from "../../../prisma/generated/prisma-postgres/index.js";
 import embeddingQueueService from "./embedding-queue.service.js";
 import documentEmbeddingService from "./document-embedding.service.js";
 import logger from "../config/logger.js";
+import aiJobService from "./aiJob.service.ts";
 
 // Align slug format for uniqueness checks.
 const normalizeSlug = (slug?: string) => slug?.trim().toLowerCase();
@@ -43,14 +44,43 @@ const isRagEligibleStatus = (status?: string | null) => {
   return RAG_ELIGIBLE_STATUSES.has(status);
 };
 
-const enqueueDocumentEmbeddingJob = async (workspaceId: string, documentId: string) => {
+const toErrorMessage = (error: unknown) => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return typeof error === "string" ? error : "Unknown error";
+};
+
+const enqueueDocumentEmbeddingJob = async (
+  workspaceId: string,
+  documentId: string,
+  requestedById?: string | null,
+  revisionId?: string | null
+) => {
+  const aiJob = await aiJobService.createAiJob({
+    workspaceId,
+    documentId,
+    revisionId: revisionId ?? null,
+    requestedById: requestedById ?? null,
+    type: AiJobType.EMBEDDING,
+  });
+
   try {
     await embeddingQueueService.enqueueEmbeddingJob({
       workspaceId,
       documentId,
+      revisionId: revisionId ?? null,
+      jobId: aiJob.id,
+      type: "EMBEDDING",
     });
   } catch (error) {
-    logger.error("Failed to enqueue document embedding job", { workspaceId, documentId, error });
+    const errorMessage = toErrorMessage(error);
+    await aiJobService.markJobFailed(aiJob.id, errorMessage);
+    logger.error("Failed to enqueue document embedding job", {
+      workspaceId,
+      documentId,
+      error,
+    });
   }
 };
 
@@ -66,13 +96,14 @@ const handleEmbeddingStatusTransition = async (
   workspaceId: string,
   documentId: string,
   previousStatus?: string | null,
-  nextStatus?: string | null
+  nextStatus?: string | null,
+  requestedById?: string | null
 ) => {
   const wasEligible = isRagEligibleStatus(previousStatus);
   const isEligible = isRagEligibleStatus(nextStatus);
 
   if (!wasEligible && isEligible) {
-    await enqueueDocumentEmbeddingJob(workspaceId, documentId);
+    await enqueueDocumentEmbeddingJob(workspaceId, documentId, requestedById);
   } else if (wasEligible && !isEligible) {
     await removeDocumentEmbeddings(documentId);
   }
@@ -207,7 +238,7 @@ const createDocument = async (workspaceId: string, userId: string, payload: Crea
       data,
     });
 
-    await handleEmbeddingStatusTransition(workspaceId, document.id, null, document.status);
+    await handleEmbeddingStatusTransition(workspaceId, document.id, null, document.status, userId);
 
     return document;
   } catch (error: unknown) {
@@ -223,7 +254,8 @@ const createDocument = async (workspaceId: string, userId: string, payload: Crea
 const updateDocument = async (
   workspaceId: string,
   documentId: string,
-  updates: UpdateDocumentBody
+  updates: UpdateDocumentBody,
+  requestedById?: string | null
 ) => {
   const existing = await getDocumentById(workspaceId, documentId);
 
@@ -288,7 +320,8 @@ const updateDocument = async (
       workspaceId,
       document.id,
       existing.status,
-      document.status
+      document.status,
+      requestedById
     );
 
     return document;
