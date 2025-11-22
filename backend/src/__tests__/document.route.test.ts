@@ -304,9 +304,14 @@ describe("Document routes", () => {
         .send({ title: "Updated Title" });
 
       expect(response.status).toBe(httpStatus.OK);
-      expect(documentServiceMock.updateDocument).toHaveBeenCalledWith(WORKSPACE_ID, DOCUMENT_ID, {
-        title: "Updated Title",
-      });
+      expect(documentServiceMock.updateDocument).toHaveBeenCalledWith(
+        WORKSPACE_ID,
+        DOCUMENT_ID,
+        {
+          title: "Updated Title",
+        },
+        TEST_USER_ID
+      );
       expect(response.body.document.title).toBe("Updated Title");
     });
 

@@ -57,7 +57,7 @@ describe("embedding-queue.service", () => {
         jobId: "generated-id",
         workspaceId: "workspace-1",
         documentId: "doc-1",
-        type: "EMBED_DOCUMENT",
+        type: "EMBEDDING",
       })
     );
     expect(jobId).toBe("generated-id");

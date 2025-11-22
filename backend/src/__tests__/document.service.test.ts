@@ -43,11 +43,23 @@ vi.mock("../config/logger.js", () => ({
   },
 }));
 
+const createAiJobMock = vi.fn();
+const markJobFailedMock = vi.fn();
+vi.mock("../services/ai-job.service.js", () => ({
+  __esModule: true,
+  default: {
+    createAiJob: createAiJobMock,
+    markJobFailed: markJobFailedMock,
+  },
+}));
+
 const documentService = (await import("../services/document.service.ts")).default;
 
 describe("document.service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    createAiJobMock.mockResolvedValue({ id: "ai-job-1" });
+    markJobFailedMock.mockResolvedValue(undefined);
   });
 
   it("enqueues embedding job when document is created in a RAG-eligible status", async () => {
@@ -62,9 +74,19 @@ describe("document.service", () => {
       status: "PUBLISHED",
     });
 
+    expect(createAiJobMock).toHaveBeenCalledWith({
+      workspaceId: "workspace-1",
+      documentId: "doc-1",
+      requestedById: "user-1",
+      revisionId: null,
+      type: "EMBEDDING",
+    });
     expect(enqueueEmbeddingJobMock).toHaveBeenCalledWith({
       workspaceId: "workspace-1",
       documentId: "doc-1",
+      revisionId: null,
+      jobId: "ai-job-1",
+      type: "EMBEDDING",
     });
   });
 
@@ -83,6 +105,25 @@ describe("document.service", () => {
     expect(enqueueEmbeddingJobMock).not.toHaveBeenCalled();
   });
 
+  it("marks ai job failed when enqueueing to Redis fails", async () => {
+    prismaDocumentMock.create.mockResolvedValue({
+      id: "doc-1",
+      status: "PUBLISHED",
+    });
+    const error = new Error("redis unavailable");
+    enqueueEmbeddingJobMock.mockRejectedValue(error);
+
+    await expect(
+      documentService.createDocument("workspace-1", "user-1", {
+        title: "Test",
+        content: null,
+        status: "PUBLISHED",
+      })
+    ).resolves.toBeDefined();
+
+    expect(markJobFailedMock).toHaveBeenCalledWith("ai-job-1", "redis unavailable");
+  });
+
   it("enqueues embedding job when status changes to published", async () => {
     prismaDocumentMock.findFirst.mockResolvedValueOnce({
       id: "doc-1",
@@ -93,13 +134,21 @@ describe("document.service", () => {
       status: "PUBLISHED",
     });
 
-    await documentService.updateDocument("workspace-1", "doc-1", {
-      status: "PUBLISHED",
-    });
+    await documentService.updateDocument(
+      "workspace-1",
+      "doc-1",
+      {
+        status: "PUBLISHED",
+      },
+      "user-2"
+    );
 
     expect(enqueueEmbeddingJobMock).toHaveBeenCalledWith({
       workspaceId: "workspace-1",
       documentId: "doc-1",
+      revisionId: null,
+      jobId: "ai-job-1",
+      type: "EMBEDDING",
     });
   });
 
