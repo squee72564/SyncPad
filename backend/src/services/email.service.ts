@@ -130,7 +130,7 @@ const queueWorkspaceInviteEmail = (payload: WorkspaceInviteEmailPayload) => {
 };
 
 const buildWorkspaceInviteAcceptUrl = (token: string): string => {
-  const url = new URL(`/invites/${token}`, env.NEXT_NEXT_APP_BASE_URL);
+  const url = new URL(`/invites/${token}`, env.NEXT_APP_BASE_URL);
   return url.toString();
 };
 
