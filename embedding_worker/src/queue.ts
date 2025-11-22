@@ -7,7 +7,7 @@ const messageSchema = z.object({
   workspaceId: z.string(),
   documentId: z.string(),
   revisionId: z.string().optional(),
-  type: z.string().default("EMBED_DOCUMENT"),
+  type: z.string().default("EMBEDDING"),
   payload: z.string().optional(),
 });
 
