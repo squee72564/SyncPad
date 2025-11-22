@@ -24,6 +24,15 @@ vi.mock("@/controllers/documentEmbedding.controller.ts", () => ({
   },
 }));
 
+vi.mock("@/services/aiJob.service.ts", () => ({
+  __esModule: true,
+  default: {
+    markJobRunning: vi.fn(),
+    markJobCompleted: vi.fn(),
+    markJobFailed: vi.fn(),
+  },
+}));
+
 const mockDocumentController = (await import("@/controllers/document.controller.ts")).default;
 const mockDocumentEmbeddingController = (
   await import("@/controllers/documentEmbedding.controller.ts")
@@ -33,6 +42,12 @@ const getDocumentByIdMock = mockDocumentController.getDocumentById as unknown as
 >;
 const storeDocumentEmbeddingsMock =
   mockDocumentEmbeddingController.storeDocumentEmbeddings as unknown as ReturnType<typeof vi.fn>;
+const mockAiJobService = (await import("@/services/aiJob.service.ts")).default;
+const markJobRunningMock = mockAiJobService.markJobRunning as unknown as ReturnType<typeof vi.fn>;
+const markJobCompletedMock = mockAiJobService.markJobCompleted as unknown as ReturnType<
+  typeof vi.fn
+>;
+const markJobFailedMock = mockAiJobService.markJobFailed as unknown as ReturnType<typeof vi.fn>;
 
 const createMessage = (): StreamMessage => ({
   id: "1-0",
@@ -41,7 +56,7 @@ const createMessage = (): StreamMessage => ({
     workspaceId: "workspace-1",
     documentId: "doc-1",
     revisionId: "rev-1",
-    type: "EMBED_DOCUMENT",
+    type: "EMBEDDING",
   },
 });
 
@@ -118,6 +133,9 @@ describe("EmbeddingWorker", () => {
       "rev-1"
     );
     expect(embeddingQueue.acknowledge).toHaveBeenCalledWith("1-0");
+    expect(markJobRunningMock).toHaveBeenCalledWith("job-1");
+    expect(markJobCompletedMock).toHaveBeenCalledWith("job-1");
+    expect(markJobFailedMock).not.toHaveBeenCalled();
   });
 
   it("sends message to dead letter on processing failure", { timeout: 10_000 }, async () => {
@@ -137,6 +155,8 @@ describe("EmbeddingWorker", () => {
 
     expect(embeddingQueue.sendToDeadLetter).toHaveBeenCalledWith(message, "provider failure");
     expect(embeddingQueue.acknowledge).not.toHaveBeenCalled();
+    expect(markJobRunningMock).toHaveBeenCalledWith("job-1");
+    expect(markJobFailedMock).toHaveBeenCalledWith("job-1", "provider failure");
   });
 
   it("reclaims pending messages during startup", { timeout: 10_000 }, async () => {
@@ -155,6 +175,8 @@ describe("EmbeddingWorker", () => {
 
     expect(embeddingQueue.claimPending).toHaveBeenCalled();
     expect(embeddingQueue.acknowledge).toHaveBeenCalledWith("1-0");
+    expect(markJobRunningMock).toHaveBeenCalledWith("job-1");
+    expect(markJobCompletedMock).toHaveBeenCalledWith("job-1");
   });
 
   it("stops processing when shutdown is triggered", { timeout: 30_000 }, async () => {

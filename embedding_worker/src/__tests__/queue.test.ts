@@ -30,7 +30,7 @@ const createMessage = (overrides: Partial<EmbeddingQueueMessage> = {}): Embeddin
   jobId: "job-123",
   workspaceId: "workspace-1",
   documentId: "document-1",
-  type: "EMBED_DOCUMENT",
+  type: "EMBEDDING",
   ...overrides,
 });
 
@@ -86,7 +86,7 @@ describe("EmbeddingQueue", () => {
               jobId: "job-1",
               workspaceId: "workspace",
               documentId: "doc",
-              type: "EMBED_DOCUMENT",
+              type: "EMBEDDING",
             },
           },
         ],
@@ -126,7 +126,7 @@ describe("EmbeddingQueue", () => {
             jobId: "job-5",
             workspaceId: "workspace",
             documentId: "doc",
-            type: "EMBED_DOCUMENT",
+            type: "EMBEDDING",
           },
         },
       ],
