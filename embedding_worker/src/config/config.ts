@@ -15,11 +15,11 @@ dotenv.config({ path: envFile });
 const envSchema = z.object({
   // App
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  REDIS_URL: z.url().default("redis://redis:6379"),
+  BACKEND_REDIS_URL: z.url().default("redis://localhost:6379"),
   REDIS_STREAM_KEY: z.string().default("embedding_tasks"),
   REDIS_CONSUMER_GROUP: z.string().default("embedding_workers"),
   EMBEDDING_PROVIDER: z.enum(["openai", "azure", "voyage", "self_hosted"]).default("openai"),
-  EMBEDDING_MODEL: z.string().default("text-embedding-3-large"),
+  EMBEDDING_MODEL: z.string().default("text-embedding-3-small"),
   EMBEDDING_BASE_URL: z.url().transform((value) => value?.replace(/\/+$/, "")),
   EMBEDDING_API_KEY: z.string(),
   EMBEDDING_TIMEOUT_MS: z.coerce.number().int().positive().default(60_000),
