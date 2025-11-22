@@ -1,5 +1,5 @@
 {
-  "name": "express_template",
+  "name": "@syncpad/express_backend",
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
@@ -29,6 +29,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.17.1",
   "dependencies": {
+    "@syncpad/redis-client": "workspace:*",
     "@hocuspocus/server": "^3.4.0",
     "better-auth": "^1.3.27",
     "compression": "^1.8.1",

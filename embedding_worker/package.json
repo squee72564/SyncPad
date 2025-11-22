@@ -1,5 +1,5 @@
 {
-  "name": "embedding_worker",
+  "name": "@syncpad/embedding_worker",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -9,6 +9,7 @@
     "pretty:check": "npx prettier . --check",
     "lint": "npx eslint . --fix",
     "lint:check": "npx eslint .",
+    "start:dev": "NODE_ENV=development nodemon --watch src --ext ts --exec tsx src/index.ts",
     "build": "rimraf dist && tsup",
     "test": "NODE_ENV=development vitest run",
     "test:watch": "NODE_ENV=development vitest",
@@ -28,6 +29,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-js": "github:eslint/js",
     "globals": "^16.5.0",
+    "nodemon": "^3.1.11",
     "prettier": "^3.6.2",
     "prisma": "^6.19.0",
     "rimraf": "^6.1.0",
@@ -37,6 +39,7 @@
     "vitest": "^4.0.10"
   },
   "dependencies": {
+    "@syncpad/redis-client": "workspace:*",
     "@prisma/client": "^7.0.0",
     "dotenv": "^17.2.3",
     "node": "^25.2.1",

@@ -1,9 +1,8 @@
 import { createClient, type RedisClientType } from "redis";
-import env from "../config/index.js";
-import logger from "../config/logger.js";
+import winston from "winston";
 
 const MAX_RECONNECT_DELAY = 5000;
-const INITIAL_RECONNECT_DELAY = 200;
+const INITIAL_RECONNECT_DELAY = 500;
 
 let client: RedisClientType | null = null;
 
@@ -12,9 +11,9 @@ const resolveReconnectDelay = (retries: number) => {
   return Math.min(INITIAL_RECONNECT_DELAY * attempt, MAX_RECONNECT_DELAY);
 };
 
-const createRedisClient = () =>
+const createRedisClient = (url: string, logger: winston.Logger | globalThis.Console = console) =>
   createClient({
-    url: env.BACKEND_REDIS_URL ?? env.REDIS_URL,
+    url: url,
     disableOfflineQueue: true,
     socket: {
       connectTimeout: 10_000,
@@ -27,12 +26,12 @@ const createRedisClient = () =>
     },
   });
 
-const getRedisClient = () => {
+const getRedisClient = (url: string, logger: winston.Logger | globalThis.Console = console) => {
   if (client) {
     return client;
   }
 
-  client = createRedisClient() as RedisClientType;
+  client = createRedisClient(url) as RedisClientType;
 
   client.on("error", (err) => logger.error("Redis client error", err));
   client.on("connect", () => logger.info("Connecting to Redis..."));
@@ -42,7 +41,7 @@ const getRedisClient = () => {
   return client;
 };
 
-const closeRedisClient = async (client: RedisClientType) => {
+const closeRedisClient = async (client: RedisClientType, logger: winston.Logger | globalThis.Console = console) => {
   try {
     if (client.isOpen) {
       await client.close();

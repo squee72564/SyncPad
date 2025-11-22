@@ -1,0 +1,14 @@
+packages:
+  - shared/*
+  - shared/*
+  - backend
+  - embedding_worker
+  - frontend
+
+ignoredBuiltDependencies:
+  - '@prisma/client'
+  - esbuild
+  - node
+  - prisma
+  - sharp
+  - unrs-resolver

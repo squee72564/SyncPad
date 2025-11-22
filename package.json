@@ -1,4 +1,6 @@
 {
+  "name": "syncpad",
+  "private": true,
 	"scripts": {
 		"prepare": "husky install",
 		"pretty": "pnpm --filter ./frontend pretty --write && pnpm --filter ./backend pretty --write && pnpm --filter ./embedding_worker pretty --write",

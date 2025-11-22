@@ -3,6 +3,7 @@ import env from "./config/index.js";
 import logger from "./config/logger.js";
 import { disconnectPrisma } from "./lib/prisma.js";
 import hocuspocusServer, { shutdownHocuspocus } from "./config/hocuspocus.js";
+import { getRedisClient, closeRedisClient } from "@syncpad/redis-client";
 
 const server = app.listen(env.EXPRESS_PORT, () => {
   logger.info(`Listening to port ${env.EXPRESS_PORT}`);
@@ -19,9 +20,14 @@ const exitHandler = async (exitCode = 0) => {
       await shutdownHocuspocus();
     }
 
+    const redisClient = getRedisClient(env.REDIS_URL ?? env.BACKEND_REDIS_URL, logger);
+
+    closeRedisClient(redisClient);
+
     await disconnectPrisma();
   } catch (err) {
     logger.error("Error during shutdown", err);
+    exitCode = 1;
   } finally {
     process.exit(exitCode);
   }
