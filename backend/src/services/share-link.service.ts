@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-import prisma from "../lib/prisma.js";
+import prisma from "@syncpad/prisma-client";
 import { Prisma, SharePermission } from "../../../prisma/generated/prisma-postgres/index.js";
 import ApiError from "@/utils/ApiError.ts";
 import httpStatus from "http-status";

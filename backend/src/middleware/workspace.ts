@@ -1,7 +1,7 @@
 import type { Request, RequestHandler } from "express";
 import httpStatus from "http-status";
 
-import prisma from "../lib/prisma.js";
+import prisma from "@syncpad/prisma-client";
 import ApiError from "../utils/ApiError.js";
 import catchAsync from "../utils/catchAsync.js";
 import {

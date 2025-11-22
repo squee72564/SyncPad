@@ -5,7 +5,7 @@ import logger from "@/config/logger.ts";
 import { createEmbeddingProvider, EmbeddingProvider } from "@/embed.ts";
 import DocumentChunker from "@/chunker.ts";
 import { RedisClientType } from "redis";
-import { disconnectPrisma } from "@/lib/prisma.ts";
+import prisma, { disconnectPrismaClient } from "@syncpad/prisma-client";
 import documentController from "@/controllers/document.controller.ts";
 import documentEmbeddingController from "@/controllers/documentEmbedding.controller.ts";
 import aiJobService from "@/services/aiJob.service.ts";
@@ -260,7 +260,7 @@ export class EmbeddingWorker {
     const { redisClient } = this.context;
 
     try {
-      await disconnectPrisma();
+      await disconnectPrismaClient(prisma);
     } catch (error) {
       logger.error("Error disconnecting Prisma", error);
     }

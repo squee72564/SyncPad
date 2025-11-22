@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-import prisma from "../lib/prisma.js";
+import prisma from "@syncpad/prisma-client";
 import type {
   CreateWorkspaceArgs,
   CreateWorkspaceInviteArgs,

@@ -14,7 +14,7 @@ import type { SessionWithImpersonatedBy, UserWithRole } from "better-auth/plugin
 import auth from "../lib/auth.ts";
 import documentService from "../services/document.service.ts";
 import workspaceService from "../services/workspace.service.ts";
-import prisma from "../lib/prisma.ts";
+import prisma from "@syncpad/prisma-client";
 import logger from "./logger.ts";
 import {
   type WorkspacePermission,

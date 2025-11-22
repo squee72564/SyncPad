@@ -1,7 +1,7 @@
 import app from "./app.js";
 import env from "./config/index.js";
 import logger from "./config/logger.js";
-import { disconnectPrisma } from "./lib/prisma.js";
+import prisma, { disconnectPrismaClient } from "@syncpad/prisma-client";
 import hocuspocusServer, { shutdownHocuspocus } from "./config/hocuspocus.js";
 import { getRedisClient, closeRedisClient } from "@syncpad/redis-client";
 
@@ -24,7 +24,7 @@ const exitHandler = async (exitCode = 0) => {
 
     closeRedisClient(redisClient);
 
-    await disconnectPrisma();
+    await disconnectPrismaClient(prisma);
   } catch (err) {
     logger.error("Error during shutdown", err);
     exitCode = 1;

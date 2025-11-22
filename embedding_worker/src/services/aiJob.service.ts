@@ -1,5 +1,5 @@
 import { AiJobStatus, Prisma } from "../../../prisma/generated/prisma-postgres/index.js";
-import prisma from "@/lib/prisma.ts";
+import prisma from "@syncpad/prisma-client";
 import logger from "@/config/logger.ts";
 
 const safeUpdate = async (jobId: string, data: Prisma.AiJobUpdateInput) => {

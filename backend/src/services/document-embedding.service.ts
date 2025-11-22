@@ -1,4 +1,4 @@
-import prisma from "../lib/prisma.js";
+import prisma from "@syncpad/prisma-client";
 
 const deleteDocumentEmbeddings = async (documentId: string, revisionId?: string) => {
   return prisma.documentEmbedding.deleteMany({

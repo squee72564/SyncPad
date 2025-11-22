@@ -1,6 +1,6 @@
 import httpStatus from "http-status";
 import { Prisma } from "../../../prisma/generated/prisma-postgres/index.js";
-import prisma from "../lib/prisma.js";
+import prisma from "@syncpad/prisma-client";
 import ApiError from "@/utils/ApiError.ts";
 import { CreateActivityLogArgs, ListActivityLogsArgs } from "@/types/activity-log.types.ts";
 

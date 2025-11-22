@@ -1,6 +1,6 @@
 import httpStatus from "http-status";
 
-import prisma from "../lib/prisma.js";
+import prisma from "@syncpad/prisma-client";
 import ApiError from "../utils/ApiError.js";
 import type {
   CreateDocumentArgs,

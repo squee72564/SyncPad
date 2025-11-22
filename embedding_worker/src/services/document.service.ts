@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma.ts";
+import prisma from "@syncpad/prisma-client";
 
 const getById = async (documentId: string) => {
   return prisma.document.findUnique({

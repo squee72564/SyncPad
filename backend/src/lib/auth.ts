@@ -1,7 +1,7 @@
 import { AuthContext, betterAuth, type User, type BetterAuthOptions } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin as adminPlugin } from "better-auth/plugins";
-import prisma from "./prisma.js";
+import prisma from "@syncpad/prisma-client";
 import env from "../config/index.js";
 import logger from "../config/logger.js";
 import { ac, admin, superAdmin, user } from "./permissions.js";

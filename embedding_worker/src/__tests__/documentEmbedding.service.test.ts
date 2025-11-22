@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import documentEmbeddingService from "@/services/documentEmbedding.service.ts";
-import prisma from "@/lib/prisma.ts";
+import prisma from "@syncpad/prisma-client";
 
 vi.mock("@/lib/prisma.ts", () => {
   const deleteMany = vi.fn();
