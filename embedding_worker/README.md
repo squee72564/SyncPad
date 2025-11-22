@@ -30,7 +30,7 @@ Place `.env.development` / `.env.production` files in the repo root and populate
 
 ## Flow
 
-1. Backend enqueues an `EMBED_DOCUMENT` job (workspaceId/documentId[/revisionId]) into the Redis stream.
+1. Backend enqueues an `EMBEDDING` job (workspaceId/documentId[/revisionId]) into the Redis stream.
 2. Worker boots, reclaims pending jobs, and waits on `XREADGROUP`.
 3. For each message:
    - Fetch document content via Prisma.

@@ -23,7 +23,7 @@ SyncPad is an emerging collaborative knowledge base that blends team wikis with 
 SyncPad’s AI orchestration hinges on the `AiJob` table plus a worker service that consumes queued jobs and writes results back to Prisma. The plan evolves through three tiers so we can ship practical wins and graduate toward a differentiated “workspace intelligence” narrative.
 
 ### Tier 1 – Practical Foundations
-- **Embeddings & Search (`EMBED_DOCUMENT`)**: queue jobs on document status changes, chunk content, call embedding APIs, and persist vectors for semantic search/RAG. This pipeline is live: the backend enqueues jobs for published/archived docs, the worker handles batching/concurrency/retries, and embeddings are replaced transactionally.
+- **Embeddings & Search (`EMBEDDING`)**: queue jobs on document status changes, chunk content, call embedding APIs, and persist vectors for semantic search/RAG. This pipeline is live: the backend enqueues jobs for published/archived docs, the worker handles batching/concurrency/retries, and embeddings are replaced transactionally.
 - **Summaries & Digests (`SUMMARIZE_DOCUMENT`, `WORKSPACE_DIGEST`)**: periodically summarize documents or activity-log windows to power dashboard cards, share links, and email/Slack digests.
 - **Outline Assistance (`DRAFT_OUTLINE`)**: server actions queue outline/draft requests; workers return structured suggestions the editor can surface for manual insertion.
 

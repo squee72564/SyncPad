@@ -12,7 +12,7 @@
 - [done] Add workspace activity log API for creating and deleting logs via `/v1/workspaces/:workspaceId/activity-logs`, wiring controllers, services, validators, and route tests.
 - [done] Research embedding models we can call to create document vectors and expose provider options (OpenAI + self-hosted) with configurable batching/concurrency.
 - [done] Implement embedding worker + backend queue integration so published/archived documents automatically generate/delete embeddings.
-- [ ] Implement Tier 1 AI jobs: `EMBED_DOCUMENT` vector generation on document changes, `SUMMARIZE_DOCUMENT` / `WORKSPACE_DIGEST` summarization, and `DRAFT_OUTLINE` assistance with persisted results.
+- [ ] Implement Tier 1 AI jobs: `EMBEDDING` vector generation on document changes, `SUMMARIZE_DOCUMENT` / `WORKSPACE_DIGEST` summarization, and `DRAFT_OUTLINE` assistance with persisted results.
 - [ ] Expose semantic search / RAG endpoints that query `document_embedding` rows per workspace, enforce status/role rules, and hydrate answers for the dashboard assistant.
 - [ ] Prototype Tier 2 AI collaborators: tracked-change `COLLAB_EDIT` suggestions, `INSIGHT_GENERATOR` risk cards tied to document publishing, and comment summarization/resolution jobs.
 - [ ] Design Tier 3 autonomous flows: multi-agent `COAUTHOR_ROOM`, decision graph extraction (`DECISION_TIMELINE`), and recurring `IDEATION_SPRINT` jobs that orchestrate follow-up tasks.
