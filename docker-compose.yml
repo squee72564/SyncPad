@@ -27,13 +27,13 @@ services:
     ports:
       - "6379:6379"
 
-  embedding-worker:
-    build:
-      context: .
-      dockerfile: ./embedding_worker/Dockerfile
-    depends_on:
-      - pgbouncer
-      - redis
-    env_file:
-      - ./.env.development
+  # embedding-worker:
+  #   build:
+  #     context: .
+  #     dockerfile: ./embedding_worker/Dockerfile
+  #   depends_on:
+  #     - pgbouncer
+  #     - redis
+  #   env_file:
+  #     - ./.env.development
   
