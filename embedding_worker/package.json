@@ -35,12 +35,14 @@
     "rimraf": "^6.1.0",
     "supertest": "^7.1.4",
     "tsup": "^8.5.1",
+    "tsx": "^4.20.6",
     "typescript-eslint": "^8.47.0",
     "vitest": "^4.0.10"
   },
   "dependencies": {
-    "@syncpad/redis-client": "workspace:*",
     "@prisma/client": "^7.0.0",
+    "@syncpad/prisma-client": "workspace:*",
+    "@syncpad/redis-client": "workspace:*",
     "dotenv": "^17.2.3",
     "node": "^25.2.1",
     "redis": "^5.9.0",

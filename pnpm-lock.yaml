@@ -33,6 +33,9 @@ importers:
       '@hocuspocus/server':
         specifier: ^3.4.0
         version: 3.4.0(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)
+      '@syncpad/prisma-client':
+        specifier: workspace:*
+        version: link:../shared/prisma-client
       '@syncpad/redis-client':
         specifier: workspace:*
         version: link:../shared/redis-client
@@ -172,6 +175,9 @@ importers:
       '@prisma/client':
         specifier: ^7.0.0
         version: 7.0.0(prisma@6.19.0(magicast@0.3.5)(typescript@5.9.3))(typescript@5.9.3)
+      '@syncpad/prisma-client':
+        specifier: workspace:*
+        version: link:../shared/prisma-client
       '@syncpad/redis-client':
         specifier: workspace:*
         version: link:../shared/redis-client
@@ -239,6 +245,9 @@ importers:
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
       typescript-eslint:
         specifier: ^8.47.0
         version: 8.47.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
@@ -362,7 +371,7 @@ importers:
         version: 19.2.3(@types/react@19.2.6)
       '@vitejs/plugin-react':
         specifier: ^4.3.4
-        version: 4.7.0(vite@7.2.4(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1))
+        version: 4.7.0(vite@5.4.21(@types/node@20.19.25)(lightningcss@1.30.2))
       '@vitest/coverage-v8':
         specifier: ^2.1.4
         version: 2.1.9(vitest@2.1.9(@types/node@20.19.25)(jsdom@25.0.1)(lightningcss@1.30.2))
@@ -390,6 +399,16 @@ importers:
       vitest:
         specifier: ^2.1.4
         version: 2.1.9(@types/node@20.19.25)(jsdom@25.0.1)(lightningcss@1.30.2)
+
+  shared/prisma-client:
+    dependencies:
+      winston:
+        specifier: ^3.18.3
+        version: 3.18.3
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
 
   shared/redis-client:
     dependencies:
@@ -8532,7 +8551,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
 
-  '@vitejs/plugin-react@4.7.0(vite@7.2.4(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1))':
+  '@vitejs/plugin-react@4.7.0(vite@5.4.21(@types/node@20.19.25)(lightningcss@1.30.2))':
     dependencies:
       '@babel/core': 7.28.5
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.28.5)
@@ -8540,7 +8559,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-beta.27
       '@types/babel__core': 7.20.5
       react-refresh: 0.17.0
-      vite: 7.2.4(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
+      vite: 5.4.21(@types/node@20.19.25)(lightningcss@1.30.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -12309,22 +12328,6 @@ snapshots:
       '@types/node': 24.10.1
       fsevents: 2.3.3
       lightningcss: 1.30.2
-
-  vite@7.2.4(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1):
-    dependencies:
-      esbuild: 0.25.12
-      fdir: 6.5.0(picomatch@4.0.3)
-      picomatch: 4.0.3
-      postcss: 8.5.6
-      rollup: 4.53.3
-      tinyglobby: 0.2.15
-    optionalDependencies:
-      '@types/node': 20.19.25
-      fsevents: 2.3.3
-      jiti: 2.6.1
-      lightningcss: 1.30.2
-      tsx: 4.20.6
-      yaml: 2.8.1
 
   vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1):
     dependencies:
