@@ -1,5 +1,5 @@
 import config from "@/config/config.ts";
-import redisClientFactory from "@/lib/redisClient.ts";
+import { getRedisClient, closeRedisClient } from "@syncpad/redis-client";
 import EmbeddingQueue, { StreamMessage } from "@/queue.ts";
 import logger from "@/config/logger.ts";
 import { createEmbeddingProvider, EmbeddingProvider } from "@/embed.ts";
@@ -8,6 +8,7 @@ import { RedisClientType } from "redis";
 import { disconnectPrisma } from "@/lib/prisma.ts";
 import documentController from "@/controllers/document.controller.ts";
 import documentEmbeddingController from "@/controllers/documentEmbedding.controller.ts";
+import aiJobService from "@/services/aiJob.service.ts";
 
 type WorkerDependencies = {
   redisClient: RedisClientType;
@@ -113,10 +114,20 @@ export class EmbeddingWorker {
   }
 
   private async processMessage(message: StreamMessage) {
+    const jobId = message.payload.jobId;
+
+    try {
+      await aiJobService.markJobRunning(jobId);
+    } catch (error) {
+      logger.error(`Failed to mark job ${jobId} as running`, error);
+    }
+
     try {
       await this.processEmbedding(message);
+      await aiJobService.markJobCompleted(jobId);
     } catch (error) {
       logger.error(`Failed to process message ${message.id}`, error);
+      await aiJobService.markJobFailed(jobId, this.extractErrorMessage(error));
       await this.handleFailedMessage(message, error);
       return;
     }
@@ -142,7 +153,12 @@ export class EmbeddingWorker {
       throw new Error(`Document ${documentId} not found`);
     }
 
+    logger.info(`Docment ${document.id}: `, document);
+
     const content = this.normalizeDocumentContent(document.content);
+
+    logger.info("Normalized document content: ", content);
+
     const chunks = documentChunker.chunkDocument(content);
 
     if (!chunks.length) {
@@ -151,6 +167,12 @@ export class EmbeddingWorker {
     }
 
     const embeddings: number[][] = await embeddingProvider.generateEmbeddings(chunks);
+
+    logger.info("Generated embeddings:", {
+      embeddings_length: embeddings.length,
+      embedding_dim: embeddings[0]?.length,
+      embeddings_snippet: `[${embeddings.slice(0, 1).join(",")}]\n...\n[${embeddings.slice(-2, -1).join(",")}]`,
+    });
 
     if (!embeddings || embeddings.length === 0) {
       throw new Error(`No embeddings generated for document ${documentId}`);
@@ -194,6 +216,16 @@ export class EmbeddingWorker {
     logger.info(`Stored ${storedCount} embeddings for document ${documentId}`);
   }
 
+  private extractErrorMessage(error: unknown) {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    if (typeof error === "string") {
+      return error;
+    }
+    return "Unknown error";
+  }
+
   private normalizeDocumentContent(content: unknown): string {
     if (content === null || content === undefined) {
       return "";
@@ -233,13 +265,7 @@ export class EmbeddingWorker {
       logger.error("Error disconnecting Prisma", error);
     }
 
-    if (redisClient.isOpen) {
-      try {
-        await redisClient.quit();
-      } catch (error) {
-        logger.error("Error closing Redis connection", error);
-      }
-    }
+    closeRedisClient(redisClient);
 
     logger.info("Worker shut down gracefully");
   }
@@ -250,7 +276,7 @@ export class EmbeddingWorker {
 }
 
 export function createWorkerDependencies(): WorkerDependencies {
-  const redisClient = redisClientFactory() as RedisClientType;
+  const redisClient = getRedisClient(config.BACKEND_REDIS_URL, logger);
 
   const embeddingQueue = new EmbeddingQueue(redisClient, {
     streamKey: config.REDIS_STREAM_KEY,
