@@ -7,7 +7,7 @@ const __dirname = dirname(__filename);
 
 const nextConfig: NextConfig = {
   turbopack: {
-    root: path.join(__dirname, "."),
+    root: path.join(__dirname, ".."),
   },
 };
 
