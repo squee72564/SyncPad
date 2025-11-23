@@ -147,17 +147,16 @@ export class EmbeddingWorker {
 
     logger.info(`Processing message ${message.id}`, message.payload);
 
-    const document = await documentController.getDocumentById(documentId);
+    const rawContent = await documentController.getContentForEmbedding(
+      documentId,
+      message.payload.revisionId
+    );
 
-    if (!document) {
-      throw new Error(`Document ${documentId} not found`);
-    }
+    const content = this.normalizeDocumentContent(rawContent);
 
-    logger.info(`Docment ${document.id}: `, document);
-
-    const content = this.normalizeDocumentContent(document.content);
-
-    logger.info("Normalized document content: ", content);
+    logger.info("Normalized document content: ", {
+      content: content,
+    });
 
     const chunks = documentChunker.chunkDocument(content);
 
@@ -171,7 +170,6 @@ export class EmbeddingWorker {
     logger.info("Generated embeddings:", {
       embeddings_length: embeddings.length,
       embedding_dim: embeddings[0]?.length,
-      embeddings_snippet: `[${embeddings.slice(0, 1).join(",")}]\n...\n[${embeddings.slice(-2, -1).join(",")}]`,
     });
 
     if (!embeddings || embeddings.length === 0) {

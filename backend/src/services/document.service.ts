@@ -12,6 +12,7 @@ import embeddingQueueService from "./embedding-queue.service.js";
 import documentEmbeddingService from "./document-embedding.service.js";
 import logger from "../config/logger.js";
 import aiJobService from "./aiJob.service.ts";
+import { collabSnapshotToPlainText } from "../utils/collabSerializer.js";
 
 // Align slug format for uniqueness checks.
 const normalizeSlug = (slug?: string) => slug?.trim().toLowerCase();
@@ -92,6 +93,82 @@ const removeDocumentEmbeddings = async (documentId: string) => {
   }
 };
 
+const normalizeEmbeddingContent = (content: unknown): string => {
+  if (content === null || content === undefined) {
+    return "";
+  }
+
+  if (typeof content === "string") {
+    return content;
+  }
+
+  if (typeof content === "object") {
+    try {
+      return JSON.stringify(content);
+    } catch (_error) {
+      return "";
+    }
+  }
+
+  return String(content);
+};
+
+const fetchNextRevisionVersion = async (documentId: string) => {
+  const latest = await prisma.documentRevision.findFirst({
+    where: { documentId },
+    orderBy: { version: "desc" },
+    select: { version: true },
+  });
+
+  return (latest?.version ?? 0) + 1;
+};
+
+const materializeDocumentForEmbedding = async (
+  workspaceId: string,
+  documentId: string,
+  requestedById?: string | null
+) => {
+  const [document, collabState, nextVersion] = await Promise.all([
+    getDocumentById(workspaceId, documentId),
+    getDocumentCollabState(workspaceId, documentId),
+    fetchNextRevisionVersion(documentId),
+  ]);
+
+  if (!document) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Document not found");
+  }
+
+  // Prefer the collaborative snapshot; fall back to existing content.
+  const collabText = collabSnapshotToPlainText(collabState?.snapshot as string | null);
+  const embeddingContent = collabText || normalizeEmbeddingContent(document.content);
+
+  const revision = await prisma.$transaction(async (tx) => {
+    const createdRevision = await tx.documentRevision.create({
+      data: {
+        documentId: document.id,
+        authorId: requestedById ?? null,
+        version: nextVersion,
+        content: embeddingContent || Prisma.JsonNull,
+      },
+    });
+
+    await tx.document.update({
+      where: { id: document.id },
+      data: {
+        content: embeddingContent || Prisma.JsonNull,
+        lastEditedAt: new Date(),
+      },
+    });
+
+    return createdRevision;
+  });
+
+  return {
+    revisionId: revision.id,
+    embeddingContent,
+  };
+};
+
 const handleEmbeddingStatusTransition = async (
   workspaceId: string,
   documentId: string,
@@ -103,7 +180,17 @@ const handleEmbeddingStatusTransition = async (
   const isEligible = isRagEligibleStatus(nextStatus);
 
   if (!wasEligible && isEligible) {
-    await enqueueDocumentEmbeddingJob(workspaceId, documentId, requestedById);
+    const materialized = await materializeDocumentForEmbedding(
+      workspaceId,
+      documentId,
+      requestedById
+    );
+    await enqueueDocumentEmbeddingJob(
+      workspaceId,
+      documentId,
+      requestedById,
+      materialized.revisionId
+    );
   } else if (wasEligible && !isEligible) {
     await removeDocumentEmbeddings(documentId);
   }
