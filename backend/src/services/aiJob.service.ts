@@ -58,9 +58,28 @@ const markJobFailed = async (jobId: string, error: string) => {
   });
 };
 
+const listAiJobs = (workspaceId: string) => {
+  return prisma.aiJob.findMany({
+    where: {
+      workspaceId: workspaceId,
+    },
+  });
+};
+
+const listAiJob = (aiJobId: string, workspaceId: string) => {
+  return prisma.aiJob.findUnique({
+    where: {
+      id: aiJobId,
+      workspaceId: workspaceId,
+    },
+  });
+};
+
 export default {
   createAiJob,
   markJobRunning,
   markJobCompleted,
   markJobFailed,
+  listAiJobs,
+  listAiJob,
 };
