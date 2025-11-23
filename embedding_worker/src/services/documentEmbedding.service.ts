@@ -1,3 +1,5 @@
+import { createId } from "@paralleldrive/cuid2";
+import { randomUUID } from "node:crypto";
 import prisma from "@syncpad/prisma-client";
 
 type EmbeddingRecord = {
@@ -33,9 +35,12 @@ const replaceDocumentEmbeddings = async (
     }
 
     for (const record of records) {
-      await tx.$queryRaw`
-        INSERT INTO document_embedding (document_id, workspace_id, revision_id, content, embedding)
-        VALUES (${documentId}, ${workspaceId}, ${revisionId ?? null}, ${record.chunkText}, ${record.vector}::vector)
+      const id = createId();
+      const chunkId = randomUUID();
+
+      await tx.$executeRaw`
+        INSERT INTO "document_embedding" ("id", "documentId", "workspaceId", "revisionId", "chunkId", "content", "embedding")
+        VALUES (${id}, ${documentId}, ${workspaceId}, ${revisionId ?? null}, ${chunkId}, ${record.chunkText}, ${record.vector}::vector)
       `;
     }
 

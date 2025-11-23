@@ -40,6 +40,7 @@
     "vitest": "^4.0.10"
   },
   "dependencies": {
+    "@paralleldrive/cuid2": "^3.0.4",
     "@prisma/client": "^7.0.0",
     "@syncpad/prisma-client": "workspace:*",
     "@syncpad/redis-client": "workspace:*",
