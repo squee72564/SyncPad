@@ -260,7 +260,7 @@ export class EmbeddingWorker {
     const { redisClient } = this.context;
 
     try {
-      await disconnectPrismaClient(prisma);
+      await disconnectPrismaClient(prisma, logger);
     } catch (error) {
       logger.error("Error disconnecting Prisma", error);
     }

@@ -24,7 +24,7 @@ const exitHandler = async (exitCode = 0) => {
 
     closeRedisClient(redisClient);
 
-    await disconnectPrismaClient(prisma);
+    await disconnectPrismaClient(prisma, logger);
   } catch (err) {
     logger.error("Error during shutdown", err);
     exitCode = 1;
