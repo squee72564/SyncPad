@@ -21,7 +21,9 @@
 		"prisma:migrate:deploy": "dotenv -e .env.$NODE_ENV -- prisma migrate deploy",
 		"prisma:studio": "dotenv -e .env.development prisma studio",
 		"prisma:push": "prisma db push",
-		"test": "pnpm --filter ./backend test && pnpm --filter ./embedding_worker test"
+		"test": "pnpm --filter ./backend test && pnpm --filter ./embedding_worker test",
+		"clean": "rm -rf node_modules pnpm-lock.yaml **/*/node_modules shared/*/dist",
+		"build:shared": "pnpm --filter ./shared/redis-client build && pnpm --filter ./shared/prisma-client build"
 	},
 	"lint-staged": {
 		"frontend/**/*.{ts,tsx,js,jsx}": [
@@ -49,10 +51,14 @@
 		"prisma": "^6.19.0",
 		"vite": "^5.4.21"
 	},
-  	"pnpm": {
+	"pnpm": {
 		"overrides": {
 			"vite": "5.4.21",
 			"@vitejs/plugin-react": "4.3.1"
-		}
-  }
+		},
+		"onlyBuiltDependencies": [
+			"@prisma/engines",
+			"better-sqlite3"
+		]
+	}
 }
