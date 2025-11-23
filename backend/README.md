@@ -74,6 +74,7 @@ src/
 - `routes/v1/document.route.ts` adds document CRUD under `/workspaces/:workspaceId/documents`, reusing workspace context middleware, enforcing document permissions, and honoring share-link access when configured.
 - `controllers/workspace.controller.ts` and `controllers/document.controller.ts` consolidate request handling using Prisma-backed services wrapped in `catchAsync`.
 - `services/workspace.service.ts` and `services/document.service.ts` provide database accessors for listing, creating, updating, and deleting workspaces/documents while normalizing slugs, validating parent relationships, and surfacing friendly Prisma conflicts.
+- Publishing/archiving now materializes the latest collaborative snapshot into `Document.content`, creates a `DocumentRevision`, and enqueues an embedding job with that `revisionId` so worker-side embeddings are tied to the captured content.
 - `middleware/workspace.ts` enriches requests with workspace context and now auto-detects CUID vs slug identifiers when `workspaceLookup` is left as `auto`.
 
 ## Scripts
