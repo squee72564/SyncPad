@@ -15,8 +15,7 @@ const ShareLinkParamsSchema = WorkspaceDocumentParamsSchema.extend({
 
 const permissionEnum = z.enum(["VIEW", "COMMENT", "EDIT"]);
 
-const expiresAtSchema = z
-  .string()
+const expiresAtSchema = z.iso
   .datetime({ message: "expiresAt must be an ISO 8601 datetime string" })
   .optional()
   .nullable();

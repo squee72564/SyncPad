@@ -1,9 +1,6 @@
 import env from "@/config/index.js";
 import logger from "@/config/logger.js";
-import type {
-  Workspace,
-  WorkspaceInvite,
-} from "../../../prisma/generated/prisma-postgres/index.js";
+import type { Workspace, WorkspaceInvite } from "@generated/prisma-postgres/index.js";
 
 type InviteWithInviter = WorkspaceInvite & {
   invitedBy?: {

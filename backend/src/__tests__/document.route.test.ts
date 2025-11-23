@@ -5,12 +5,8 @@ import type { Request, Response, NextFunction } from "express";
 import type { User } from "better-auth";
 import type { UserWithRole } from "better-auth/plugins";
 
-import type { WorkspaceContext } from "../types/workspace.types.ts";
-import type {
-  Document,
-  Workspace,
-  WorkspaceMember,
-} from "../../../prisma/generated/prisma-postgres/index.js";
+import type { WorkspaceContext } from "@/types/workspace.types.ts";
+import type { Document, Workspace, WorkspaceMember } from "@generated/prisma-postgres/index.js";
 
 type DocumentServiceMock = {
   listDocuments: ReturnType<typeof vi.fn>;
@@ -162,7 +158,7 @@ vi.mock("../services/activity-log.service.js", () => ({
   default: activityLogServiceMock,
 }));
 
-import app from "../app.js";
+import app from "@/app.js";
 
 describe("Document routes", () => {
   beforeEach(() => {

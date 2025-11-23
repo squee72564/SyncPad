@@ -17,7 +17,7 @@ import {
   Workspace,
   WorkspaceMember,
   WorkspaceRole,
-} from "../../../prisma/generated/prisma-postgres/index.js";
+} from "@generated/prisma-postgres/index.js";
 
 export interface WorkspaceListItem {
   workspace: Workspace;

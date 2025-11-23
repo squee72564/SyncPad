@@ -1,6 +1,6 @@
 import { ZodRequest } from "@/utils/zodReqeust.ts";
 import shareLinkValidations from "@/validations/share-link.validations.js";
-import { SharePermission } from "../../../prisma/generated/prisma-postgres/index.js";
+import { SharePermission } from "@generated/prisma-postgres/index.js";
 
 export type ListShareLinksRequest = ZodRequest<
   typeof shareLinkValidations.ListShareLinksRequestSchema

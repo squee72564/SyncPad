@@ -1,6 +1,6 @@
-import prisma from "../src/lib/prisma.js";
 import auth from "../src/lib/auth.js";
 import logger from "../src/config/logger.js";
+import prisma from "@syncpad/prisma-client";
 
 async function main() {
   const user = await auth.api.createUser({
@@ -36,7 +36,7 @@ async function main() {
     });
     logger.info(`Example user ${i} created:`, exampleUser);
   }
-
+  
   await prisma.$disconnect();
 }
 

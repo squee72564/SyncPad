@@ -12,7 +12,7 @@ import {
   ShareLinkTokenRequest,
   UpdateShareLinkRequest,
 } from "@/types/share-link.types.ts";
-import { DocumentShareLink } from "../../../prisma/generated/prisma-postgres/index.js";
+import { DocumentShareLink } from "@generated/prisma-postgres/index.js";
 import activityLogService from "@/services/activity-log.service.js";
 
 const buildShareLinkUrl = (token: string) => {

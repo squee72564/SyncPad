@@ -1,6 +1,6 @@
 import request from "supertest";
 import httpStatus from "http-status";
-import app from "../app.js";
+import app from "@/app.js";
 
 describe("Health route", () => {
   it("returns uptime metadata", async () => {

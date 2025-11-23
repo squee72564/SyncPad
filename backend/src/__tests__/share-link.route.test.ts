@@ -5,12 +5,12 @@ import type { Request, Response, NextFunction } from "express";
 import type { User } from "better-auth";
 import type { UserWithRole } from "better-auth/plugins";
 
-import type { WorkspaceContext } from "../types/workspace.types.ts";
+import type { WorkspaceContext } from "@/types/workspace.types.ts";
 import type {
   DocumentShareLink,
   Workspace,
   WorkspaceMember,
-} from "../../../prisma/generated/prisma-postgres/index.js";
+} from "@generated/prisma-postgres/index.js";
 
 type ShareLinkServiceMock = {
   listShareLinks: ReturnType<typeof vi.fn>;
@@ -138,7 +138,7 @@ vi.mock("../config/index.js", () => ({
   },
 }));
 
-import app from "../app.js";
+import app from "@/app.js";
 
 describe("Share link routes", () => {
   beforeEach(() => {

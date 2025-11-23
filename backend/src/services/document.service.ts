@@ -7,7 +7,7 @@ import type {
   ListDocumentsQuery,
   UpdateDocumentBody,
 } from "@/types/document.types.ts";
-import { Prisma, AiJobType } from "../../../prisma/generated/prisma-postgres/index.js";
+import { Prisma, AiJobType } from "@generated/prisma-postgres/index.js";
 import { embeddingQueueService, documentEmbeddingService, aiJobService } from "@/services/index.ts";
 import logger from "@/config/logger.js";
 import { collabSnapshotToPlainText } from "@/utils/collabSerializer.js";

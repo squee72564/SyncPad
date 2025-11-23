@@ -7,7 +7,7 @@ import {
   DocumentShareLink,
   WorkspaceRole,
   SharePermission,
-} from "../../../prisma/generated/prisma-postgres/index.js";
+} from "@generated/prisma-postgres/index.js";
 
 export type WorkspacePermission =
   | "workspace:view"

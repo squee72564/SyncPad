@@ -1,4 +1,4 @@
-import { Prisma, AiJobStatus, AiJobType } from "../../../prisma/generated/prisma-postgres/index.js";
+import { Prisma, AiJobStatus, AiJobType } from "@generated/prisma-postgres/index.js";
 import prisma from "@syncpad/prisma-client";
 
 type CreateAiJobArgs = {

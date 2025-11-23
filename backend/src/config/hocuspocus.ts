@@ -25,7 +25,7 @@ import type {
   Document as PrismaDocument,
   Workspace,
   WorkspaceMember,
-} from "../../../prisma/generated/prisma-postgres/index.js";
+} from "@generated/prisma-postgres/index.js";
 
 type DocumentWithWorkspace = PrismaDocument & { workspace: Workspace };
 
