@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import DocsPage from "../app/docs/page";
+import DocsPage from "@/app/docs/page";
 
 describe("Docs page", () => {
   it("describes the documentation quickstart", () => {

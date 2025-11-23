@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import SignUpPage from "../app/signup/page";
+import SignUpPage from "@/app/signup/page";
 
 describe("SignUp page", () => {
   it("renders intro and account form", async () => {

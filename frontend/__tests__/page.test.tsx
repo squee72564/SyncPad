@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import Home from "../app/page";
+import Home from "@/app/page";
 
 describe("Home page", () => {
   it("renders hero message and key calls to action", () => {

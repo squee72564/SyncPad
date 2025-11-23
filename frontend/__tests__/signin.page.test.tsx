@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import SignInPage from "../app/signin/page";
+import SignInPage from "@/app/signin/page";
 
 describe("SignIn page", () => {
   it("shows the sign-in form", async () => {
