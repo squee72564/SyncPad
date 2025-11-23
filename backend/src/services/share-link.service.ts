@@ -1,9 +1,9 @@
 import crypto from "node:crypto";
+import httpStatus from "http-status";
 
 import prisma from "@syncpad/prisma-client";
 import { Prisma, SharePermission } from "../../../prisma/generated/prisma-postgres/index.js";
 import ApiError from "@/utils/ApiError.ts";
-import httpStatus from "http-status";
 
 const SHARE_LINK_TOKEN_LENGTH = 32;
 

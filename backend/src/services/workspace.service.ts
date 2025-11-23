@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import httpStatus from "http-status";
 
 import prisma from "@syncpad/prisma-client";
 import type {
@@ -10,14 +11,13 @@ import type {
   WorkspaceLookupField,
   WorkspaceInviteRole,
 } from "@/types/workspace.types.ts";
+import ApiError from "@/utils/ApiError.ts";
 import {
   Prisma,
   Workspace,
   WorkspaceMember,
   WorkspaceRole,
 } from "../../../prisma/generated/prisma-postgres/index.js";
-import ApiError from "@/utils/ApiError.ts";
-import httpStatus from "http-status";
 
 export interface WorkspaceListItem {
   workspace: Workspace;

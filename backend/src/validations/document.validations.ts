@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-import workspaceValidations from "./workspace.validations.js";
+import workspaceValidations from "@/validations/workspace.validations.js";
 
 const documentId = z
   .cuid({ message: "documentId must be a valid CUID" })

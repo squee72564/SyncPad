@@ -1,5 +1,5 @@
+import { ZodRequest } from "@/utils/zodReqeust.ts";
 import adminValidations from "@/validations/admin.validations.js";
-import { ZodRequest } from "../utils/zodReqeust.ts";
 
 export type CreateUserRequest = ZodRequest<typeof adminValidations.CreateUserRequestSchema>;
 export type CreateUserArgs = CreateUserRequest["body"];

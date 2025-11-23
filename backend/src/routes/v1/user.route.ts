@@ -1,8 +1,7 @@
 import express, { type Router } from "express";
-import { userController } from "../../controllers/index.js";
-import { userValidations } from "../../validations/index.js";
-import validate from "../../middleware/validate.js";
-import auth from "../../middleware/auth.js";
+import { userController } from "@/controllers/index.js";
+import { userValidations } from "@/validations/index.js";
+import { auth, validate } from "@/middleware/index.js";
 
 import { defaultRoles, adminRoles } from "@/lib/permissions.ts";
 

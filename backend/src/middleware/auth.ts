@@ -2,9 +2,9 @@ import type { NextFunction, Request, RequestHandler, Response } from "express";
 import { fromNodeHeaders } from "better-auth/node";
 import httpStatus from "http-status";
 
-import auth from "../lib/auth.js";
-import ApiError from "../utils/ApiError.js";
-import catchAsync from "../utils/catchAsync.js";
+import auth from "@/lib/auth.js";
+import ApiError from "@/utils/ApiError.js";
+import catchAsync from "@/utils/catchAsync.js";
 import { SessionWithImpersonatedBy, UserWithRole } from "better-auth/plugins";
 
 interface PermissionCheck {

@@ -1,19 +1,19 @@
 import type { Response, NextFunction } from "express";
 import httpStatus from "http-status";
 
-import shareLinkService from "../services/share-link.service.js";
-import ApiError from "../utils/ApiError.ts";
-import catchAsync from "../utils/catchAsync.js";
-import env from "../config/index.js";
+import shareLinkService from "@/services/share-link.service.js";
+import ApiError from "@/utils/ApiError.ts";
+import catchAsync from "@/utils/catchAsync.js";
+import env from "@/config/index.js";
 import {
   CreateShareLinkRequest,
   DeleteShareLinkRequest,
   ListShareLinksRequest,
   ShareLinkTokenRequest,
   UpdateShareLinkRequest,
-} from "../types/share-link.types.ts";
+} from "@/types/share-link.types.ts";
 import { DocumentShareLink } from "../../../prisma/generated/prisma-postgres/index.js";
-import activityLogService from "../services/activity-log.service.js";
+import activityLogService from "@/services/activity-log.service.js";
 
 const buildShareLinkUrl = (token: string) => {
   const url = new URL(`/share-links/${token}`, env.NEXT_APP_BASE_URL);

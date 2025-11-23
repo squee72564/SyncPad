@@ -1,4 +1,4 @@
-import { ZodRequest } from "../utils/zodReqeust.ts";
+import { ZodRequest } from "@/utils/zodReqeust.ts";
 import aiJobValidations from "@/validations/ai-job.validations.ts";
 
 export type GetAiJobsRequest = ZodRequest<typeof aiJobValidations.GetAiJobsSchema>;

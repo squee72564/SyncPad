@@ -1,12 +1,12 @@
 import type { Response } from "express";
 
-import catchAsync from "../utils/catchAsync.js";
-import { userService } from "../services/index.js";
+import catchAsync from "@/utils/catchAsync.js";
+import { userService } from "@/services/index.js";
 import {
   GetUserRequest,
   GetUserWithSessionRequest,
   ListPublicUsersRequest,
-} from "../types/user.types.js";
+} from "@/types/user.types.js";
 import ApiError from "@/utils/ApiError.ts";
 
 const getUserWithSession = catchAsync(async (req: GetUserWithSessionRequest, res: Response) => {

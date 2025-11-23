@@ -2,8 +2,8 @@ import type { Request, RequestHandler } from "express";
 import httpStatus from "http-status";
 
 import prisma from "@syncpad/prisma-client";
-import ApiError from "../utils/ApiError.js";
-import catchAsync from "../utils/catchAsync.js";
+import ApiError from "@/utils/ApiError.js";
+import catchAsync from "@/utils/catchAsync.js";
 import {
   type EffectiveWorkspaceRole,
   type WorkspaceContext,
@@ -16,9 +16,10 @@ import {
   ALL_PERMISSIONS,
   WORKSPACE_ROLE_PERMISSIONS,
   SHARE_PERMISSION_MAP,
-} from "../types/workspace.types.ts";
+} from "@/types/workspace.types.ts";
 
-import workspaceService from "../services/workspace.service.js";
+import workspaceService from "@/services/workspace.service.js";
+
 // Resolve identifier precedence: params > query > body.
 const extractFromRequest = (req: Request, key: string): string | undefined => {
   const paramValue = req.params?.[key];

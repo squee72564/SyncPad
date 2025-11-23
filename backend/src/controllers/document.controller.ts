@@ -1,10 +1,10 @@
 import type { NextFunction, Response } from "express";
 import httpStatus from "http-status";
 
-import catchAsync from "../utils/catchAsync.js";
-import ApiError from "../utils/ApiError.js";
-import documentService from "../services/document.service.js";
-import activityLogService from "../services/activity-log.service.js";
+import catchAsync from "@/utils/catchAsync.js";
+import ApiError from "@/utils/ApiError.js";
+import documentService from "@/services/document.service.js";
+import activityLogService from "@/services/activity-log.service.js";
 import {
   type CreateDocumentRequest,
   type DeleteDocumentRequest,
@@ -12,7 +12,7 @@ import {
   type ListDocumentsRequest,
   type UpdateDocumentRequest,
   type UpdateDocumentCollabStateRequest,
-} from "../types/document.types.ts";
+} from "@/types/document.types.ts";
 
 // Return all documents in a workspace, optionally filtered by parent/status, respecting permission scope.
 const listDocuments = catchAsync(

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import env from "../config/index.js";
-import logger from "../config/logger.js";
+import env from "@/config/index.js";
+import logger from "@/config/logger.js";
 import { getRedisClient } from "@syncpad/redis-client";
 
 type EmbeddingJobPayload = {

@@ -27,7 +27,7 @@ import {
   ImpersonateUserRequest,
   RevokeAllUserSessionRequest,
   RevokeUserSessionRequest,
-} from "../types/admin.types.js";
+} from "@/types/admin.types.js";
 
 const createUser = async (args: CreateUserArgs, req: CreateUserRequest) => {
   return auth.api.createUser({

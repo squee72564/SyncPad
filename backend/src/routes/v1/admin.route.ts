@@ -1,9 +1,7 @@
 import { Router } from "express";
-import auth from "../../middleware/auth.js";
-import validate from "../../middleware/validate.js";
-import { adminValidations } from "../../validations/index.js";
-import { adminController } from "../../controllers/index.js";
-
+import { auth, validate } from "@/middleware/index.ts";
+import { adminValidations } from "@/validations/index.js";
+import { adminController } from "@/controllers/index.js";
 import { adminRoles } from "@/lib/permissions.ts";
 
 const router: Router = Router();

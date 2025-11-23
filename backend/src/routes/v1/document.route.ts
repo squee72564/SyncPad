@@ -1,10 +1,14 @@
 import { Router } from "express";
 
-import auth from "../../middleware/auth.js";
-import validate from "../../middleware/validate.js";
-import { attachWorkspaceContext, requireWorkspacePermission } from "../../middleware/workspace.js";
-import { documentController } from "../../controllers/index.js";
-import { documentValidations } from "../../validations/index.js";
+import {
+  auth,
+  validate,
+  attachWorkspaceContext,
+  requireWorkspacePermission,
+} from "@/middleware/index.ts";
+
+import { documentController } from "@/controllers/index.js";
+import { documentValidations } from "@/validations/index.js";
 import { adminRoles, defaultRoles } from "@/lib/permissions.ts";
 
 const router: Router = Router({ mergeParams: true });

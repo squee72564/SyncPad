@@ -1,5 +1,5 @@
+import type { ZodRequest } from "@/utils/zodReqeust.ts";
 import documentValidations from "@/validations/document.validations.js";
-import type { ZodRequest } from "../utils/zodReqeust.ts";
 
 export type ListDocumentsRequest = ZodRequest<
   typeof documentValidations.ListDocumentsRequestSchema

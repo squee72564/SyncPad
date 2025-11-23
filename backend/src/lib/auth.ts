@@ -2,9 +2,9 @@ import { AuthContext, betterAuth, type User, type BetterAuthOptions } from "bett
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin as adminPlugin } from "better-auth/plugins";
 import prisma from "@syncpad/prisma-client";
-import env from "../config/index.js";
-import logger from "../config/logger.js";
-import { ac, admin, superAdmin, user } from "./permissions.js";
+import env from "@/config/index.js";
+import logger from "@/config/logger.js";
+import { ac, admin, superAdmin, user } from "@/lib/permissions.js";
 
 const database = prismaAdapter(prisma, { provider: "postgresql" });
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { roles as definedRoles } from "../lib/permissions.js";
+import { roles as definedRoles } from "@/lib/permissions.js";
 
 const RoleSchema = z.union([z.enum(definedRoles), z.array(z.enum(definedRoles))]);
 

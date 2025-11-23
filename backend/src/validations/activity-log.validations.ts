@@ -1,5 +1,5 @@
 import { z } from "zod";
-import workspaceValidations from "./workspace.validations.js";
+import workspaceValidations from "@/validations/workspace.validations.js";
 
 const ActivityLogParamsSchema = z.object({
   workspaceId: workspaceValidations.workspaceIdentifier,

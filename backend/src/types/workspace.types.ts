@@ -1,3 +1,6 @@
+import { Request } from "express";
+import { ZodRequest } from "@/utils/zodReqeust.ts";
+import workspaceValidations from "@/validations/workspace.validations.js";
 import {
   Workspace,
   WorkspaceMember,
@@ -5,10 +8,6 @@ import {
   WorkspaceRole,
   SharePermission,
 } from "../../../prisma/generated/prisma-postgres/index.js";
-
-import { Request } from "express";
-import workspaceValidations from "@/validations/workspace.validations.js";
-import { ZodRequest } from "../utils/zodReqeust.ts";
 
 export type WorkspacePermission =
   | "workspace:view"

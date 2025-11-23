@@ -1,11 +1,12 @@
-import activityLogService from "./activity-log.service.js";
-import adminService from "./admin.service.js";
-import documentService from "./document.service.js";
-import documentEmbeddingService from "./document-embedding.service.js";
-import embeddingQueueService from "./embedding-queue.service.js";
-import shareLinkService from "./share-link.service.js";
-import userService from "./user.service.js";
-import workspaceService from "./workspace.service.js";
+import activityLogService from "@/services/activity-log.service.js";
+import adminService from "@/services/admin.service.js";
+import documentService from "@/services/document.service.js";
+import documentEmbeddingService from "@/services/document-embedding.service.js";
+import embeddingQueueService from "@/services/embedding-queue.service.js";
+import shareLinkService from "@/services/share-link.service.js";
+import userService from "@/services/user.service.js";
+import workspaceService from "@/services/workspace.service.js";
+import aiJobService from "@/services/aiJob.service.ts";
 
 export {
   activityLogService,
@@ -16,4 +17,5 @@ export {
   shareLinkService,
   userService,
   workspaceService,
+  aiJobService,
 };

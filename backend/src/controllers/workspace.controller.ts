@@ -1,12 +1,12 @@
 import type { NextFunction, Response } from "express";
 import httpStatus from "http-status";
 
-import env from "../config/index.js";
-import catchAsync from "../utils/catchAsync.js";
-import ApiError from "../utils/ApiError.js";
-import workspaceService from "../services/workspace.service.js";
-import emailService from "../services/email.service.js";
-import activityLogService from "../services/activity-log.service.js";
+import env from "@/config/index.js";
+import catchAsync from "@/utils/catchAsync.js";
+import ApiError from "@/utils/ApiError.js";
+import workspaceService from "@/services/workspace.service.js";
+import emailService from "@/services/email.service.js";
+import activityLogService from "@/services/activity-log.service.js";
 import {
   CreateWorkspaceArgs,
   CreateWorkspaceRequest,
@@ -23,7 +23,7 @@ import {
   AcceptWorkspaceInviteRequest,
   RemoveWorkspaceMemberRequest,
   UpdateWorkspaceMemberRoleRequest,
-} from "../types/workspace.types.ts";
+} from "@/types/workspace.types.ts";
 
 const includeInviteLinksInResponses = env.NODE_ENV !== "production";
 

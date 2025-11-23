@@ -3,22 +3,20 @@ import expressWebsockets from "express-ws";
 
 import httpStatus from "http-status";
 
-import morgan from "./config/morgan.js";
+import morgan from "@/config/morgan.js";
 
-import env from "./config/index.js";
+import env from "@/config/index.js";
 
 import helmet from "helmet";
 import cors from "cors";
 import hpp from "hpp";
 import compression from "compression";
-import xssSanitize from "./middleware/xss-clean/index.js";
-import rateLimiter from "./middleware/ratelimit.js";
+import { xssSanitize, rateLimiter, errorConverter, errorHandler } from "@/middleware/index.ts";
 
-import routes from "./routes/v1/index.js";
-import ApiError from "./utils/ApiError.js";
-import { errorConverter, errorHandler } from "./middleware/errors.js";
+import routes from "@/routes/v1/index.js";
+import ApiError from "@/utils/ApiError.js";
 
-import hocuspocusServer from "./config/hocuspocus.ts";
+import hocuspocusServer from "@/config/hocuspocus.ts";
 
 const { app }: { app: expressWebsockets.Application } = expressWebsockets(express());
 

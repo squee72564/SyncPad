@@ -1,6 +1,6 @@
-import { PublicUser, PublicUserSelect } from "../models/index.js";
 import prisma from "@syncpad/prisma-client";
 import { ListPublicUsersArgs } from "@/types/user.types.ts";
+import { PublicUser, PublicUserSelect } from "@/models/index.js";
 
 const getPublicUserById = async (id: string): Promise<PublicUser | null> => {
   return prisma.user.findUnique({

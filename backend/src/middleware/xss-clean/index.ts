@@ -1,4 +1,4 @@
-import { clean } from "./xss.js";
+import { clean } from "@/middleware/xss-clean/xss.js";
 import { type Request, type Response, type NextFunction } from "express";
 
 export default function xssSanitize() {

@@ -1,9 +1,10 @@
-import userController from "../controllers/user.controller.js";
-import adminController from "../controllers/admin.controller.js";
-import workspaceController from "../controllers/workspace.controller.js";
-import documentController from "../controllers/document.controller.js";
-import shareLinkController from "../controllers/share-link.controller.js";
-import activityLogController from "../controllers/activity-log.controller.js";
+import userController from "@/controllers/user.controller.js";
+import adminController from "@/controllers/admin.controller.js";
+import workspaceController from "@/controllers/workspace.controller.js";
+import documentController from "@/controllers/document.controller.js";
+import shareLinkController from "@/controllers/share-link.controller.js";
+import activityLogController from "@/controllers/activity-log.controller.js";
+import aiJobController from "@/controllers/ai-job.controller.ts";
 
 export {
   userController,
@@ -12,4 +13,5 @@ export {
   documentController,
   shareLinkController,
   activityLogController,
+  aiJobController,
 };

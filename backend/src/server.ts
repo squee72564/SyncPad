@@ -1,8 +1,8 @@
-import app from "./app.js";
-import env from "./config/index.js";
-import logger from "./config/logger.js";
+import app from "@/app.js";
+import env from "@/config/index.js";
+import logger from "@/config/logger.js";
+import hocuspocusServer, { shutdownHocuspocus } from "@/config/hocuspocus.js";
 import prisma, { disconnectPrismaClient } from "@syncpad/prisma-client";
-import hocuspocusServer, { shutdownHocuspocus } from "./config/hocuspocus.js";
 import { getRedisClient, closeRedisClient } from "@syncpad/redis-client";
 
 const server = app.listen(env.EXPRESS_PORT, () => {

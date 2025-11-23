@@ -1,4 +1,4 @@
-import { ZodRequest } from "../utils/zodReqeust.ts";
+import { ZodRequest } from "@/utils/zodReqeust.ts";
 import activityLogValidations from "@/validations/activity-log.validations.js";
 
 export type CreateActivityLogRequest = ZodRequest<

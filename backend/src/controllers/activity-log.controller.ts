@@ -1,14 +1,14 @@
 import type { Response, NextFunction } from "express";
 import httpStatus from "http-status";
 
-import activityLogService from "../services/activity-log.service.js";
-import ApiError from "../utils/ApiError.js";
-import catchAsync from "../utils/catchAsync.js";
+import activityLogService from "@/services/activity-log.service.js";
+import ApiError from "@/utils/ApiError.js";
+import catchAsync from "@/utils/catchAsync.js";
 import {
   CreateActivityLogRequest,
   DeleteActivityLogRequest,
   ListActivityLogsRequest,
-} from "../types/activity-log.types.ts";
+} from "@/types/activity-log.types.ts";
 
 const listActivityLogs = catchAsync(
   async (req: ListActivityLogsRequest, res: Response, _next: NextFunction) => {

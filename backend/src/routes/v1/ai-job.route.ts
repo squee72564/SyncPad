@@ -14,7 +14,7 @@ import { aiJobController } from "@/controllers/index.ts";
 const router: Router = Router();
 
 router
-  .route("/workspaces/:workspaceId/ai-jobs")
+  .route("/")
   .get(
     auth([...adminRoles, ...defaultRoles]),
     validate(aiJobValidations.GetAiJobsSchema),
@@ -24,7 +24,7 @@ router
   );
 
 router
-  .route("/workspaces/:workspaceId/ai-jobs/:aiJobId")
+  .route("/:aiJobId")
   .get(
     auth([...adminRoles, ...defaultRoles]),
     validate(aiJobValidations.GetAiJobSchema),
@@ -32,3 +32,5 @@ router
     requireWorkspacePermission("ai:view"),
     aiJobController.listAiJob
   );
+
+export default router;

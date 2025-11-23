@@ -11,16 +11,16 @@ import { applyUpdate, encodeStateAsUpdate } from "yjs";
 import { fromNodeHeaders } from "better-auth/node";
 import type { SessionWithImpersonatedBy, UserWithRole } from "better-auth/plugins";
 
-import auth from "../lib/auth.ts";
-import documentService from "../services/document.service.ts";
-import workspaceService from "../services/workspace.service.ts";
+import auth from "@/lib/auth.ts";
+import documentService from "@/services/document.service.ts";
+import workspaceService from "@/services/workspace.service.ts";
 import prisma from "@syncpad/prisma-client";
-import logger from "./logger.ts";
+import logger from "@/config/logger.ts";
 import {
   type WorkspacePermission,
   ALL_PERMISSIONS,
   WORKSPACE_ROLE_PERMISSIONS,
-} from "../types/workspace.types.ts";
+} from "@/types/workspace.types.ts";
 import type {
   Document as PrismaDocument,
   Workspace,

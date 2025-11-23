@@ -1,8 +1,8 @@
 import type { NextFunction, Response } from "express";
 import httpStatus from "http-status";
 
-import catchAsync from "../utils/catchAsync.js";
-import { adminService, userService } from "../services/index.js";
+import catchAsync from "@/utils/catchAsync.js";
+import { adminService, userService } from "@/services/index.js";
 
 import {
   BanUserRequest,
@@ -18,7 +18,7 @@ import {
   StopImpersonatingRequest,
   UnbanUserRequest,
   UpdateUserRequest,
-} from "../types/admin.types.js";
+} from "@/types/admin.types.js";
 import ApiError from "@/utils/ApiError.ts";
 
 const createUser = catchAsync(

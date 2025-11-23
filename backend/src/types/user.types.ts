@@ -1,5 +1,5 @@
+import { ZodRequest } from "@/utils/zodReqeust.ts";
 import userValidations from "@/validations/user.validations.ts";
-import { ZodRequest } from "../utils/zodReqeust.ts";
 
 export type GetUserWithSessionRequest = ZodRequest<typeof userValidations.getUserWithSession>;
 

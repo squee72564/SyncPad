@@ -1,8 +1,8 @@
 import { z, ZodObject } from "zod";
 import type { Request, Response, NextFunction, RequestHandler } from "express";
 import httpStatus from "http-status";
-import ApiError from "../utils/ApiError.js";
-import catchAsync from "../utils/catchAsync.js";
+import ApiError from "@/utils/ApiError.js";
+import catchAsync from "@/utils/catchAsync.js";
 
 const validate: (schema: ZodObject) => RequestHandler = (schema) =>
   catchAsync(async (req: Request, _res: Response, next: NextFunction) => {

@@ -4,6 +4,7 @@ import workspaceValidations from "./workspace.validations.js";
 import documentValidations from "./document.validations.js";
 import shareLinkValidations from "./share-link.validations.js";
 import activityLogValidations from "./activity-log.validations.js";
+import aiJobValidations from "./ai-job.validations.ts";
 
 export {
   userValidations,
@@ -12,4 +13,5 @@ export {
   documentValidations,
   shareLinkValidations,
   activityLogValidations,
+  aiJobValidations,
 };

@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { z } from "zod";
 import path from "path";
-import logger from "./logger.js";
+import logger from "@/config/logger.js";
 
 const envFile =
   process.env.NODE_ENV === "development"

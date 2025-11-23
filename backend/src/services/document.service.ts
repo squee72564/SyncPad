@@ -1,18 +1,16 @@
 import httpStatus from "http-status";
 
 import prisma from "@syncpad/prisma-client";
-import ApiError from "../utils/ApiError.js";
+import ApiError from "@/utils/ApiError.js";
 import type {
   CreateDocumentArgs,
   ListDocumentsQuery,
   UpdateDocumentBody,
 } from "@/types/document.types.ts";
 import { Prisma, AiJobType } from "../../../prisma/generated/prisma-postgres/index.js";
-import embeddingQueueService from "./embedding-queue.service.js";
-import documentEmbeddingService from "./document-embedding.service.js";
-import logger from "../config/logger.js";
-import aiJobService from "./aiJob.service.ts";
-import { collabSnapshotToPlainText } from "../utils/collabSerializer.js";
+import { embeddingQueueService, documentEmbeddingService, aiJobService } from "@/services/index.ts";
+import logger from "@/config/logger.js";
+import { collabSnapshotToPlainText } from "@/utils/collabSerializer.js";
 
 // Align slug format for uniqueness checks.
 const normalizeSlug = (slug?: string) => slug?.trim().toLowerCase();
