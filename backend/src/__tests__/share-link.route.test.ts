@@ -38,6 +38,7 @@ const mockUser: User & UserWithRole = {
   emailVerified: true,
   name: "Share Link Tester",
   role: "user",
+  banned: false,
 };
 
 const baseWorkspace: Workspace = {

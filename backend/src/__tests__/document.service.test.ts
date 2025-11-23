@@ -6,16 +6,28 @@ const prismaDocumentMock = {
   update: vi.fn(),
   delete: vi.fn(),
 };
+const prismaDocumentCollabStateMock = {
+  findFirst: vi.fn(),
+  upsert: vi.fn(),
+};
+const prismaDocumentRevisionMock = {
+  findFirst: vi.fn(),
+  create: vi.fn(),
+};
 
-vi.mock("../lib/prisma.js", () => ({
-  __esModule: true,
-  default: {
-    document: prismaDocumentMock,
-    documentCollabState: {
-      findFirst: vi.fn(),
-      upsert: vi.fn(),
-    },
+const prismaMock: any = {
+  document: prismaDocumentMock,
+  documentCollabState: prismaDocumentCollabStateMock,
+  documentRevision: prismaDocumentRevisionMock,
+  aiJob: {
+    create: vi.fn(),
   },
+  $transaction: vi.fn(async (fn: (tx: any) => unknown) => fn(prismaMock)),
+};
+
+vi.mock("@syncpad/prisma-client", () => ({
+  __esModule: true,
+  default: prismaMock,
 }));
 
 const enqueueEmbeddingJobMock = vi.fn();
@@ -45,7 +57,7 @@ vi.mock("../config/logger.js", () => ({
 
 const createAiJobMock = vi.fn();
 const markJobFailedMock = vi.fn();
-vi.mock("../services/ai-job.service.js", () => ({
+vi.mock("../services/aiJob.service.ts", () => ({
   __esModule: true,
   default: {
     createAiJob: createAiJobMock,
@@ -58,6 +70,23 @@ const documentService = (await import("../services/document.service.ts")).defaul
 describe("document.service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    prismaDocumentMock.findFirst.mockResolvedValue({
+      id: "doc-1",
+      workspaceId: "workspace-1",
+      status: "PUBLISHED",
+      content: null,
+    });
+    prismaDocumentRevisionMock.findFirst.mockResolvedValue(null);
+    prismaDocumentRevisionMock.create.mockResolvedValue({
+      id: "rev-1",
+      version: 1,
+    });
+    prismaDocumentMock.update.mockResolvedValue({
+      id: "doc-1",
+      status: "PUBLISHED",
+    });
+    prismaDocumentMock.delete.mockResolvedValue(undefined);
+    prismaDocumentCollabStateMock.findFirst.mockResolvedValue(null);
     createAiJobMock.mockResolvedValue({ id: "ai-job-1" });
     markJobFailedMock.mockResolvedValue(undefined);
   });
@@ -66,6 +95,8 @@ describe("document.service", () => {
     prismaDocumentMock.create.mockResolvedValue({
       id: "doc-1",
       status: "PUBLISHED",
+      workspaceId: "workspace-1",
+      content: null,
     });
 
     await documentService.createDocument("workspace-1", "user-1", {
@@ -78,13 +109,13 @@ describe("document.service", () => {
       workspaceId: "workspace-1",
       documentId: "doc-1",
       requestedById: "user-1",
-      revisionId: null,
+      revisionId: "rev-1",
       type: "EMBEDDING",
     });
     expect(enqueueEmbeddingJobMock).toHaveBeenCalledWith({
       workspaceId: "workspace-1",
       documentId: "doc-1",
-      revisionId: null,
+      revisionId: "rev-1",
       jobId: "ai-job-1",
       type: "EMBEDDING",
     });
@@ -94,6 +125,8 @@ describe("document.service", () => {
     prismaDocumentMock.create.mockResolvedValue({
       id: "doc-1",
       status: "DRAFT",
+      workspaceId: "workspace-1",
+      content: null,
     });
 
     await documentService.createDocument("workspace-1", "user-1", {
@@ -109,6 +142,8 @@ describe("document.service", () => {
     prismaDocumentMock.create.mockResolvedValue({
       id: "doc-1",
       status: "PUBLISHED",
+      workspaceId: "workspace-1",
+      content: null,
     });
     const error = new Error("redis unavailable");
     enqueueEmbeddingJobMock.mockRejectedValue(error);
@@ -127,11 +162,15 @@ describe("document.service", () => {
   it("enqueues embedding job when status changes to published", async () => {
     prismaDocumentMock.findFirst.mockResolvedValueOnce({
       id: "doc-1",
+      workspaceId: "workspace-1",
       status: "DRAFT",
+      content: null,
     });
     prismaDocumentMock.update.mockResolvedValue({
       id: "doc-1",
+      workspaceId: "workspace-1",
       status: "PUBLISHED",
+      content: null,
     });
 
     await documentService.updateDocument(
@@ -146,7 +185,7 @@ describe("document.service", () => {
     expect(enqueueEmbeddingJobMock).toHaveBeenCalledWith({
       workspaceId: "workspace-1",
       documentId: "doc-1",
-      revisionId: null,
+      revisionId: "rev-1",
       jobId: "ai-job-1",
       type: "EMBEDDING",
     });

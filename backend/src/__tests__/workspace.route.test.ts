@@ -43,6 +43,7 @@ const mockUser: User & UserWithRole = {
   emailVerified: true,
   name: "Workspace Test User",
   role: "user",
+  banned: false,
 };
 
 const baseWorkspace: Workspace = {
