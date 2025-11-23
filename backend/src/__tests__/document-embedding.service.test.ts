@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const deleteManyMock = vi.fn();
 
-vi.mock("../lib/prisma.js", () => ({
+vi.mock("@syncpad/prisma-client", () => ({
   __esModule: true,
   default: {
     documentEmbedding: {

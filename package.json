@@ -1,6 +1,6 @@
 {
-  "name": "syncpad",
-  "private": true,
+	"name": "syncpad",
+	"private": true,
 	"scripts": {
 		"prepare": "husky install",
 		"pretty": "pnpm --filter ./frontend pretty --write && pnpm --filter ./backend pretty --write && pnpm --filter ./embedding_worker pretty --write",
@@ -42,9 +42,17 @@
 	},
 	"devDependencies": {
 		"@better-auth/cli": "^1.3.34",
+		"@vitejs/plugin-react": "^4.7.0",
 		"dotenv-cli": "^11.0.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.2.6",
-		"prisma": "^6.19.0"
-	}
+		"prisma": "^6.19.0",
+		"vite": "^5.4.21"
+	},
+  	"pnpm": {
+		"overrides": {
+			"vite": "5.4.21",
+			"@vitejs/plugin-react": "4.3.1"
+		}
+  }
 }

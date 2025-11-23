@@ -1,11 +1,13 @@
 import { documentService } from "@/services/index.ts";
 
-const getDocumentById = async (documentId: string) => {
-  const document = await documentService.getById(documentId);
-  if (!document) throw new Error("No document found");
-  return document;
+const getContentForEmbedding = async (documentId: string, revisionId?: string | null) => {
+  const content = await documentService.getContentForEmbedding(documentId, revisionId);
+  if (content === undefined) {
+    throw new Error("No document content found");
+  }
+  return content;
 };
 
 export default {
-  getDocumentById,
+  getContentForEmbedding,
 };

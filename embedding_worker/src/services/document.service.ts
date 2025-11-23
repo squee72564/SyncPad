@@ -1,7 +1,26 @@
 import prisma from "@syncpad/prisma-client";
 
-const getById = async (documentId: string) => {
-  return prisma.document.findUnique({
+const getContentForEmbedding = async (documentId: string, revisionId?: string | null) => {
+  if (revisionId) {
+    const revision = await prisma.documentRevision.findUnique({
+      where: { id: revisionId },
+      select: {
+        id: true,
+        documentId: true,
+        content: true,
+      },
+    });
+
+    if (revision && revision.documentId !== documentId) {
+      throw new Error("Revision does not belong to the requested document");
+    }
+
+    if (revision) {
+      return revision.content;
+    }
+  }
+
+  const document = await prisma.document.findUnique({
     where: {
       id: documentId,
     },
@@ -10,8 +29,10 @@ const getById = async (documentId: string) => {
       content: true,
     },
   });
+
+  return document?.content ?? null;
 };
 
 export default {
-  getById,
+  getContentForEmbedding,
 };

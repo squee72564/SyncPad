@@ -1,28 +1,21 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import documentEmbeddingService from "@/services/documentEmbedding.service.ts";
-import prisma from "@syncpad/prisma-client";
 
-vi.mock("@/lib/prisma.ts", () => {
-  const deleteMany = vi.fn();
-  const $queryRaw = vi.fn();
-  const $transaction = vi.fn((callback: (tx: unknown) => Promise<unknown>) =>
-    callback({ documentEmbedding: { deleteMany }, $queryRaw })
-  );
+const deleteMany = vi.fn();
+const executeRaw = vi.fn();
+const transaction = vi.fn((callback: (tx: unknown) => Promise<unknown>) =>
+  callback({ documentEmbedding: { deleteMany }, $executeRaw: executeRaw })
+);
 
-  return {
-    default: {
-      documentEmbedding: { deleteMany },
-      $queryRaw,
-      $transaction,
-    },
-  };
-});
+vi.mock("@syncpad/prisma-client", () => ({
+  __esModule: true,
+  default: {
+    documentEmbedding: { deleteMany },
+    $executeRaw: executeRaw,
+    $transaction: transaction,
+  },
+}));
 
-const prismaMock = prisma as unknown as {
-  documentEmbedding: { deleteMany: ReturnType<typeof vi.fn> };
-  $queryRaw: ReturnType<typeof vi.fn>;
-  $transaction: ReturnType<typeof vi.fn>;
-};
+const documentEmbeddingService = (await import("@/services/documentEmbedding.service.ts")).default;
 
 describe("documentEmbedding.service", () => {
   beforeEach(() => {
@@ -31,7 +24,7 @@ describe("documentEmbedding.service", () => {
 
   it("deletes embeddings for a document optionally scoped to revision", async () => {
     await documentEmbeddingService.deleteEmbeddingsForDocument("doc-1", "rev-1");
-    expect(prismaMock.documentEmbedding.deleteMany).toHaveBeenCalledWith({
+    expect(deleteMany).toHaveBeenCalledWith({
       where: {
         documentId: "doc-1",
         revisionId: "rev-1",
@@ -40,7 +33,7 @@ describe("documentEmbedding.service", () => {
   });
 
   it("replaces embeddings transactionally", async () => {
-    prismaMock.$queryRaw.mockResolvedValue(undefined);
+    executeRaw.mockResolvedValue(undefined);
     const count = await documentEmbeddingService.replaceDocumentEmbeddings(
       "doc-1",
       "workspace-1",
@@ -48,7 +41,7 @@ describe("documentEmbedding.service", () => {
       "rev-1"
     );
 
-    expect(prismaMock.$transaction).toHaveBeenCalled();
+    expect(transaction).toHaveBeenCalled();
     expect(count).toBe(1);
   });
 
@@ -59,6 +52,6 @@ describe("documentEmbedding.service", () => {
       []
     );
     expect(count).toBe(0);
-    expect(prismaMock.$queryRaw).not.toHaveBeenCalled();
+    expect(executeRaw).not.toHaveBeenCalled();
   });
 });

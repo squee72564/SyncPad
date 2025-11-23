@@ -30,10 +30,10 @@ Place `.env.development` / `.env.production` files in the repo root and populate
 
 ## Flow
 
-1. Backend enqueues an `EMBEDDING` job (workspaceId/documentId[/revisionId]) into the Redis stream.
+1. Backend enqueues an `EMBEDDING` job (workspaceId/documentId[/revisionId]) into the Redis stream. Publish/archive now materializes the latest collab snapshot into a `DocumentRevision` and passes that `revisionId` so embeddings are anchored to the captured content.
 2. Worker boots, reclaims pending jobs, and waits on `XREADGROUP`.
 3. For each message:
-   - Fetch document content via Prisma.
+   - Fetch document content via Prisma. If a `revisionId` is present, the worker reads `DocumentRevision.content`; otherwise it falls back to `Document.content`.
    - Chunk text using `DocumentChunker`.
    - Batch-call the configured embedding provider with concurrency/retry guards.
    - Persist all chunk embeddings transactionally (delete + insert) via the controller/service layer.

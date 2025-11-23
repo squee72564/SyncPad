@@ -8,9 +8,9 @@ const mockRedisClient = {
 
 const getRedisClientMock = vi.fn(() => mockRedisClient);
 
-vi.mock("../lib/redis.js", () => ({
+vi.mock("@syncpad/redis-client", () => ({
   __esModule: true,
-  default: getRedisClientMock,
+  getRedisClient: getRedisClientMock,
 }));
 
 vi.mock("../config/index.js", () => ({
