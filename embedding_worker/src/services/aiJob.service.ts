@@ -1,4 +1,4 @@
-import { AiJobStatus, Prisma } from "../../../prisma/generated/prisma-postgres/index.js";
+import { AiJobStatus, Prisma } from "@generated/prisma-postgres/index.js";
 import prisma from "@syncpad/prisma-client";
 import logger from "@/config/logger.ts";
 
