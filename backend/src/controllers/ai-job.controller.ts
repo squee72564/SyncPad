@@ -19,7 +19,7 @@ const listAiJobs = catchAsync(async (req: GetAiJobsRequest, res: Response, _next
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
   }
 
-  const result = await aiJobService.listAiJobs(context.workspace.id);
+  const result = await aiJobService.listAiJobs(context.workspace.id, req.query);
 
   res.status(httpStatus.OK).json(result);
 });

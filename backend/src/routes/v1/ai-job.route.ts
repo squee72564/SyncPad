@@ -11,7 +11,7 @@ import { aiJobValidations } from "@/validations/index.ts";
 
 import { aiJobController } from "@/controllers/index.ts";
 
-const router: Router = Router();
+const router: Router = Router({ mergeParams: true });
 
 router
   .route("/")

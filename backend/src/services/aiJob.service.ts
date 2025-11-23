@@ -1,5 +1,6 @@
 import { Prisma, AiJobStatus, AiJobType } from "@generated/prisma-postgres/index.js";
 import prisma from "@syncpad/prisma-client";
+import type { ListAiJobsQuery } from "@/types/ai-job.types.ts";
 
 type CreateAiJobArgs = {
   workspaceId: string;
@@ -58,19 +59,89 @@ const markJobFailed = async (jobId: string, error: string) => {
   });
 };
 
-const listAiJobs = (workspaceId: string) => {
-  return prisma.aiJob.findMany({
-    where: {
-      workspaceId: workspaceId,
+const listAiJobs = async (workspaceId: string, query: ListAiJobsQuery) => {
+  const limit = query.limit ?? 50;
+
+  const where: Prisma.AiJobWhereInput = {
+    workspaceId,
+  };
+
+  if (query.status) {
+    where.status = query.status as AiJobStatus;
+  }
+
+  if (query.type) {
+    where.type = query.type as AiJobType;
+  }
+
+  if (query.documentId) {
+    where.documentId = query.documentId;
+  }
+
+  const aiJobs = await prisma.aiJob.findMany({
+    where,
+    include: {
+      document: {
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          status: true,
+        },
+      },
+      requestedBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
     },
+    orderBy: [{ queuedAt: "desc" }, { id: "desc" }],
+    take: limit + 1,
+    ...(query.cursor
+      ? {
+          cursor: { id: query.cursor },
+          skip: 1,
+        }
+      : {}),
   });
+
+  const hasNextPage = aiJobs.length > limit;
+  const trimmed = hasNextPage ? aiJobs.slice(0, limit) : aiJobs;
+
+  const nextCursor = hasNextPage ? (trimmed[trimmed.length - 1]?.id ?? null) : null;
+
+  return {
+    aiJobs: trimmed,
+    nextCursor,
+  };
 };
 
 const listAiJob = (aiJobId: string, workspaceId: string) => {
-  return prisma.aiJob.findUnique({
+  return prisma.aiJob.findFirst({
     where: {
       id: aiJobId,
-      workspaceId: workspaceId,
+      workspaceId,
+    },
+    include: {
+      document: {
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          status: true,
+        },
+      },
+      requestedBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
     },
   });
 };
