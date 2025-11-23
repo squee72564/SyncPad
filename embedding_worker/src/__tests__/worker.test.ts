@@ -13,7 +13,7 @@ vi.mock("@/lib/prisma.ts", () => ({
 vi.mock("@/controllers/document.controller.ts", () => ({
   __esModule: true,
   default: {
-    getDocumentById: vi.fn(),
+    getContentForEmbedding: vi.fn(),
   },
 }));
 
@@ -37,9 +37,8 @@ const mockDocumentController = (await import("@/controllers/document.controller.
 const mockDocumentEmbeddingController = (
   await import("@/controllers/documentEmbedding.controller.ts")
 ).default;
-const getDocumentByIdMock = mockDocumentController.getDocumentById as unknown as ReturnType<
-  typeof vi.fn
->;
+const getContentForEmbeddingMock =
+  mockDocumentController.getContentForEmbedding as unknown as ReturnType<typeof vi.fn>;
 const storeDocumentEmbeddingsMock =
   mockDocumentEmbeddingController.storeDocumentEmbeddings as unknown as ReturnType<typeof vi.fn>;
 const mockAiJobService = (await import("@/services/aiJob.service.ts")).default;
@@ -116,7 +115,7 @@ describe("EmbeddingWorker", () => {
     embeddingQueue.readNext
       .mockImplementationOnce(async () => [message])
       .mockImplementationOnce(async () => []);
-    getDocumentByIdMock.mockResolvedValue({ content: "doc content" });
+    getContentForEmbeddingMock.mockResolvedValue("doc content");
     documentChunker.chunkDocument.mockReturnValue(["chunk"]);
     embeddingProvider.generateEmbeddings.mockResolvedValue([[0.1, 0.2]]);
     storeDocumentEmbeddingsMock.mockResolvedValue(1);
@@ -125,7 +124,7 @@ describe("EmbeddingWorker", () => {
     await vi.waitFor(() => expect(storeDocumentEmbeddingsMock).toHaveBeenCalled());
     await worker.stop();
 
-    expect(getDocumentByIdMock).toHaveBeenCalledWith("doc-1");
+    expect(getContentForEmbeddingMock).toHaveBeenCalledWith("doc-1", "rev-1");
     expect(storeDocumentEmbeddingsMock).toHaveBeenCalledWith(
       "doc-1",
       "workspace-1",
@@ -145,7 +144,7 @@ describe("EmbeddingWorker", () => {
     embeddingQueue.readNext
       .mockImplementationOnce(async () => [message])
       .mockImplementationOnce(async () => []);
-    getDocumentByIdMock.mockResolvedValue({ content: "doc content" });
+    getContentForEmbeddingMock.mockResolvedValue("doc content");
     documentChunker.chunkDocument.mockReturnValue(["chunk"]);
     embeddingProvider.generateEmbeddings.mockRejectedValue(new Error("provider failure"));
 
@@ -164,7 +163,7 @@ describe("EmbeddingWorker", () => {
     const pendingMessage = createMessage();
     embeddingQueue.claimPending.mockResolvedValueOnce([pendingMessage]);
     embeddingQueue.readNext.mockImplementationOnce(async () => []);
-    getDocumentByIdMock.mockResolvedValue({ content: "content" });
+    getContentForEmbeddingMock.mockResolvedValue("content");
     documentChunker.chunkDocument.mockReturnValue(["chunk"]);
     embeddingProvider.generateEmbeddings.mockResolvedValue([[1]]);
     storeDocumentEmbeddingsMock.mockResolvedValue(1);
@@ -216,9 +215,7 @@ describe("EmbeddingWorker", () => {
     embeddingQueue.readNext
       .mockImplementationOnce(async () => [message])
       .mockImplementationOnce(async () => []);
-    getDocumentByIdMock.mockResolvedValue({
-      content: { blocks: [{ type: "paragraph", data: "hi" }] },
-    });
+    getContentForEmbeddingMock.mockResolvedValue({ blocks: [{ type: "paragraph", data: "hi" }] });
     documentChunker.chunkDocument.mockReturnValue(["serialized"]);
     embeddingProvider.generateEmbeddings.mockResolvedValue([[0.5]]);
     storeDocumentEmbeddingsMock.mockResolvedValue(1);
