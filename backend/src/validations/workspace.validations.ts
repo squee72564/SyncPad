@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { paginationSchema } from "./common/pagination.ts";
+import { query } from "winston";
 
 const workspaceSlug = z
   .string()
@@ -82,6 +84,7 @@ const GetWorkspaceMembersRequestSchema = z.object({
   params: z.object({
     workspaceId: workspaceIdentifier,
   }),
+  query: paginationSchema,
 });
 
 const WorkspaceInviteRequestSchema = z.object({
@@ -98,6 +101,7 @@ const WorkspaceInviteListRequestSchema = z.object({
   params: z.object({
     workspaceId: workspaceIdentifier,
   }),
+  query: paginationSchema,
 });
 
 const WorkspaceInviteIdParamsSchema = z.object({

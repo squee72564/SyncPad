@@ -1,7 +1,6 @@
 import type { NextFunction, Response } from "express";
 import httpStatus from "http-status";
 
-import env from "@/config/index.js";
 import catchAsync from "@/utils/catchAsync.js";
 import ApiError from "@/utils/ApiError.js";
 import workspaceService from "@/services/workspace.service.js";
@@ -24,25 +23,7 @@ import {
   RemoveWorkspaceMemberRequest,
   UpdateWorkspaceMemberRoleRequest,
 } from "@/types/workspace.types.ts";
-
-const includeInviteLinksInResponses = env.NODE_ENV !== "production";
-
-const serializeInvite = <T extends { token: string }>(
-  invite: T,
-  options?: { acceptUrl?: string }
-): Omit<T, "token"> & { acceptUrl?: string } => {
-  const { token, ...rest } = invite;
-
-  if (!includeInviteLinksInResponses) {
-    return rest;
-  }
-
-  const acceptUrl = options?.acceptUrl ?? emailService.buildWorkspaceInviteAcceptUrl(token);
-  return {
-    ...rest,
-    acceptUrl,
-  };
-};
+import { parseBoolean } from "@/utils/parse.ts";
 
 const listWorkspaces = catchAsync(
   async (req: ListWorkspacesRequest, res: Response, _next: NextFunction) => {
@@ -55,8 +36,7 @@ const listWorkspaces = catchAsync(
     const query: ListWorkspacesArgs | undefined = req.query;
     const workspaces = await workspaceService.listUserWorkspaces(userId, query);
 
-    const includeMembership =
-      req.query?.includeMembership === true || req.query?.includeMembership === "true";
+    const includeMembership = parseBoolean(req.query?.includeMembership);
 
     const payload = includeMembership
       ? workspaces
@@ -132,11 +112,9 @@ const listWorkspaceInvites = catchAsync(
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
     }
 
-    const invites = await workspaceService.listWorkspaceInvites(context.workspace.id);
+    const result = await workspaceService.listWorkspaceInvites({ ...req.query, ...req.params });
 
-    res.status(httpStatus.OK).json({
-      invites: invites.map((invite) => serializeInvite(invite)),
-    });
+    res.status(httpStatus.OK).json(result);
   }
 );
 
@@ -152,16 +130,15 @@ const createWorkspaceInvite = catchAsync(
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
     }
 
-    const invite = await workspaceService.createWorkspaceInvite({
+    const { token, acceptUrl, invite } = await workspaceService.createWorkspaceInvite({
       workspaceId: context.workspace.id,
       email: req.body.email,
       role: req.body.role,
       invitedById: req.user.id,
     });
 
-    const acceptUrl = emailService.buildWorkspaceInviteAcceptUrl(invite.token);
     emailService.queueWorkspaceInviteEmail({
-      invite,
+      invite: { ...invite, token },
       workspace: context.workspace,
       acceptUrl,
     });
@@ -177,7 +154,7 @@ const createWorkspaceInvite = catchAsync(
     });
 
     res.status(httpStatus.CREATED).json({
-      invite: serializeInvite(invite, { acceptUrl }),
+      invite: invite,
     });
   }
 );
@@ -194,15 +171,14 @@ const resendWorkspaceInvite = catchAsync(
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
     }
 
-    const invite = await workspaceService.resendWorkspaceInvite(
+    const { acceptUrl, invite, token } = await workspaceService.resendWorkspaceInvite(
       context.workspace.id,
       req.params.inviteId,
       req.user.id
     );
 
-    const acceptUrl = emailService.buildWorkspaceInviteAcceptUrl(invite.token);
     emailService.queueWorkspaceInviteEmail({
-      invite,
+      invite: { ...invite, token },
       workspace: context.workspace,
       acceptUrl,
     });
@@ -218,7 +194,7 @@ const resendWorkspaceInvite = catchAsync(
     });
 
     res.status(httpStatus.OK).json({
-      invite: serializeInvite(invite, { acceptUrl }),
+      invite: invite,
     });
   }
 );

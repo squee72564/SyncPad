@@ -1,10 +1,9 @@
 import type { Response, NextFunction } from "express";
 import httpStatus from "http-status";
 
-import shareLinkService from "@/services/share-link.service.js";
+import shareLinkService, { buildShareLinkUrl } from "@/services/share-link.service.js";
 import ApiError from "@/utils/ApiError.ts";
 import catchAsync from "@/utils/catchAsync.js";
-import env from "@/config/index.js";
 import {
   CreateShareLinkRequest,
   DeleteShareLinkRequest,
@@ -12,24 +11,7 @@ import {
   ShareLinkTokenRequest,
   UpdateShareLinkRequest,
 } from "@/types/share-link.types.ts";
-import { DocumentShareLink } from "@generated/prisma-postgres/index.js";
 import activityLogService from "@/services/activity-log.service.js";
-
-const buildShareLinkUrl = (token: string) => {
-  const url = new URL(`/share-links/${token}`, env.NEXT_APP_BASE_URL);
-  return url.toString();
-};
-
-const serializeShareLink = (
-  link: DocumentShareLink & { createdBy: { email: string; name: string; id: string } | null }
-) => ({
-  id: link.id,
-  permission: link.permission,
-  expiresAt: link.expiresAt,
-  createdAt: link.createdAt,
-  createdBy: link.createdBy,
-  url: buildShareLinkUrl(link.token),
-});
 
 const listShareLinks = catchAsync(
   async (req: ListShareLinksRequest, res: Response, _next: NextFunction) => {
@@ -39,14 +21,9 @@ const listShareLinks = catchAsync(
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
     }
 
-    const shareLinks = await shareLinkService.listShareLinks(
-      context.workspace.id,
-      req.params.documentId
-    );
+    const result = await shareLinkService.listShareLinks({ ...req.params, ...req.query });
 
-    res.status(httpStatus.OK).json({
-      shareLinks: shareLinks.map(serializeShareLink),
-    });
+    res.status(httpStatus.OK).json(result);
   }
 );
 
@@ -78,12 +55,12 @@ const createShareLink = catchAsync(
       metadata: {
         shareLinkId: shareLink.id,
         permission: shareLink.permission,
-        expiresAt: shareLink.expiresAt ? shareLink.expiresAt.toISOString() : null,
+        expiresAt: shareLink.expiresAt,
       },
     });
 
     res.status(httpStatus.CREATED).json({
-      shareLink: serializeShareLink(shareLink),
+      shareLink: shareLink,
     });
   }
 );
@@ -121,13 +98,13 @@ const updateShareLink = catchAsync(
       metadata: {
         shareLinkId: shareLink.id,
         permission: shareLink.permission,
-        expiresAt: shareLink.expiresAt ? shareLink.expiresAt.toISOString() : null,
+        expiresAt: shareLink.expiresAt,
         regenerateToken: Boolean(req.body.regenerateToken),
       },
     });
 
     res.status(httpStatus.OK).json({
-      shareLink: serializeShareLink(shareLink),
+      shareLink: shareLink,
     });
   }
 );

@@ -152,7 +152,8 @@ export type DeleteWorkspaceArgs = DeleteWorkspaceRequest["params"];
 export type GetWorkspaceMembersRequest = ZodRequest<
   typeof workspaceValidations.GetWorkspaceMembersRequestSchema
 >;
-export type GetWorkspaceMembersArgs = GetWorkspaceMembersRequest["params"];
+export type GetWorkspaceMembersArgs = GetWorkspaceMembersRequest["params"] &
+  GetWorkspaceMembersRequest["query"];
 
 export type CreateWorkspaceInviteRequest = ZodRequest<
   typeof workspaceValidations.WorkspaceInviteRequestSchema
@@ -163,7 +164,8 @@ export type CreateWorkspaceInviteArgs = CreateWorkspaceInviteRequest["params"] &
 export type ListWorkspaceInvitesRequest = ZodRequest<
   typeof workspaceValidations.WorkspaceInviteListRequestSchema
 >;
-export type ListWorkspaceInvitesArgs = ListWorkspaceInvitesRequest["params"];
+export type ListWorkspaceInvitesArgs = ListWorkspaceInvitesRequest["params"] &
+  ListWorkspaceInvitesRequest["query"];
 
 export type ResendWorkspaceInviteRequest = ZodRequest<
   typeof workspaceValidations.WorkspaceInviteResendRequestSchema

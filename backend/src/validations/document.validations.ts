@@ -1,5 +1,6 @@
 import { z } from "zod";
 import workspaceValidations from "@/validations/workspace.validations.js";
+import { paginationSchema } from "@/validations/common/pagination.ts";
 
 const documentId = z
   .cuid({ message: "documentId must be a valid CUID" })
@@ -25,8 +26,8 @@ const ListDocumentsRequestSchema = z.object({
   params: z.object({
     workspaceId: workspaceValidations.workspaceIdentifier,
   }),
-  query: z
-    .object({
+  query: paginationSchema
+    .extend({
       parentId: z.cuid({ message: "parentId must be a valid CUID" }).optional(),
       status: documentStatus.optional(),
       includeContent: booleanQueryParam.optional(),

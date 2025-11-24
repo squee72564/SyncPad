@@ -1,13 +1,32 @@
 import crypto from "node:crypto";
 import httpStatus from "http-status";
 
+import env from "@/config/index.js";
 import prisma from "@syncpad/prisma-client";
-import { Prisma, SharePermission } from "@generated/prisma-postgres/index.js";
+import { DocumentShareLink, Prisma, SharePermission } from "@generated/prisma-postgres/index.js";
 import ApiError from "@/utils/ApiError.ts";
+import { ListShareLinksArgs } from "@/types/share-link.types.ts";
+import { buildPaginationParams, paginateItems } from "@/utils/pagination.ts";
 
 const SHARE_LINK_TOKEN_LENGTH = 32;
 
 const generateShareLinkToken = () => crypto.randomBytes(SHARE_LINK_TOKEN_LENGTH).toString("hex");
+
+export const buildShareLinkUrl = (token: string) => {
+  const url = new URL(`/share-links/${token}`, env.NEXT_APP_BASE_URL);
+  return url.toString();
+};
+
+const serializeShareLink = (
+  link: DocumentShareLink & { createdBy: { email: string; name: string; id: string } | null }
+) => ({
+  id: link.id,
+  permission: link.permission,
+  expiresAt: link.expiresAt,
+  createdAt: link.createdAt,
+  createdBy: link.createdBy,
+  url: buildShareLinkUrl(link.token),
+});
 
 const ensureDocumentBelongsToWorkspace = async (workspaceId: string, documentId: string) => {
   const document = await prisma.document.findFirst({
@@ -23,18 +42,31 @@ const ensureDocumentBelongsToWorkspace = async (workspaceId: string, documentId:
   }
 };
 
-const listShareLinks = async (workspaceId: string, documentId: string) => {
-  await ensureDocumentBelongsToWorkspace(workspaceId, documentId);
+const listShareLinks = async (args: ListShareLinksArgs) => {
+  await ensureDocumentBelongsToWorkspace(args.workspaceId, args.documentId);
 
-  return prisma.documentShareLink.findMany({
-    where: { workspaceId, documentId },
+  const pagination = buildPaginationParams({ cursor: args.cursor, limit: args.limit });
+
+  const shareLinks = await prisma.documentShareLink.findMany({
+    where: { workspaceId: args.workspaceId, documentId: args.documentId },
     include: {
       createdBy: {
         select: { id: true, name: true, email: true },
       },
     },
     orderBy: { createdAt: "desc" },
+    take: pagination.take,
+    ...(pagination.cursor ? { cursor: pagination.cursor, skip: pagination.skip } : {}),
   });
+
+  const shareLinksSerialized = shareLinks.map(serializeShareLink);
+
+  const { items, nextCursor } = paginateItems(shareLinksSerialized, pagination.limit);
+
+  return {
+    shareLinks: items,
+    nextCursor,
+  };
 };
 
 const createShareLink = async (
@@ -56,19 +88,22 @@ const createShareLink = async (
   };
 
   try {
-    return await prisma.documentShareLink.create({
+    const shareLink = await prisma.documentShareLink.create({
       data,
       include: {
         createdBy: { select: { id: true, name: true, email: true } },
       },
     });
+
+    return serializeShareLink(shareLink);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       data.token = generateShareLinkToken();
-      return prisma.documentShareLink.create({
+      const shareLink = await prisma.documentShareLink.create({
         data,
         include: { createdBy: { select: { id: true, name: true, email: true } } },
       });
+      return serializeShareLink(shareLink);
     }
     throw error;
   }
@@ -121,13 +156,15 @@ const updateShareLink = async (
     data.token = generateShareLinkToken();
   }
 
-  return prisma.documentShareLink.update({
+  const shareLink = await prisma.documentShareLink.update({
     where: { id: shareLinkId },
     data,
     include: {
       createdBy: { select: { id: true, name: true, email: true } },
     },
   });
+
+  return serializeShareLink(shareLink);
 };
 
 const deleteShareLink = async (workspaceId: string, documentId: string, shareLinkId: string) => {

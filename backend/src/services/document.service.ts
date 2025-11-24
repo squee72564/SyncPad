@@ -11,20 +11,8 @@ import { Prisma, AiJobType } from "@generated/prisma-postgres/index.js";
 import { embeddingQueueService, documentEmbeddingService, aiJobService } from "@/services/index.ts";
 import logger from "@/config/logger.js";
 import { collabSnapshotToPlainText } from "@/utils/collabSerializer.js";
-
-// Align slug format for uniqueness checks.
-const normalizeSlug = (slug?: string) => slug?.trim().toLowerCase();
-
-// Support query params that arrive as either boolean or stringified boolean.
-const parseBoolean = (value: boolean | "true" | "false" | undefined) => {
-  if (value === undefined) {
-    return false;
-  }
-  if (typeof value === "boolean") {
-    return value;
-  }
-  return value === "true";
-};
+import { buildPaginationParams, paginateItems } from "@/utils/pagination.ts";
+import { normalizeSlug, parseBoolean } from "@/utils/parse.ts";
 
 // Convert optional ISO strings to Date/null for Prisma writes.
 const parsePublishedAt = (value: string | null) => {
@@ -263,6 +251,8 @@ const upsertDocumentCollabState = async (
 
 // Return workspace documents filtering by parent/status and optionally omitting content payloads.
 const listDocuments = async (workspaceId: string, query?: ListDocumentsQuery) => {
+  const pagination = buildPaginationParams({ cursor: query?.cursor, limit: query?.limit });
+
   const where: Prisma.DocumentWhereInput = {
     workspaceId,
   };
@@ -278,18 +268,19 @@ const listDocuments = async (workspaceId: string, query?: ListDocumentsQuery) =>
   const documents = await prisma.document.findMany({
     where,
     orderBy: [{ parentId: "asc" }, { updatedAt: "desc" }],
+    take: pagination.take,
+    ...(pagination.cursor ? { cursor: pagination.cursor, skip: pagination.skip } : {}),
+    omit: {
+      content: parseBoolean(query?.includeContent),
+    },
   });
 
-  const includeContent = parseBoolean(query?.includeContent);
+  const { items, nextCursor } = paginateItems(documents, pagination.limit);
 
-  if (includeContent) {
-    return documents;
-  }
-
-  return documents.map(({ content: _content, ...document }) => ({
-    ...document,
-    content: undefined,
-  }));
+  return {
+    documents: items,
+    nextCursor,
+  };
 };
 
 // Insert a new document while enforcing parent existence and slug uniqueness.

@@ -1,6 +1,7 @@
 import { Prisma, AiJobStatus, AiJobType } from "@generated/prisma-postgres/index.js";
 import prisma from "@syncpad/prisma-client";
 import type { ListAiJobsQuery } from "@/types/ai-job.types.ts";
+import { buildPaginationParams, paginateItems } from "@/utils/pagination.ts";
 
 type CreateAiJobArgs = {
   workspaceId: string;
@@ -60,7 +61,7 @@ const markJobFailed = async (jobId: string, error: string) => {
 };
 
 const listAiJobs = async (workspaceId: string, query: ListAiJobsQuery) => {
-  const limit = query.limit ?? 50;
+  const pagination = buildPaginationParams({ cursor: query.cursor, limit: query.limit });
 
   const where: Prisma.AiJobWhereInput = {
     workspaceId,
@@ -99,22 +100,14 @@ const listAiJobs = async (workspaceId: string, query: ListAiJobsQuery) => {
       },
     },
     orderBy: [{ queuedAt: "desc" }, { id: "desc" }],
-    take: limit + 1,
-    ...(query.cursor
-      ? {
-          cursor: { id: query.cursor },
-          skip: 1,
-        }
-      : {}),
+    take: pagination.take,
+    ...(pagination.cursor ? { cursor: pagination.cursor, skip: pagination.skip } : {}),
   });
 
-  const hasNextPage = aiJobs.length > limit;
-  const trimmed = hasNextPage ? aiJobs.slice(0, limit) : aiJobs;
-
-  const nextCursor = hasNextPage ? (trimmed[trimmed.length - 1]?.id ?? null) : null;
+  const { items, nextCursor } = paginateItems(aiJobs, pagination.limit);
 
   return {
-    aiJobs: trimmed,
+    aiJobs: items,
     nextCursor,
   };
 };

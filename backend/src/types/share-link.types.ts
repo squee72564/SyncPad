@@ -5,7 +5,7 @@ import { SharePermission } from "@generated/prisma-postgres/index.js";
 export type ListShareLinksRequest = ZodRequest<
   typeof shareLinkValidations.ListShareLinksRequestSchema
 >;
-export type ListShareLinksArgs = ListShareLinksRequest["params"];
+export type ListShareLinksArgs = ListShareLinksRequest["params"] & ListShareLinksRequest["query"];
 
 export type CreateShareLinkRequest = ZodRequest<
   typeof shareLinkValidations.CreateShareLinkRequestSchema

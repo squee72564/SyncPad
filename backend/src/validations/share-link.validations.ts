@@ -1,5 +1,6 @@
 import { z } from "zod";
 import workspaceValidations from "@/validations/workspace.validations.js";
+import { paginationSchema } from "./common/pagination.ts";
 
 const documentId = z.cuid({ message: "documentId must be a valid CUID" });
 const shareLinkId = z.cuid({ message: "shareLinkId must be a valid CUID" });
@@ -22,6 +23,7 @@ const expiresAtSchema = z.iso
 
 const ListShareLinksRequestSchema = z.object({
   params: WorkspaceDocumentParamsSchema,
+  query: paginationSchema,
 });
 
 const CreateShareLinkRequestSchema = z.object({

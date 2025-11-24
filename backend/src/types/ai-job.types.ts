@@ -1,5 +1,6 @@
 import { ZodRequest } from "@/utils/zodReqeust.ts";
 import aiJobValidations from "@/validations/ai-job.validations.ts";
+import type { paginationSchema } from "@/validations/common/pagination.ts";
 
 export type GetAiJobsRequest = ZodRequest<typeof aiJobValidations.GetAiJobsSchema>;
 export type GetAiJobsArgs = GetAiJobsRequest["params"];

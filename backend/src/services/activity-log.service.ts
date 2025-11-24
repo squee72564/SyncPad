@@ -3,6 +3,7 @@ import { Prisma } from "@generated/prisma-postgres/index.js";
 import prisma from "@syncpad/prisma-client";
 import ApiError from "@/utils/ApiError.ts";
 import { CreateActivityLogArgs, ListActivityLogsArgs } from "@/types/activity-log.types.ts";
+import { buildPaginationParams, paginateItems } from "@/utils/pagination.ts";
 
 const activityLogInclude = {
   actor: {
@@ -73,7 +74,7 @@ const listActivityLogs = async ({
   actorId,
   event,
 }: ListActivityLogsArgs) => {
-  const take = Math.min(limit ?? 25, 100);
+  const pagination = buildPaginationParams({ cursor: cursor, limit: limit });
 
   const where: Prisma.ActivityLogWhereInput = {
     workspaceId,
@@ -102,16 +103,14 @@ const listActivityLogs = async ({
         id: "desc",
       },
     ],
-    take: take + 1,
-    ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+    take: pagination.take,
+    ...(pagination.cursor ? { cursor: pagination.cursor, skip: pagination.skip } : {}),
   });
 
-  const hasMore = activityLogs.length > take;
-  const nodes = hasMore ? activityLogs.slice(0, take) : activityLogs;
-  const nextCursor = hasMore ? (nodes[nodes.length - 1]?.id ?? null) : null;
+  const { items, nextCursor } = paginateItems(activityLogs, pagination.limit);
 
   return {
-    activityLogs: nodes,
+    activityLogs: items,
     nextCursor,
   };
 };

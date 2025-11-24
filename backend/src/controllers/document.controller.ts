@@ -23,12 +23,12 @@ const listDocuments = catchAsync(
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Workspace context not found");
     }
 
-    const documents = await documentService.listDocuments(
+    const result = await documentService.listDocuments(
       context.workspace.id,
       req.query ?? undefined
     );
 
-    res.status(httpStatus.OK).json({ documents });
+    res.status(httpStatus.OK).json(result);
   }
 );
 

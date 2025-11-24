@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import httpStatus from "http-status";
 
+import env from "@/config/index.js";
 import prisma from "@syncpad/prisma-client";
 import type {
   CreateWorkspaceArgs,
@@ -10,6 +11,7 @@ import type {
   UpdateWorkspaceArgs,
   WorkspaceLookupField,
   WorkspaceInviteRole,
+  ListWorkspaceInvitesArgs,
 } from "@/types/workspace.types.ts";
 import ApiError from "@/utils/ApiError.ts";
 import {
@@ -18,6 +20,10 @@ import {
   WorkspaceMember,
   WorkspaceRole,
 } from "@generated/prisma-postgres/index.js";
+
+import emailService from "@/services/email.service.js";
+import { normalizeSlug, normalizeEmail } from "@/utils/parse.ts";
+import { buildPaginationParams, paginateItems } from "@/utils/pagination.ts";
 
 export interface WorkspaceListItem {
   workspace: Workspace;
@@ -28,13 +34,30 @@ export interface WorkspaceListItem {
 const INVITE_TOKEN_BYTE_LENGTH = 32;
 const INVITE_EXPIRATION_HOURS = 48;
 
-const normalizeSlug = (slug: string) => slug.trim().toLowerCase();
-const normalizeEmail = (email: string) => email.trim().toLowerCase();
 const generateInviteToken = () => crypto.randomBytes(INVITE_TOKEN_BYTE_LENGTH).toString("hex");
 const calculateInviteExpiration = () => {
   const expirationDate = new Date();
   expirationDate.setHours(expirationDate.getHours() + INVITE_EXPIRATION_HOURS);
   return expirationDate;
+};
+
+const includeInviteLinksInResponses = env.NODE_ENV !== "production";
+
+const serializeInvite = <T extends { token: string }>(
+  invite: T,
+  options?: { acceptUrl?: string }
+): Omit<T, "token"> & { acceptUrl?: string } => {
+  const { token, ...rest } = invite;
+
+  if (!includeInviteLinksInResponses) {
+    return rest;
+  }
+
+  const acceptUrl = options?.acceptUrl ?? emailService.buildWorkspaceInviteAcceptUrl(token);
+  return {
+    ...rest,
+    acceptUrl,
+  };
 };
 const invitedBySelect = { id: true, name: true, email: true } as const;
 
@@ -52,12 +75,12 @@ const getWorkspaceByIdentifier = async (
     }
 
     return prisma.workspace.findUnique({
-      where: { slug: normalizeSlug(identifier) },
+      where: { slug: normalizeSlug(identifier)! },
     });
   }
 
   return prisma.workspace.findUnique({
-    where: workspaceLookup === "slug" ? { slug: normalizeSlug(identifier) } : { id: identifier },
+    where: workspaceLookup === "slug" ? { slug: normalizeSlug(identifier)! } : { id: identifier },
   });
 };
 
@@ -73,7 +96,9 @@ const getWorkspaceMemeber = async (workspaceId: string, userId: string) => {
 };
 
 const getWorkspaceMembers = async (args: GetWorkspaceMembersArgs) => {
-  return prisma.workspaceMember.findMany({
+  const pagination = buildPaginationParams({ limit: args.limit, cursor: args.cursor });
+
+  const workspaceMembers = await prisma.workspaceMember.findMany({
     where: { workspaceId: args.workspaceId },
     select: {
       role: true,
@@ -90,7 +115,16 @@ const getWorkspaceMembers = async (args: GetWorkspaceMembersArgs) => {
     orderBy: {
       createdAt: "asc",
     },
+    take: pagination.take,
+    ...(pagination.cursor ? { cursor: pagination.cursor, skip: pagination.skip } : {}),
   });
+
+  const { items, nextCursor } = paginateItems(workspaceMembers, pagination.limit);
+
+  return {
+    members: items,
+    nextCursor,
+  };
 };
 
 const listUserWorkspaces = async (
@@ -146,7 +180,7 @@ export const createWorkspace = async (
   args: CreateWorkspaceArgs,
   userId: string
 ): Promise<WorkspaceListItem> => {
-  const slug = normalizeSlug(args.slug);
+  const slug = normalizeSlug(args.slug)!;
 
   try {
     return await prisma.$transaction(async (tx) => {
@@ -189,7 +223,7 @@ const updateWorkspace = async (workspaceId: string, updates: UpdateWorkspaceArgs
   }
 
   if (updates.slug !== undefined) {
-    data.slug = normalizeSlug(updates.slug);
+    data.slug = normalizeSlug(updates.slug)!;
   }
 
   if (updates.description !== undefined) {
@@ -293,12 +327,12 @@ const createWorkspaceInvite = async (
     invitedById: string;
   }
 ) => {
-  const email = normalizeEmail(args.email);
+  const email = normalizeEmail(args.email)!;
   await ensureUserIsNotAlreadyMember(args.workspaceId, email);
 
   const invite = await upsertWorkspaceInvite(args.workspaceId, email, args.role, args.invitedById);
 
-  return prisma.workspaceInvite.findUniqueOrThrow({
+  const workspaceInvite = await prisma.workspaceInvite.findUniqueOrThrow({
     where: { id: invite.id },
     include: {
       invitedBy: {
@@ -306,13 +340,24 @@ const createWorkspaceInvite = async (
       },
     },
   });
+
+  const acceptUrl = emailService.buildWorkspaceInviteAcceptUrl(workspaceInvite.token);
+
+  return {
+    invite: serializeInvite(workspaceInvite, { acceptUrl }),
+    token: workspaceInvite.token,
+    acceptUrl,
+  };
 };
 
-const listWorkspaceInvites = async (workspaceId: string) => {
+const listWorkspaceInvites = async (args: ListWorkspaceInvitesArgs) => {
   const now = new Date();
-  return prisma.workspaceInvite.findMany({
+
+  const pagination = buildPaginationParams({ limit: args.limit, cursor: args.cursor });
+
+  const workspaceInvites = await prisma.workspaceInvite.findMany({
     where: {
-      workspaceId,
+      workspaceId: args.workspaceId,
       acceptedAt: null,
       OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
     },
@@ -324,7 +369,18 @@ const listWorkspaceInvites = async (workspaceId: string) => {
     orderBy: {
       createdAt: "desc",
     },
+    take: pagination.take,
+    ...(pagination.cursor ? { cursor: pagination.cursor, skip: pagination.skip } : {}),
   });
+
+  const serializedWorkspaceInvites = workspaceInvites.map((invite) => serializeInvite(invite));
+
+  const { items, nextCursor } = paginateItems(serializedWorkspaceInvites, pagination.limit);
+
+  return {
+    workspaceInvites: items,
+    nextCursor,
+  };
 };
 
 const getWorkspaceInviteOrThrow = async (workspaceId: string, inviteId: string) => {
@@ -355,7 +411,7 @@ const resendWorkspaceInvite = async (
 ) => {
   await getWorkspaceInviteOrThrow(workspaceId, inviteId);
 
-  return prisma.workspaceInvite.update({
+  const workspaceInvite = await prisma.workspaceInvite.update({
     where: { id: inviteId },
     data: {
       invitedById,
@@ -368,6 +424,14 @@ const resendWorkspaceInvite = async (
       },
     },
   });
+
+  const acceptUrl = emailService.buildWorkspaceInviteAcceptUrl(workspaceInvite.token);
+
+  return {
+    invite: serializeInvite(workspaceInvite, { acceptUrl }),
+    token: workspaceInvite.token,
+    acceptUrl,
+  };
 };
 
 const revokeWorkspaceInvite = async (workspaceId: string, inviteId: string) => {
