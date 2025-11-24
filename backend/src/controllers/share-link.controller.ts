@@ -23,7 +23,10 @@ const listShareLinks = catchAsync(
 
     const result = await shareLinkService.listShareLinks({ ...req.params, ...req.query });
 
-    res.status(httpStatus.OK).json(result);
+    res.status(httpStatus.OK).json({
+      data: result.shareLinks,
+      nextCursor: result.nextCursor,
+    });
   }
 );
 

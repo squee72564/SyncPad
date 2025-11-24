@@ -100,7 +100,10 @@ const getWorkspaceMembers = catchAsync(
 
     const workspaceMembers = await workspaceService.getWorkspaceMembers(req.params);
 
-    res.status(httpStatus.OK).json(workspaceMembers);
+    res.status(httpStatus.OK).json({
+      data: workspaceMembers.members,
+      nextCursor: workspaceMembers.nextCursor,
+    });
   }
 );
 
@@ -114,7 +117,10 @@ const listWorkspaceInvites = catchAsync(
 
     const result = await workspaceService.listWorkspaceInvites({ ...req.query, ...req.params });
 
-    res.status(httpStatus.OK).json(result);
+    res.status(httpStatus.OK).json({
+      data: result.workspaceInvites,
+      nextCursor: result.nextCursor,
+    });
   }
 );
 

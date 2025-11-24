@@ -28,7 +28,10 @@ const listDocuments = catchAsync(
       req.query ?? undefined
     );
 
-    res.status(httpStatus.OK).json(result);
+    res.status(httpStatus.OK).json({
+      data: result.documents,
+      nextCursor: result.nextCursor,
+    });
   }
 );
 

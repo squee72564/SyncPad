@@ -31,7 +31,10 @@ const listActivityLogs = catchAsync(
       event: req.query?.event,
     });
 
-    res.status(httpStatus.OK).json(result);
+    res.status(httpStatus.OK).json({
+      data: result.activityLogs,
+      nextCursor: result.nextCursor,
+    });
   }
 );
 

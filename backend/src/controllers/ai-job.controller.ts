@@ -21,7 +21,10 @@ const listAiJobs = catchAsync(async (req: GetAiJobsRequest, res: Response, _next
 
   const result = await aiJobService.listAiJobs(context.workspace.id, req.query);
 
-  res.status(httpStatus.OK).json(result);
+  res.status(httpStatus.OK).json({
+    data: result.aiJobs,
+    nextCursor: result.nextCursor,
+  });
 });
 
 const listAiJob = catchAsync(async (req: GetAiJobRequest, res: Response, _next: NextFunction) => {
