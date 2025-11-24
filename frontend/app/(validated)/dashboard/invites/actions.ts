@@ -11,7 +11,8 @@ import {
 
 const INVITES_PATH = "/dashboard/invites";
 
-import { ActionResult, formatError } from "@/lib/utils";
+import { formatError } from "@/lib/utils";
+import { ActionResult } from "@/lib/types";
 
 export async function createWorkspaceInviteAction(input: {
   workspaceId: string;

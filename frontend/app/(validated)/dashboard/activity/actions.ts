@@ -9,7 +9,8 @@ import {
   ActivityLogRecord,
 } from "@/lib/activity-log";
 
-import { ActionResult, formatError } from "@/lib/utils";
+import { formatError } from "@/lib/utils";
+import { ActionResult } from "@/lib/types";
 
 const ACTIVITY_LOG_PATH = "/dashboard/activity";
 

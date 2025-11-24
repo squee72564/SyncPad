@@ -24,7 +24,7 @@ export default async function NewDocumentPage() {
     );
   }
 
-  const existingDocuments = await listDocuments(
+  const { data: existingDocuments, nextCursor: _nextCursor } = await listDocuments(
     activeWorkspace.workspace.id,
     activeWorkspace.workspace.slug
   );

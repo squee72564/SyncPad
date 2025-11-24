@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 
 import { removeWorkspaceMemberApi, updateWorkspaceMemberRoleApi } from "@/lib/workspaces";
 
-import { ActionResult, formatError } from "@/lib/utils";
+import { formatError } from "@/lib/utils";
+import { ActionResult } from "@/lib/types";
 
 const MEMBERS_PATH = "/dashboard/members";
 

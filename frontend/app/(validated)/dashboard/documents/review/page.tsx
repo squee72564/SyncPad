@@ -24,7 +24,7 @@ export default async function DocumentReviewPage() {
     );
   }
 
-  const inReview = await listDocuments(
+  const { data: inReview, nextCursor: _nextCursor } = await listDocuments(
     activeWorkspace.workspace.id,
     activeWorkspace.workspace.slug,
     {

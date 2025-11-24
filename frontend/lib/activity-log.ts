@@ -1,6 +1,7 @@
 "use server";
 
 import { authorizedFetch } from "./api-client";
+import type { PaginatedResult } from "./types";
 
 export type CreateActivityLogPayload = {
   event: string;
@@ -71,10 +72,7 @@ export type ListActivityLogsParams = {
   event?: string;
 };
 
-export type ListActivityLogsResponse = {
-  activityLogs: ActivityLogRecord[];
-  nextCursor: string | null;
-};
+export type ListActivityLogsResponse = PaginatedResult<ActivityLogRecord>;
 
 export const listActivityLogs = async (
   workspaceId: string,

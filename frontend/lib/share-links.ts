@@ -1,6 +1,7 @@
 "use server";
 
 import { authorizedFetch } from "./api-client";
+import type { PaginatedResult } from "./types";
 
 export type ShareLinkPermission = "VIEW" | "COMMENT" | "EDIT";
 
@@ -33,21 +34,29 @@ export type ShareLinkPreview = {
   url: string;
 };
 
-type ShareLinksResponse = {
-  shareLinks: ShareLinkRecord[];
-};
+type ShareLinksResponse =
+  | {
+      shareLinks: ShareLinkRecord[];
+      nextCursor?: string | null;
+    }
+  | {
+      data: ShareLinkRecord[];
+      nextCursor?: string | null;
+    };
 
 type ShareLinkResponse = {
   shareLink: ShareLinkRecord;
 };
 
-export async function listShareLinks(workspaceId: string, documentId: string) {
+export async function listShareLinks(
+  workspaceId: string,
+  documentId: string
+): Promise<PaginatedResult<ShareLinkRecord>> {
   const response = await authorizedFetch(
     `/v1/workspaces/${workspaceId}/documents/${documentId}/share-links`
   );
 
-  const data = (await response.json()) as ShareLinksResponse;
-  return data.shareLinks;
+  return (await response.json()) as PaginatedResult<ShareLinkRecord>;
 }
 
 export async function createShareLink(

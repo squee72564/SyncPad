@@ -24,7 +24,7 @@ export default async function DocumentArchivePage() {
     );
   }
 
-  const archives = await listDocuments(
+  const { data: activeWorkspaces, nextCursor: _nextCursor } = await listDocuments(
     activeWorkspace.workspace.id,
     activeWorkspace.workspace.slug,
     {
@@ -35,7 +35,7 @@ export default async function DocumentArchivePage() {
   return (
     <div className="flex flex-col gap-4 p-6 w-full">
       <PageHeader header={pageTextData.title} body={pageTextData.description} />
-      <DocumentList documents={archives} />
+      <DocumentList documents={activeWorkspaces} />
     </div>
   );
 }

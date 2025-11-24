@@ -36,7 +36,8 @@ export default async function InvitesPage() {
 
   if (canManageInvites) {
     try {
-      invites = await getWorkspaceInvites(workspaceId);
+      const inviteResult = await getWorkspaceInvites(workspaceId);
+      invites = inviteResult.data;
     } catch (error) {
       invitesError = formatError(error, "Unable to load pending invites right now.");
     }

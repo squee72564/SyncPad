@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { authorizedFetch } from "./api-client";
+import type { PaginatedResult } from "./types";
 const ACTIVE_WORKSPACE_ID_COOKIE = "active_workspace_id";
 const ACTIVE_WORKSPACE_SLUG_COOKIE = "active_workspace_slug";
 
@@ -57,8 +58,7 @@ export async function getWorkspaces(options: { includeMembership?: boolean } = {
     `/v1/workspaces${query.size > 0 ? `?${query.toString()}` : ""}`
   );
 
-  const data = (await response.json()) as WorkspaceListResponse;
-  return data;
+  return (await response.json()) as WorkspaceListResponse;
 }
 
 export async function createWorkspace(payload: CreateWorkspacePayload) {
@@ -188,11 +188,12 @@ export type getWorkspaceMembersResult = {
   role: "OWNER" | "ADMIN" | "EDITOR" | "COMMENTER" | "VIEWER";
 };
 
-export async function getWorkspaceMembers(workspaceId: string) {
+export async function getWorkspaceMembers(
+  workspaceId: string
+): Promise<PaginatedResult<getWorkspaceMembersResult>> {
   const response = await authorizedFetch(`/v1/workspaces/${workspaceId}/members`);
 
-  const data = (await response.json()) as getWorkspaceMembersResult[];
-  return data;
+  return (await response.json()) as PaginatedResult<getWorkspaceMembersResult>;
 }
 
 export async function updateWorkspaceMemberRoleApi(

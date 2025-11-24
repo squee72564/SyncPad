@@ -1,7 +1,8 @@
 "use server";
 
 import { acceptWorkspaceInvite } from "@/lib/invites";
-import { formatError, ActionResult } from "@/lib/utils";
+import { formatError } from "@/lib/utils";
+import { ActionResult } from "@/lib/types";
 import { getWorkspaces, type WorkspaceSummary } from "@/lib/workspaces";
 
 export type AcceptInviteResult =

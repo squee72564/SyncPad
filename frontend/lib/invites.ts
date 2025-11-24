@@ -1,6 +1,7 @@
 "use server";
 
 import { authorizedFetch } from "./api-client";
+import type { PaginatedResult } from "./types";
 
 export type WorkspaceInviteRole = "ADMIN" | "EDITOR" | "COMMENTER" | "VIEWER";
 
@@ -19,10 +20,6 @@ export type WorkspaceInviteRecord = {
   acceptedAt: string | null;
   createdAt: string;
   acceptUrl?: string;
-};
-
-type WorkspaceInvitesResponse = {
-  invites: WorkspaceInviteRecord[];
 };
 
 type CreateInvitePayload = {
@@ -47,10 +44,11 @@ export type AcceptWorkspaceInviteResult = {
   };
 };
 
-export async function getWorkspaceInvites(workspaceId: string): Promise<WorkspaceInviteRecord[]> {
+export async function getWorkspaceInvites(
+  workspaceId: string
+): Promise<PaginatedResult<WorkspaceInviteRecord>> {
   const response = await authorizedFetch(`/v1/workspaces/${workspaceId}/invites`);
-  const data = (await response.json()) as WorkspaceInvitesResponse;
-  return data.invites;
+  return (await response.json()) as PaginatedResult<WorkspaceInviteRecord>;
 }
 
 export async function createWorkspaceInvite(

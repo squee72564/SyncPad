@@ -34,7 +34,7 @@ export default async function ShareLinksPage({ searchParams }: ShareLinksPagePro
     );
   }
 
-  const documents = await listDocuments(
+  const { data: documents, nextCursor: _nextCursor } = await listDocuments(
     activeWorkspace.workspace.id,
     activeWorkspace.workspace.slug,
     { includeContent: false }
@@ -66,7 +66,8 @@ export default async function ShareLinksPage({ searchParams }: ShareLinksPagePro
     ? (documents.find((doc) => doc.id === requestedDocumentId) ?? documents[0])
     : documents[0];
 
-  const shareLinks = await listShareLinks(activeWorkspace.workspace.id, selectedDocument.id);
+  const shareLinksResult = await listShareLinks(activeWorkspace.workspace.id, selectedDocument.id);
+  const shareLinks = shareLinksResult.data;
 
   return (
     <div className="flex flex-col gap-4 p-6 w-full">

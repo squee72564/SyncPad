@@ -24,9 +24,13 @@ export default async function DocumentDraftsPage() {
     );
   }
 
-  const drafts = await listDocuments(activeWorkspace.workspace.id, activeWorkspace.workspace.slug, {
-    status: "DRAFT",
-  });
+  const { data: drafts, nextCursor: _nextCursor } = await listDocuments(
+    activeWorkspace.workspace.id,
+    activeWorkspace.workspace.slug,
+    {
+      status: "DRAFT",
+    }
+  );
 
   return (
     <div className="flex flex-col gap-4 p-6 w-full">

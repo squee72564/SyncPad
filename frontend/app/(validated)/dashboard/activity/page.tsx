@@ -44,7 +44,7 @@ export default async function ActivityPage() {
       ) : (
         <ActivityTimeline
           workspaceId={activeWorkspace.workspace.id}
-          activityLogs={activityData?.activityLogs ?? []}
+          activityLogs={activityData?.data ?? []}
         />
       )}
     </div>

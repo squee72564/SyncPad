@@ -24,7 +24,7 @@ export default async function PublishedDocumentsPage() {
     );
   }
 
-  const published = await listDocuments(
+  const { data: published, nextCursor: _nextCursor } = await listDocuments(
     activeWorkspace.workspace.id,
     activeWorkspace.workspace.slug,
     {

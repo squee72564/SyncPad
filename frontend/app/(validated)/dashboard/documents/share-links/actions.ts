@@ -6,7 +6,8 @@ import { createShareLink, deleteShareLink, updateShareLink } from "@/lib/share-l
 
 const SHARE_LINKS_PATH = "/dashboard/documents/share-links";
 
-import { ActionResult, formatError } from "@/lib/utils";
+import { formatError } from "@/lib/utils";
+import { ActionResult } from "@/lib/types";
 
 export async function createShareLinkAction(input: {
   workspaceId: string;

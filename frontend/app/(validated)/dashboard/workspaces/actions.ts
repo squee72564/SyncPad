@@ -184,7 +184,7 @@ export async function setActiveWorkspaceAction(
 
 export async function getWorkspaceMembersAction(
   workspaceId: string
-): Promise<getWorkspaceMembersResult[]> {
-  const data = (await getWorkspaceMembers(workspaceId)) as getWorkspaceMembersResult[];
+): Promise<{ data: getWorkspaceMembersResult[]; nextCursor: string | null }> {
+  const data = await getWorkspaceMembers(workspaceId);
   return data;
 }

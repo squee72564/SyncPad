@@ -19,7 +19,8 @@ export type CreateDocumentInput = {
   publishedAt?: string;
 };
 
-import { ActionResult, formatError } from "@/lib/utils";
+import { formatError } from "@/lib/utils";
+import { ActionResult } from "@/lib/types";
 import { revalidatePaths } from "@/lib/api-client";
 
 export type DocumentActionResult = ActionResult<{ documentId: string }>;

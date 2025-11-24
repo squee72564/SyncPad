@@ -26,7 +26,7 @@ export default async function MembersPage() {
   }
 
   const effectiveRole = activeWorkspace.effectiveRole;
-  const workspaceMembers = await getWorkspaceMembersAction(activeWorkspace.workspace.id);
+  const { data: workspaceMembers } = await getWorkspaceMembersAction(activeWorkspace.workspace.id);
 
   return (
     <div className="flex flex-col gap-4 p-6 w-full">

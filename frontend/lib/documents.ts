@@ -1,6 +1,7 @@
 "use server";
 
 import { authorizedFetch } from "./api-client";
+import { PaginatedResult } from "./types";
 import { readActiveWorkspaceSelection } from "./workspaces";
 
 export type DocumentRecord = {
@@ -75,7 +76,7 @@ export async function listDocuments(
   workspaceId: string | undefined,
   workspaceSlug: string | undefined,
   options: ListDocumentsOptions = {}
-): Promise<DocumentRecord[]> {
+): Promise<PaginatedResult<DocumentRecord>> {
   const identifier = await workspacePath(workspaceId, workspaceSlug);
   const query = new URLSearchParams();
 
@@ -95,8 +96,7 @@ export async function listDocuments(
     `/v1/workspaces/${identifier}/documents${query.size > 0 ? `?${query.toString()}` : ""}`
   );
 
-  const data = (await response.json()) as DocumentListResponse;
-  return data.documents;
+  return (await response.json()) as PaginatedResult<DocumentRecord>;
 }
 
 export async function createDocument(
