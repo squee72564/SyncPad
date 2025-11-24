@@ -346,27 +346,38 @@ describe("Workspace routes", () => {
         name: mockUser.name,
         email: mockUser.email,
       },
+      token: undefined,
     };
 
-    workspaceServiceMock.listWorkspaceInvites.mockResolvedValue([inviteWithInviter]);
+    workspaceServiceMock.listWorkspaceInvites.mockResolvedValue({
+      workspaceInvites: [
+        {
+          ...inviteWithInviter,
+          acceptUrl: emailServiceMock.buildWorkspaceInviteAcceptUrl(baseWorkspaceInvite.token),
+        },
+      ],
+      nextCursor: null,
+    });
 
     const response = await request(app).get(`/v1/workspaces/${baseWorkspace.id}/invites`);
 
     expect(response.status).toBe(httpStatus.OK);
-    expect(response.body.invites).toHaveLength(1);
-    expect(response.body.invites[0]).toEqual(
+    expect(response.body.workspaceInvites).toHaveLength(1);
+    expect(response.body.workspaceInvites[0]).toEqual(
       expect.objectContaining({
         id: baseWorkspaceInvite.id,
         email: baseWorkspaceInvite.email,
         acceptUrl: expect.stringContaining(`/invites/${baseWorkspaceInvite.token}`),
       })
     );
-    expect(response.body.invites[0].token).toBeUndefined();
+    expect(response.body.workspaceInvites[0].token).toBeUndefined();
     expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledWith(
       baseWorkspaceInvite.token
     );
     expect(emailServiceMock.queueWorkspaceInviteEmail).not.toHaveBeenCalled();
-    expect(workspaceServiceMock.listWorkspaceInvites).toHaveBeenCalledWith(baseWorkspace.id);
+    expect(workspaceServiceMock.listWorkspaceInvites).toHaveBeenCalledWith(
+      expect.objectContaining({ workspaceId: baseWorkspace.id })
+    );
   });
 
   it("creates a workspace invite", async () => {
@@ -377,9 +388,17 @@ describe("Workspace routes", () => {
         name: mockUser.name,
         email: mockUser.email,
       },
+      token: undefined,
     };
 
-    workspaceServiceMock.createWorkspaceInvite.mockResolvedValue(inviteWithInviter);
+    workspaceServiceMock.createWorkspaceInvite.mockResolvedValue({
+      invite: {
+        ...inviteWithInviter,
+        acceptUrl: emailServiceMock.buildWorkspaceInviteAcceptUrl(baseWorkspaceInvite.token),
+      },
+      token: baseWorkspaceInvite.token,
+      acceptUrl: emailServiceMock.buildWorkspaceInviteAcceptUrl(baseWorkspaceInvite.token),
+    });
 
     const response = await request(app)
       .post(`/v1/workspaces/${baseWorkspace.id}/invites`)
@@ -404,10 +423,13 @@ describe("Workspace routes", () => {
       role: baseWorkspaceInvite.role,
       invitedById: TEST_USER_ID,
     });
-    expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledTimes(1);
+    expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledTimes(2);
     expect(emailServiceMock.queueWorkspaceInviteEmail).toHaveBeenCalledWith(
       expect.objectContaining({
-        invite: inviteWithInviter,
+        invite: expect.objectContaining({
+          id: baseWorkspaceInvite.id,
+          acceptUrl: expect.stringContaining(`/invites/${baseWorkspaceInvite.token}`),
+        }),
         workspace: expect.objectContaining({ id: baseWorkspace.id }),
         acceptUrl: expect.stringContaining(`/invites/${baseWorkspaceInvite.token}`),
       })
@@ -422,9 +444,17 @@ describe("Workspace routes", () => {
         name: mockUser.name,
         email: mockUser.email,
       },
+      token: undefined,
     };
 
-    workspaceServiceMock.resendWorkspaceInvite.mockResolvedValue(inviteWithInviter);
+    workspaceServiceMock.resendWorkspaceInvite.mockResolvedValue({
+      invite: {
+        ...inviteWithInviter,
+        acceptUrl: emailServiceMock.buildWorkspaceInviteAcceptUrl(baseWorkspaceInvite.token),
+      },
+      // token: baseWorkspaceInvite.token,
+      acceptUrl: emailServiceMock.buildWorkspaceInviteAcceptUrl(baseWorkspaceInvite.token),
+    });
 
     const response = await request(app).post(
       `/v1/workspaces/${baseWorkspace.id}/invites/${baseWorkspaceInvite.id}/resend`

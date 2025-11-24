@@ -188,19 +188,25 @@ describe("Document routes", () => {
 
   describe("GET /v1/workspaces/:workspaceId/documents", () => {
     it("lists documents for the workspace", async () => {
-      documentServiceMock.listDocuments.mockResolvedValue([baseDocument]);
+      documentServiceMock.listDocuments.mockResolvedValue({
+        documents: [baseDocument],
+        nextCursor: null,
+      });
 
       const response = await request(app).get(`/v1/workspaces/${WORKSPACE_SLUG}/documents`);
 
       expect(response.status).toBe(httpStatus.OK);
       expect(documentServiceMock.listDocuments).toHaveBeenCalledWith(WORKSPACE_ID, {});
-      expect(response.body.documents).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            id: baseDocument.id,
-            workspaceId: WORKSPACE_ID,
-          }),
-        ])
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          documents: expect.arrayContaining([
+            expect.objectContaining({
+              id: baseDocument.id,
+              workspaceId: WORKSPACE_ID,
+            }),
+          ]),
+          nextCursor: null,
+        })
       );
     });
 

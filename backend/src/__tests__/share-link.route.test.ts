@@ -2,7 +2,7 @@ import request from "supertest";
 import httpStatus from "http-status";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Request, Response, NextFunction } from "express";
-import type { User } from "better-auth";
+import { type User } from "better-auth";
 import type { UserWithRole } from "better-auth/plugins";
 
 import type { WorkspaceContext } from "@/types/workspace.types.ts";
@@ -25,65 +25,6 @@ type ActivityLogServiceMock = {
   deleteActivityLog: ReturnType<typeof vi.fn>;
   listActivityLogs: ReturnType<typeof vi.fn>;
 };
-
-const TEST_USER_ID = "user_share_link";
-const WORKSPACE_ID = "cw_1234567890123456789012345";
-const DOCUMENT_ID = "cd_1234567890123456789012345";
-
-const mockUser: User & UserWithRole = {
-  id: TEST_USER_ID,
-  createdAt: new Date("2024-02-01T00:00:00.000Z"),
-  updatedAt: new Date("2024-02-01T00:00:00.000Z"),
-  email: "share.link@example.com",
-  emailVerified: true,
-  name: "Share Link Tester",
-  role: "user",
-  banned: false,
-};
-
-const baseWorkspace: Workspace = {
-  id: WORKSPACE_ID,
-  name: "Share Link Workspace",
-  slug: "share-link-workspace",
-  description: null,
-  createdAt: new Date("2024-02-01T00:00:00.000Z"),
-  updatedAt: new Date("2024-02-01T00:00:00.000Z"),
-  createdById: TEST_USER_ID,
-};
-
-const baseMembership: WorkspaceMember = {
-  id: "wm_share_link",
-  workspaceId: WORKSPACE_ID,
-  userId: TEST_USER_ID,
-  role: "OWNER",
-  createdAt: new Date("2024-02-01T00:00:00.000Z"),
-  updatedAt: new Date("2024-02-01T00:00:00.000Z"),
-};
-
-const baseShareLink: DocumentShareLink = {
-  id: "cmhvk1b2s000004lk2clvehtq",
-  documentId: DOCUMENT_ID,
-  workspaceId: WORKSPACE_ID,
-  createdById: TEST_USER_ID,
-  token: "share-token-123",
-  permission: "VIEW",
-  expiresAt: new Date("2024-03-01T00:00:00.000Z"),
-  createdAt: new Date("2024-02-02T00:00:00.000Z"),
-};
-
-const workspaceContext: WorkspaceContext = {
-  workspace: baseWorkspace,
-  membership: baseMembership,
-  effectiveRole: "OWNER",
-  permissions: ["share:manage", "document:read"],
-};
-
-const cloneContext = (): WorkspaceContext => ({
-  workspace: { ...workspaceContext.workspace },
-  membership: workspaceContext.membership ? { ...workspaceContext.membership } : undefined,
-  effectiveRole: workspaceContext.effectiveRole,
-  permissions: [...workspaceContext.permissions],
-});
 
 const shareLinkServiceMock = vi.hoisted(() => ({
   listShareLinks: vi.fn(),
@@ -121,9 +62,16 @@ vi.mock("../middleware/workspace.js", () => ({
   },
 }));
 
-vi.mock("../services/share-link.service.js", () => ({
+vi.mock("@/services/share-link.service.js", () => ({
   __esModule: true,
-  default: shareLinkServiceMock,
+  default: {
+    listShareLinks: shareLinkServiceMock.listShareLinks,
+    createShareLink: shareLinkServiceMock.createShareLink,
+    updateShareLink: shareLinkServiceMock.updateShareLink,
+    deleteShareLink: shareLinkServiceMock.deleteShareLink,
+    getShareLinkByToken: shareLinkServiceMock.getShareLinkByToken,
+  },
+  buildShareLinkUrl: vi.fn((token) => `http://localhost:3000/share-links/${token}`),
 }));
 
 vi.mock("../services/activity-log.service.js", () => ({
@@ -137,6 +85,81 @@ vi.mock("../config/index.js", () => ({
     NEXT_APP_BASE_URL: "http://localhost:3000",
   },
 }));
+
+const TEST_USER_ID = "user_share_link";
+const WORKSPACE_ID = "cw_1234567890123456789012345";
+const DOCUMENT_ID = "cd_1234567890123456789012345";
+
+const mockUser: User & UserWithRole = {
+  id: TEST_USER_ID,
+  createdAt: new Date("2024-02-01T00:00:00.000Z"),
+  updatedAt: new Date("2024-02-01T00:00:00.000Z"),
+  email: "share.link@example.com",
+  emailVerified: true,
+  name: "Share Link Tester",
+  role: "user",
+  banned: false,
+};
+
+const baseWorkspace: Workspace = {
+  id: WORKSPACE_ID,
+  name: "Share Link Workspace",
+  slug: "share-link-workspace",
+  description: null,
+  createdAt: new Date("2024-02-01T00:00:00.000Z"),
+  updatedAt: new Date("2024-02-01T00:00:00.000Z"),
+  createdById: TEST_USER_ID,
+};
+
+const baseMembership: WorkspaceMember = {
+  id: "wm_share_link",
+  workspaceId: WORKSPACE_ID,
+  userId: TEST_USER_ID,
+  role: "OWNER",
+  createdAt: new Date("2024-02-01T00:00:00.000Z"),
+  updatedAt: new Date("2024-02-01T00:00:00.000Z"),
+};
+
+const baseShareLink: DocumentShareLink & {
+  createdBy: { id: string; email: string; name: string } | null;
+} = {
+  id: "cmhvk1b2s000004lk2clvehtq",
+  documentId: DOCUMENT_ID,
+  workspaceId: WORKSPACE_ID,
+  createdById: TEST_USER_ID,
+  createdBy: {
+    id: mockUser.id,
+    email: mockUser.email,
+    name: mockUser.name,
+  },
+  token: "share-token-123",
+  permission: "VIEW",
+  expiresAt: new Date("2024-03-01T00:00:00.000Z"),
+  createdAt: new Date("2024-02-02T00:00:00.000Z"),
+};
+
+const workspaceContext: WorkspaceContext = {
+  workspace: baseWorkspace,
+  membership: baseMembership,
+  effectiveRole: "OWNER",
+  permissions: ["share:manage", "document:read"],
+};
+
+const cloneContext = (): WorkspaceContext => ({
+  workspace: { ...workspaceContext.workspace },
+  membership: workspaceContext.membership ? { ...workspaceContext.membership } : undefined,
+  effectiveRole: workspaceContext.effectiveRole,
+  permissions: [...workspaceContext.permissions],
+});
+
+const baseShareLinkSerialized = {
+  id: baseShareLink.id,
+  permission: baseShareLink.permission,
+  createdAt: baseShareLink.createdAt.toISOString(),
+  expiresAt: baseShareLink.expiresAt?.toISOString(),
+  createdBy: baseShareLink.createdBy,
+  url: `http://localhost:3000/share-links/${baseShareLink.token}`,
+};
 
 import app from "@/app.js";
 
@@ -162,29 +185,25 @@ describe("Share link routes", () => {
 
   describe("GET /v1/workspaces/:workspaceId/documents/:documentId/share-links", () => {
     it("lists share links for a document", async () => {
-      shareLinkServiceMock.listShareLinks.mockResolvedValue([
-        {
-          ...baseShareLink,
-          createdBy: {
-            id: TEST_USER_ID,
-            name: mockUser.name,
-            email: mockUser.email,
-          },
-        },
-      ]);
+      shareLinkServiceMock.listShareLinks.mockResolvedValue({
+        shareLinks: [baseShareLinkSerialized],
+        nextCursor: null,
+      });
 
       const response = await request(app).get(
         `/v1/workspaces/${WORKSPACE_ID}/documents/${DOCUMENT_ID}/share-links`
       );
 
       expect(response.status).toBe(httpStatus.OK);
-      expect(shareLinkServiceMock.listShareLinks).toHaveBeenCalledWith(WORKSPACE_ID, DOCUMENT_ID);
+      expect(shareLinkServiceMock.listShareLinks).toHaveBeenCalledWith({
+        workspaceId: WORKSPACE_ID,
+        documentId: DOCUMENT_ID,
+      });
+
       expect(response.body.shareLinks).toHaveLength(1);
       expect(response.body.shareLinks[0]).toEqual(
         expect.objectContaining({
-          id: baseShareLink.id,
-          permission: baseShareLink.permission,
-          url: expect.stringContaining(baseShareLink.token),
+          ...baseShareLinkSerialized,
         })
       );
     });
@@ -194,7 +213,7 @@ describe("Share link routes", () => {
     it("creates a share link", async () => {
       const expiresAt = new Date("2024-03-15T00:00:00.000Z");
       shareLinkServiceMock.createShareLink.mockResolvedValue({
-        ...baseShareLink,
+        ...baseShareLinkSerialized,
         permission: "EDIT",
         expiresAt,
         createdBy: {
@@ -224,14 +243,14 @@ describe("Share link routes", () => {
   describe("PATCH /v1/workspaces/:workspaceId/documents/:documentId/share-links/:shareLinkId", () => {
     it("updates a share link", async () => {
       shareLinkServiceMock.updateShareLink.mockResolvedValue({
-        ...baseShareLink,
+        ...baseShareLinkSerialized,
         permission: "COMMENT",
         createdBy: null,
       });
 
       const response = await request(app)
         .patch(
-          `/v1/workspaces/${WORKSPACE_ID}/documents/${DOCUMENT_ID}/share-links/${baseShareLink.id}`
+          `/v1/workspaces/${WORKSPACE_ID}/documents/${DOCUMENT_ID}/share-links/${baseShareLinkSerialized.id}`
         )
         .send({ permission: "COMMENT", regenerateToken: true });
 
@@ -269,7 +288,7 @@ describe("Share link routes", () => {
   describe("GET /v1/share-links/:token", () => {
     it("returns metadata for a valid share link token", async () => {
       shareLinkServiceMock.getShareLinkByToken.mockResolvedValue({
-        ...baseShareLink,
+        ...baseShareLinkSerialized,
         document: {
           id: DOCUMENT_ID,
           title: "Shared document",
