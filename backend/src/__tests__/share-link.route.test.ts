@@ -200,8 +200,8 @@ describe("Share link routes", () => {
         documentId: DOCUMENT_ID,
       });
 
-      expect(response.body.shareLinks).toHaveLength(1);
-      expect(response.body.shareLinks[0]).toEqual(
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0]).toEqual(
         expect.objectContaining({
           ...baseShareLinkSerialized,
         })

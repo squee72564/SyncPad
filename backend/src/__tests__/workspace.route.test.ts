@@ -362,15 +362,15 @@ describe("Workspace routes", () => {
     const response = await request(app).get(`/v1/workspaces/${baseWorkspace.id}/invites`);
 
     expect(response.status).toBe(httpStatus.OK);
-    expect(response.body.workspaceInvites).toHaveLength(1);
-    expect(response.body.workspaceInvites[0]).toEqual(
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0]).toEqual(
       expect.objectContaining({
         id: baseWorkspaceInvite.id,
         email: baseWorkspaceInvite.email,
         acceptUrl: expect.stringContaining(`/invites/${baseWorkspaceInvite.token}`),
       })
     );
-    expect(response.body.workspaceInvites[0].token).toBeUndefined();
+    expect(response.body.data[0].token).toBeUndefined();
     expect(emailServiceMock.buildWorkspaceInviteAcceptUrl).toHaveBeenCalledWith(
       baseWorkspaceInvite.token
     );

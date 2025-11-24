@@ -199,7 +199,7 @@ describe("Document routes", () => {
       expect(documentServiceMock.listDocuments).toHaveBeenCalledWith(WORKSPACE_ID, {});
       expect(response.body).toEqual(
         expect.objectContaining({
-          documents: expect.arrayContaining([
+          data: expect.arrayContaining([
             expect.objectContaining({
               id: baseDocument.id,
               workspaceId: WORKSPACE_ID,

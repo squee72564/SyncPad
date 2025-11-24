@@ -138,8 +138,8 @@ describe("AI job routes", () => {
     });
 
     expect(response.status).toBe(httpStatus.OK);
-    expect(response.body.aiJobs).toHaveLength(1);
-    expect(response.body.aiJobs[0]).toMatchObject({
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0]).toMatchObject({
       id: TEST_JOB_ID,
       type: "EMBEDDING",
       status: "PENDING",
