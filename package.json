@@ -26,7 +26,7 @@
 		"clean": "rm -rf node_modules && pnpm -r exec rm -rf node_modules dist",
 		"build": "pnpm run build:all",
 		"clean:build": "pnpm clean && pnpm install && pnpm run build:all",
-		"build:all": "pnpm build:shared && pnpm -r --filter '!./shared' build",
+		"build:all": "pnpm build:shared && pnpm -r --filter '!./shared/*' build",
 		"build:shared": "pnpm -F \"./shared/*\" build",
 		"build:backend": "pnpm -F ./backend build",
 		"build:frontend": "pnpm -F ./frontend build",
