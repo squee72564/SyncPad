@@ -7,6 +7,7 @@ import { DocumentShareLink, Prisma, SharePermission } from "@generated/prisma-po
 import ApiError from "@/utils/ApiError.ts";
 import { ListShareLinksArgs } from "@/types/share-link.types.ts";
 import { buildPaginationParams, paginateItems } from "@/utils/pagination.ts";
+import { ensureDocumentBelongsToWorkspace } from "@/services/document.service.ts";
 
 const SHARE_LINK_TOKEN_LENGTH = 32;
 
@@ -27,20 +28,6 @@ const serializeShareLink = (
   createdBy: link.createdBy,
   url: buildShareLinkUrl(link.token),
 });
-
-const ensureDocumentBelongsToWorkspace = async (workspaceId: string, documentId: string) => {
-  const document = await prisma.document.findFirst({
-    where: {
-      id: documentId,
-      workspaceId,
-    },
-    select: { id: true },
-  });
-
-  if (!document) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Document not found in workspace");
-  }
-};
 
 const listShareLinks = async (args: ListShareLinksArgs) => {
   await ensureDocumentBelongsToWorkspace(args.workspaceId, args.documentId);

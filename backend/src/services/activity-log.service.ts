@@ -4,6 +4,7 @@ import prisma from "@syncpad/prisma-client";
 import ApiError from "@/utils/ApiError.ts";
 import { CreateActivityLogArgs, ListActivityLogsArgs } from "@/types/activity-log.types.ts";
 import { buildPaginationParams, paginateItems } from "@/utils/pagination.ts";
+import { ensureDocumentBelongsToWorkspace } from "@/services/document.service.ts";
 
 const activityLogInclude = {
   actor: {
@@ -23,17 +24,6 @@ const activityLogInclude = {
     },
   },
 } as const;
-
-const ensureDocumentBelongsToWorkspace = async (workspaceId: string, documentId: string) => {
-  const document = await prisma.document.findFirst({
-    where: { id: documentId, workspaceId },
-    select: { id: true },
-  });
-
-  if (!document) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Document not found in workspace");
-  }
-};
 
 const ensureActivityLogBelongsToWorkspace = async (workspaceId: string, activityLogId: string) => {
   const activityLog = await prisma.activityLog.findFirst({

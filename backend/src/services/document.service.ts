@@ -14,6 +14,17 @@ import { collabSnapshotToPlainText } from "@/utils/collabSerializer.js";
 import { buildPaginationParams, paginateItems } from "@/utils/pagination.ts";
 import { normalizeSlug, parseBoolean } from "@/utils/parse.ts";
 
+export const ensureDocumentBelongsToWorkspace = async (workspaceId: string, documentId: string) => {
+  const document = await prisma.document.findFirst({
+    where: { id: documentId, workspaceId },
+    select: { id: true },
+  });
+
+  if (!document) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Document not found in workspace");
+  }
+};
+
 // Convert optional ISO strings to Date/null for Prisma writes.
 const parsePublishedAt = (value: string | null) => {
   if (value === null) {
