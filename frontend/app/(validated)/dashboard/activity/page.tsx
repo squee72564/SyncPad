@@ -3,9 +3,10 @@
 import PageHeader from "@/components/PageHeader";
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
 import ActivityTimeline from "./ActivityTimeline";
-import { listActivityLogs } from "@/lib/activity-log";
+import { ActivityLogRecord, listActivityLogs } from "@/lib/activity-log";
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 import { formatError } from "@/lib/utils";
+import { PaginatedResult } from "@/lib/types";
 
 const pageTextData = {
   title: "Activity Log",
@@ -25,11 +26,11 @@ export default async function ActivityPage() {
     );
   }
 
-  let activityData: Awaited<ReturnType<typeof listActivityLogs>> | null = null;
+  let activityData: PaginatedResult<ActivityLogRecord> | null = null;
   let fetchError: string | null = null;
 
   try {
-    activityData = await listActivityLogs(activeWorkspace.workspace.id, { limit: 50 });
+    activityData = await listActivityLogs(activeWorkspace.workspace.id, { limit: 5 });
   } catch (error) {
     fetchError = formatError(error, "Unable to load activity log");
   }
@@ -45,6 +46,7 @@ export default async function ActivityPage() {
         <ActivityTimeline
           workspaceId={activeWorkspace.workspace.id}
           activityLogs={activityData?.data ?? []}
+          nextCursor={activityData?.nextCursor ?? null}
         />
       )}
     </div>

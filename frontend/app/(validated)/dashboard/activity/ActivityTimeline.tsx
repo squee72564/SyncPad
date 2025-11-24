@@ -6,7 +6,7 @@ import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { ActivityLogRecord } from "@/lib/activity-log";
-import { deleteActivityLogAction } from "./actions";
+import { deleteActivityLogAction, loadActivityLogsAction } from "./actions";
 import {
   Card,
   CardAction,
@@ -17,10 +17,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useCursorPagination } from "@/hooks/useCursorPagination";
 
 type ActivityTimelineProps = {
   workspaceId: string;
   activityLogs: ActivityLogRecord[];
+  nextCursor: string | null;
 };
 
 const formatTimestamp = (value: string | Date) => {
@@ -70,8 +72,41 @@ const formatMetadataValue = (value: unknown) => {
   }
 };
 
-export default function ActivityTimeline({ workspaceId, activityLogs }: ActivityTimelineProps) {
+export default function ActivityTimeline({
+  workspaceId,
+  activityLogs,
+  nextCursor,
+}: ActivityTimelineProps) {
   const [isPending, startTransition] = useTransition();
+
+  const {
+    items,
+    nextCursor: cursor,
+    isLoading,
+    loadMore,
+    setItems,
+  } = useCursorPagination<ActivityLogRecord>({
+    initialData: activityLogs,
+    initialCursor: nextCursor,
+    loadMore: async (cursorValue) => {
+      const result = await loadActivityLogsAction(workspaceId, {
+        cursor: cursorValue ?? undefined,
+        limit: 5,
+      });
+
+      if (!result.success) {
+        toast.error(result.error ?? "Unable to load more activity");
+        return { data: [], nextCursor: null };
+      }
+
+      if (!result.data) {
+        toast.error("Unable to load more activity");
+        return { data: [], nextCursor: null };
+      }
+
+      return result.data;
+    },
+  });
 
   const handleDelete = (activityLogId: string) => {
     const confirmed = window.confirm("Remove this activity entry? This cannot be undone.");
@@ -87,70 +122,84 @@ export default function ActivityTimeline({ workspaceId, activityLogs }: Activity
         return;
       }
 
+      setItems((prev) => prev.filter((log) => log.id !== activityLogId));
+
       toast.success("Activity log removed");
     });
   };
 
-  if (activityLogs.length === 0) {
-    return (
-      <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        No activity yet. Once you publish documents, invite teammates, or trigger AI jobs, entries
-        will appear here.
-      </div>
-    );
-  }
+  const handleLoadMore = () => {
+    if (!cursor || isLoading) return;
+    loadMore();
+  };
 
   return (
-    <div className="relative">
-      <div className="absolute left-3 top-2 bottom-2 w-px bg-border" aria-hidden />
-      <ul className="space-y-4 pl-8">
-        {activityLogs.map((log) => {
-          const documentLabel = getDocumentLabel(log);
-          const metadataEntries = Object.entries(log.metadata ?? {});
+    <>
+      {items.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
+          No activity yet. Once you publish documents, invite teammates, or trigger AI jobs, entries
+          will appear here.
+        </div>
+      ) : (
+        <div className="relative">
+          <div className="absolute left-3 top-2 bottom-2 w-px bg-border" aria-hidden />
+          <ul className="space-y-4 pl-8">
+            {items.map((log) => {
+              const documentLabel = getDocumentLabel(log);
+              const metadataEntries = Object.entries(log.metadata ?? {});
 
-          return (
-            <li key={log.id} className="relative">
-              <div className="absolute -left-0.5 top-3 size-3 -translate-x-1/2 rounded-full border-2 border-background bg-primary" />
-              <Card>
-                <CardHeader>
-                  <CardTitle>{log.event}</CardTitle>
-                  <CardDescription>
-                    {formatTimestamp(log.createdAt)} • {getActorDisplay(log)}
-                  </CardDescription>
-                  <CardAction>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(log.id)}
-                      disabled={isPending}
-                      title="Delete activity log"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </CardAction>
-                </CardHeader>
-                <CardContent className="flex flex-wrap gap-2">
-                  {metadataEntries.length > 0 ? (
-                    <>
-                      {metadataEntries.map(([key, value]) => (
-                        <Badge key={key} variant={"outline"} className="truncate">
-                          {key}: {formatMetadataValue(value)}
-                        </Badge>
-                      ))}
-                    </>
-                  ) : null}
-                </CardContent>
+              return (
+                <li key={log.id} className="relative">
+                  <div className="absolute -left-0.5 top-3 size-3 -translate-x-1/2 rounded-full border-2 border-background bg-primary" />
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{log.event}</CardTitle>
+                      <CardDescription>
+                        {formatTimestamp(log.createdAt)} • {getActorDisplay(log)}
+                      </CardDescription>
+                      <CardAction>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(log.id)}
+                          disabled={isPending}
+                          title="Delete activity log"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </CardAction>
+                    </CardHeader>
+                    <CardContent className="flex flex-wrap gap-2">
+                      {metadataEntries.length > 0 ? (
+                        <>
+                          {metadataEntries.map(([key, value]) => (
+                            <Badge key={key} variant={"outline"} className="truncate">
+                              {key}: {formatMetadataValue(value)}
+                            </Badge>
+                          ))}
+                        </>
+                      ) : null}
+                    </CardContent>
 
-                {documentLabel ? (
-                  <CardFooter>
-                    <Badge variant={"secondary"}>Document: {documentLabel}</Badge>
-                  </CardFooter>
-                ) : null}
-              </Card>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+                    {documentLabel ? (
+                      <CardFooter>
+                        <Badge variant={"secondary"}>Document: {documentLabel}</Badge>
+                      </CardFooter>
+                    ) : null}
+                  </Card>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+      {cursor ? (
+        <div className="mt-4 flex justify-center">
+          <Button onClick={handleLoadMore} disabled={isLoading} variant="outline" size="sm">
+            {isLoading ? "Loading..." : "Load more"}
+          </Button>
+        </div>
+      ) : null}
+    </>
   );
 }

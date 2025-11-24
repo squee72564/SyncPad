@@ -50,12 +50,10 @@ export type ListActivityLogsParams = {
   event?: string;
 };
 
-export type ListActivityLogsResponse = PaginatedResult<ActivityLogRecord>;
-
 export const listActivityLogs = async (
   workspaceId: string,
   params: ListActivityLogsParams = {}
-): Promise<ListActivityLogsResponse> => {
+): Promise<PaginatedResult<ActivityLogRecord>> => {
   const query = new URLSearchParams();
 
   if (params.cursor) query.set("cursor", params.cursor);
@@ -70,5 +68,5 @@ export const listActivityLogs = async (
     `/v1/workspaces/${workspaceId}/activity-logs${search ? `?${search}` : ""}`
   );
 
-  return (await response.json()) as ListActivityLogsResponse;
+  return (await response.json()) as PaginatedResult<ActivityLogRecord>;
 };
