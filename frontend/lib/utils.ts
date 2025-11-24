@@ -25,9 +25,5 @@ export function getSafeRedirect(target?: string | null, fallback = "/dashboard")
   return target;
 }
 
-export type ActionResult<T = undefined> =
-  | { success: true; data?: T }
-  | { success: false; error: string };
-
 export const formatError = (error: unknown, fallback: string) =>
   error instanceof Error ? error.message : fallback;
