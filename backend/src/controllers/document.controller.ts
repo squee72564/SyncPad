@@ -3,8 +3,7 @@ import httpStatus from "http-status";
 
 import catchAsync from "@/utils/catchAsync.js";
 import ApiError from "@/utils/ApiError.js";
-import documentService from "@/services/document.service.js";
-import activityLogService from "@/services/activity-log.service.js";
+import { documentService, activityLogService } from "@/services/index.js";
 import {
   type CreateDocumentRequest,
   type DeleteDocumentRequest,
@@ -157,12 +156,6 @@ const deleteDocument = catchAsync(
 
     await documentService.deleteDocument(context.workspace.id, req.params.documentId);
 
-    await activityLogService.createActivityLog(context.workspace.id, {
-      event: "document.deleted",
-      documentId: req.params.documentId,
-      actorId: req.user?.id ?? null,
-    });
-
     res.status(httpStatus.NO_CONTENT).send();
   }
 );
@@ -198,15 +191,6 @@ const saveDocumentCollabState = catchAsync(
       req.body.snapshot,
       req.body.version
     );
-
-    // await activityLogService.createActivityLog(context.workspace.id, {
-    //   event: "document.collab-saved",
-    //   documentId: document.id,
-    //   actorId: req.user.id,
-    //   metadata: {
-    //     version: collabState.version,
-    //   },
-    // });
 
     res.status(httpStatus.OK).json({ collabState });
   }
