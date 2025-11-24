@@ -14,7 +14,7 @@ export type CreateDocumentInput = {
   headline?: string | null;
   summary?: string | null;
   parentId?: string | null;
-  status?: "DRAFT" | "IN_REVIEW" | "PUBLISHED" | "ARCHIVED";
+  status?: "DRAFT";
   content?: JsonValue;
   publishedAt?: string;
 };
@@ -81,12 +81,12 @@ export async function createDocumentAction(
     headline?: string;
     summary?: string;
     parentId?: string | null;
-    status: "DRAFT" | "IN_REVIEW" | "PUBLISHED" | "ARCHIVED";
+    status: "DRAFT";
     content?: unknown;
     publishedAt?: string;
   } = {
     title,
-    status: input.status ?? "DRAFT",
+    status: "DRAFT",
   };
 
   const slugValue = sanitizeSlug(input.slug);

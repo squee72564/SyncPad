@@ -12,13 +12,6 @@ import type { DocumentRecord } from "@/lib/documents";
 import { createDocumentAction } from "./actions";
 import { formatError } from "@/lib/utils";
 
-const DOCUMENT_STATUSES = [
-  { value: "DRAFT", label: "Draft" },
-  { value: "IN_REVIEW", label: "In Review" },
-  { value: "PUBLISHED", label: "Published" },
-  { value: "ARCHIVED", label: "Archived" },
-] as const;
-
 type CreateDocumentFormProps = {
   documents: DocumentRecord[];
 };
@@ -41,7 +34,6 @@ export function CreateDocumentForm({ documents }: CreateDocumentFormProps) {
   const [headline, setHeadline] = useState("");
   const [summary, setSummary] = useState("");
   const [parentId, setParentId] = useState<string>("");
-  const [status, setStatus] = useState<string>("DRAFT");
 
   const parentOptions = useMemo(() => {
     return documents.map((doc) => ({
@@ -68,7 +60,6 @@ export function CreateDocumentForm({ documents }: CreateDocumentFormProps) {
           headline: headline.trim() || undefined,
           summary: summary.trim() || undefined,
           parentId: parentId ? parentId : null,
-          status: status as DocumentRecord["status"],
         });
 
         if (!result.success) {
@@ -157,23 +148,6 @@ export function CreateDocumentForm({ documents }: CreateDocumentFormProps) {
         >
           <option value="">No parent</option>
           {parentOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="grid gap-1.5">
-        <Label htmlFor="document-status">Status</Label>
-        <select
-          id="document-status"
-          className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-          value={status}
-          onChange={(event) => setStatus(event.target.value)}
-          disabled={isPending}
-        >
-          {DOCUMENT_STATUSES.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
