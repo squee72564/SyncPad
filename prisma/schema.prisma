@@ -327,7 +327,7 @@ model ActivityLog {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   actor     User?     @relation("ActivityActor", fields: [actorId], references: [id], onDelete: SetNull)
-  document  Document? @relation("DocumentActivity", fields: [documentId], references: [id], onDelete: SetNull)
+  document  Document? @relation("DocumentActivity", fields: [documentId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
   @@index([documentId])
