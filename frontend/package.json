@@ -1,6 +1,7 @@
 {
-  "name": "frontend",
+  "name": "@syncpad/frontend",
   "version": "0.1.0",
+  "description": "Next.js 15 frontend for SyncPad: dashboard, landing pages, invites, share links, and AI features.",
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",

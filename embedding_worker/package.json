@@ -1,7 +1,7 @@
 {
-  "name": "@syncpad/embedding_worker",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@syncpad/embedding-worker",
+  "version": "0.1.0",
+  "description": "Redis stream–driven embedding worker for SyncPad documents, chunking content and persisting vectors.",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {

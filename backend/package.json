@@ -1,7 +1,7 @@
 {
   "name": "@syncpad/express_backend",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Express 5 API for SyncPad workspaces, documents, invites, share links, activity logs, and AI jobs.",
   "main": "dist/server.js",
   "type": "module",
   "scripts": {

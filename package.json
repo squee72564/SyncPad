@@ -1,6 +1,7 @@
 {
-	"name": "syncpad",
+	"name": "@syncpad/root",
 	"private": true,
+	"description": "Monorepo for the SyncPad platform (backend API, frontend app, embedding worker, shared clients).",
 	"scripts": {
 		"prepare": "husky install",
 		"pretty": "pnpm -r --parallel pretty",
@@ -25,7 +26,7 @@
 		"clean": "rm -rf node_modules && pnpm -r exec rm -rf node_modules dist",
 		"build": "pnpm run build:all",
 		"clean:build": "pnpm clean && pnpm install && pnpm run build:all",
-		"build:all": "pnpm build:shared && pnpm -r --parallel --filter '!./shared' build",
+		"build:all": "pnpm build:shared && pnpm -r --filter '!./shared' build",
 		"build:shared": "pnpm -F \"./shared/*\" build",
 		"build:backend": "pnpm -F ./backend build",
 		"build:frontend": "pnpm -F ./frontend build",
