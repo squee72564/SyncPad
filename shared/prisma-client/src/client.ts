@@ -1,4 +1,4 @@
-import { PrismaClient as PrismaClientPostgres } from "@generated/prisma-postgres/index.js";
+import { PrismaClient as PrismaClientPostgres } from "../../../prisma/generated/prisma-postgres/index.js";
 import winston from "winston";
 
 const PRISMA_KEY = Symbol.for("syncpad.prisma");

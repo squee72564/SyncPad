@@ -1,4 +1,4 @@
-import { getPrismaClient, disconnectPrismaClient } from "@/client.js"
+import { getPrismaClient, disconnectPrismaClient } from "./client.js"
 
 const env = (process.env.NODE_ENV ?? "development") as
   | "development"
