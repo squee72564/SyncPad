@@ -3,8 +3,8 @@
 	"private": true,
 	"scripts": {
 		"prepare": "husky install",
-		"pretty": "pnpm --filter ./frontend pretty --write && pnpm --filter ./backend pretty --write && pnpm --filter ./embedding_worker pretty --write",
-		"lint": "pnpm --filter ./frontend lint && pnpm --filter ./backend lint && pnpm --filter ./embedding_worker lint",
+		"pretty": "pnpm -r --parallel pretty",
+		"lint": "pnpm -r --parallel lint",
 		"docker:dev": "docker compose up -d",
 		"docker:dev:logs": "docker compose logs -f postgres",
 		"docker:dev:down": "docker compose down",
@@ -21,9 +21,15 @@
 		"prisma:migrate:deploy": "dotenv -e .env.$NODE_ENV -- prisma migrate deploy",
 		"prisma:studio": "dotenv -e .env.development prisma studio",
 		"prisma:push": "prisma db push",
-		"test": "pnpm --filter ./backend test && pnpm --filter ./embedding_worker test",
-		"clean": "rm -rf node_modules pnpm-lock.yaml **/*/node_modules shared/*/dist",
-		"build:shared": "pnpm --filter ./shared/redis-client build && pnpm --filter ./shared/prisma-client build"
+		"test": "pnpm -r --parallel test",
+		"clean": "rm -rf node_modules && pnpm -r exec rm -rf node_modules dist",
+		"build": "pnpm run build:all",
+		"clean:build": "pnpm clean && pnpm install && pnpm run build:all",
+		"build:all": "pnpm build:shared && pnpm -r --parallel --filter '!./shared' build",
+		"build:shared": "pnpm -F \"./shared/*\" build",
+		"build:backend": "pnpm -F ./backend build",
+		"build:frontend": "pnpm -F ./frontend build",
+		"build:embedding_worker": "pnpm -F ./embedding_worker build"
 	},
 	"lint-staged": {
 		"frontend/**/*.{ts,tsx,js,jsx}": [
