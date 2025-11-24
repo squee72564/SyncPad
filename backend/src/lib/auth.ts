@@ -1,4 +1,4 @@
-import { AuthContext, betterAuth, type User, type BetterAuthOptions } from "better-auth";
+import { AuthContext, betterAuth, type User, type BetterAuthOptions, Auth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin as adminPlugin } from "better-auth/plugins";
 import prisma from "@syncpad/prisma-client";
@@ -18,7 +18,7 @@ if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
   };
 }
 
-const auth = betterAuth({
+const auth: Auth<BetterAuthOptions> = betterAuth({
   database: database,
   // Other sign-in methods: https://www.better-auth.com/docs/authentication/email-password
   // https://www.better-auth.com/docs/reference/options#emailandpassword
