@@ -89,8 +89,11 @@ export default function DocumentEditor({ document, readOnly, currentUser }: Docu
         <div className="flex items-center justify-between border-b px-4 py-2 text-xs text-muted-foreground">
           <span>{readOnly ? "Read-only mode" : "Draft editor"}</span>
         </div>
-        <div className="prose max-w-none">
-          <EditorContent editor={editor} className="min-h-[320px] px-4 py-6" />
+        <div className="prose max-w-none p-2">
+          <EditorContent
+            editor={editor}
+            className="min-h-[500px] [&>.ProseMirror]:min-h-[500px] [&>.ProseMirror]:p-6"
+          />
         </div>
       </div>
     </EditorContext.Provider>
