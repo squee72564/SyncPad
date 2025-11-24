@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
+import Link from "next/link";
 
 type ActivityTimelineProps = {
   workspaceId: string;
@@ -147,13 +148,17 @@ export default function ActivityTimeline({
             {items.map((log) => {
               const documentLabel = getDocumentLabel(log);
               const metadataEntries = Object.entries(log.metadata ?? {});
+              const logEventFormatted = log.event
+                .split(".")
+                .map((word) => word.at(0)?.toUpperCase() + word.slice(1))
+                .join(" ");
 
               return (
                 <li key={log.id} className="relative">
                   <div className="absolute -left-0.5 top-3 size-3 -translate-x-1/2 rounded-full border-2 border-background bg-primary" />
                   <Card>
                     <CardHeader>
-                      <CardTitle>{log.event}</CardTitle>
+                      <CardTitle>{logEventFormatted}</CardTitle>
                       <CardDescription>
                         {formatTimestamp(log.createdAt)} • {getActorDisplay(log)}
                       </CardDescription>
@@ -183,7 +188,11 @@ export default function ActivityTimeline({
 
                     {documentLabel ? (
                       <CardFooter>
-                        <Badge variant={"secondary"}>Document: {documentLabel}</Badge>
+                        <Link href={`documents/${log.documentId}`}>
+                          <Badge variant={"secondary"} className="hover:border-primary">
+                            Document: {documentLabel}
+                          </Badge>
+                        </Link>
                       </CardFooter>
                     ) : null}
                   </Card>
