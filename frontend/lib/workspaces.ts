@@ -3,32 +3,17 @@
 import { cookies } from "next/headers";
 import { authorizedFetch } from "./api-client";
 import type { PaginatedResult } from "./types";
+import Prisma from "@generated/prisma-postgres";
 const ACTIVE_WORKSPACE_ID_COOKIE = "active_workspace_id";
 const ACTIVE_WORKSPACE_SLUG_COOKIE = "active_workspace_slug";
 
-export type WorkspaceRecord = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  createdAt: string;
-  updatedAt: string;
-  createdById: string;
-};
-
-export type WorkspaceMembership = {
-  id: string;
-  workspaceId: string;
-  userId: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
-};
+export type WorkspaceRecord = Prisma.Workspace;
+export type WorkspaceMembership = Prisma.WorkspaceMember;
 
 export type WorkspaceSummary = {
   workspace: WorkspaceRecord;
   membership?: WorkspaceMembership | null;
-  effectiveRole: string;
+  effectiveRole: Prisma.WorkspaceRole;
 };
 
 type WorkspaceListResponse = {

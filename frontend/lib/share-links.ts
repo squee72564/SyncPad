@@ -2,47 +2,21 @@
 
 import { authorizedFetch } from "./api-client";
 import type { PaginatedResult } from "./types";
+import Prisma from "@generated/prisma-postgres";
 
 export type ShareLinkPermission = "VIEW" | "COMMENT" | "EDIT";
 
-export type ShareLinkRecord = {
-  id: string;
-  permission: ShareLinkPermission;
-  expiresAt: string | null;
-  createdAt: string;
-  createdBy: {
-    id: string;
-    name: string | null;
-    email: string | null;
-  } | null;
-  url: string;
-};
+export type ShareLinkRecord = Pick<
+  Prisma.DocumentShareLink,
+  "id" | "permission" | "expiresAt" | "createdAt"
+> & { createdBy: Pick<Prisma.User, "id" | "name" | "email"> | null } & { url: string };
 
-export type ShareLinkPreview = {
-  token: string;
-  permission: ShareLinkPermission;
-  expiresAt: string | null;
-  document: {
-    id: string;
-    title: string;
-  };
-  workspace: {
-    id: string;
-    name: string;
-    slug: string;
-  };
-  url: string;
-};
-
-type ShareLinksResponse =
-  | {
-      shareLinks: ShareLinkRecord[];
-      nextCursor?: string | null;
-    }
-  | {
-      data: ShareLinkRecord[];
-      nextCursor?: string | null;
-    };
+export type ShareLinkPreview = Pick<
+  Prisma.DocumentShareLink,
+  "token" | "permission" | "expiresAt"
+> & { document: Pick<Prisma.Document, "id" | "title"> } & {
+  workspace: Pick<Prisma.Workspace, "id" | "name" | "slug">;
+} & { url: string };
 
 type ShareLinkResponse = {
   shareLink: ShareLinkRecord;

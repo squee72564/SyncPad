@@ -23,9 +23,11 @@ type ActivityTimelineProps = {
   activityLogs: ActivityLogRecord[];
 };
 
-const formatTimestamp = (value: string) => {
-  const date = new Date(value);
-  return date.toLocaleString();
+const formatTimestamp = (value: string | Date) => {
+  if (typeof value === "string") {
+    value = new Date(value);
+  }
+  return value.toLocaleString();
 };
 
 const getActorDisplay = (log: ActivityLogRecord) => {

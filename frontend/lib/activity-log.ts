@@ -2,39 +2,17 @@
 
 import { authorizedFetch } from "./api-client";
 import type { PaginatedResult } from "./types";
+import Prisma from "@generated/prisma-postgres/index";
 
-export type CreateActivityLogPayload = {
-  event: string;
-  documentId?: string;
-  metadata?: Record<string, unknown>;
-};
-
-export type ActivityLogActor = {
-  id: string;
-  name: string | null;
-  email: string | null;
-  image: string | null;
-};
-
-export type ActivityLogDocument = {
-  id: string;
-  title: string | null;
-  slug: string | null;
-  status: string | null;
-};
-
-export type ActivityLogRecord = {
-  id: string;
-  workspaceId: string;
-  event: string;
-  documentId: string | null;
-  actorId: string | null;
-  metadata: Record<string, unknown> | null;
-  createdAt: string;
-  actor: ActivityLogActor | null;
+export type CreateActivityLogPayload = Pick<
+  Prisma.ActivityLog,
+  "event" | "documentId" | "metadata"
+>;
+export type ActivityLogActor = Pick<Prisma.User, "id" | "name" | "email" | "image">;
+export type ActivityLogDocument = Pick<Prisma.Document, "id" | "title" | "slug" | "status">;
+export type ActivityLogRecord = Prisma.ActivityLog & { actor: ActivityLogActor | null } & {
   document: ActivityLogDocument | null;
 };
-
 export type CreateActivityLogResponse = {
   activityLog: ActivityLogRecord;
 };

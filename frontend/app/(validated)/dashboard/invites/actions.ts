@@ -3,11 +3,12 @@
 import { revalidatePath } from "next/cache";
 import {
   WorkspaceInviteRecord,
-  WorkspaceInviteRole,
   createWorkspaceInvite,
   resendWorkspaceInvite,
   revokeWorkspaceInvite,
 } from "@/lib/invites";
+
+import Prisma from "@generated/prisma-postgres";
 
 const INVITES_PATH = "/dashboard/invites";
 
@@ -17,7 +18,7 @@ import { ActionResult } from "@/lib/types";
 export async function createWorkspaceInviteAction(input: {
   workspaceId: string;
   email: string;
-  role: WorkspaceInviteRole;
+  role: Exclude<Prisma.WorkspaceRole, "OWNER">;
 }): Promise<ActionResult<WorkspaceInviteRecord>> {
   const email = input.email.trim().toLowerCase();
 

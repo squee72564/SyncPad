@@ -7,18 +7,12 @@ import { Clipboard, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ShareLinkRecord } from "@/lib/share-links";
 import { deleteShareLinkAction, updateShareLinkAction } from "./actions";
+import { formatDate } from "@/lib/utils";
 
 type ShareLinkListProps = {
   workspaceId: string;
   documentId: string;
   shareLinks: ShareLinkRecord[];
-};
-
-const formatDate = (value: string | null) => {
-  if (!value) {
-    return "Never";
-  }
-  return new Date(value).toLocaleString();
 };
 
 export default function ShareLinkList({ workspaceId, documentId, shareLinks }: ShareLinkListProps) {

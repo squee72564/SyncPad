@@ -1,30 +1,18 @@
 "use server";
 
 import { authorizedFetch } from "./api-client";
-import { PaginatedResult } from "./types";
+import { PaginatedResult, PickWithOptional } from "./types";
 import { readActiveWorkspaceSelection } from "./workspaces";
+import Prisma from "@generated/prisma-postgres/index";
 
-export type DocumentRecord = {
-  id: string;
-  workspaceId: string;
-  authorId: string | null;
-  parentId: string | null;
-  title: string;
-  slug: string | null;
-  headline: string | null;
-  status: "DRAFT" | "IN_REVIEW" | "PUBLISHED" | "ARCHIVED";
-  searchText: string | null;
-  summary: string | null;
-  content: unknown;
-  publishedAt: string | null;
-  lastEditedAt: string;
-  createdAt: string;
-  updatedAt: string;
-};
+export type DocumentRecord = Prisma.Document;
+export type DocumentCollabStateRecord = Prisma.DocumentCollabState;
 
-type DocumentListResponse = {
-  documents: DocumentRecord[];
-};
+export type SaveDocumentCollabStateInput = PickWithOptional<
+  Prisma.DocumentCollabState,
+  "documentId" | "snapshot" | "version",
+  "version"
+>;
 
 type DocumentResponse = {
   document: DocumentRecord;
@@ -32,7 +20,7 @@ type DocumentResponse = {
 };
 
 export type ListDocumentsOptions = {
-  parentId?: string;
+  parentId?: DocumentRecord["id"];
   status?: DocumentRecord["status"];
   includeContent?: boolean;
 };
@@ -129,14 +117,6 @@ export async function getDocument(
   return data.document;
 }
 
-export type DocumentCollabStateRecord = {
-  documentId: string;
-  workspaceId: string;
-  snapshot: unknown;
-  version: number;
-  updatedAt: string;
-};
-
 export async function getDocumentWithCollabState(
   workspaceId: string | undefined,
   workspaceSlug: string | undefined,
@@ -181,12 +161,6 @@ export async function deleteDocument(
     method: "DELETE",
   });
 }
-
-export type SaveDocumentCollabStateInput = {
-  documentId: string;
-  snapshot: unknown;
-  version?: number;
-};
 
 export async function saveDocumentCollabState(
   workspaceId: string | undefined,

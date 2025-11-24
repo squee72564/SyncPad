@@ -2,47 +2,27 @@
 
 import { authorizedFetch } from "./api-client";
 import type { PaginatedResult } from "./types";
+import Prisma from "@generated/prisma-postgres";
 
-export type WorkspaceInviteRole = "ADMIN" | "EDITOR" | "COMMENTER" | "VIEWER";
-
-export type WorkspaceInviteRecord = {
-  id: string;
-  workspaceId: string;
-  email: string;
-  role: WorkspaceInviteRole;
-  invitedById: string | null;
-  invitedBy?: {
-    id: string;
-    name: string | null;
-    email: string | null;
-  } | null;
-  expiresAt: string | null;
-  acceptedAt: string | null;
-  createdAt: string;
+export type WorkspaceInviteRecord = Omit<Prisma.WorkspaceInvite, "token"> & {
+  invitedBy?: Pick<Prisma.User, "id" | "name" | "email"> | null;
+} & {
   acceptUrl?: string;
 };
 
 type CreateInvitePayload = {
   email: string;
-  role: WorkspaceInviteRole;
+  role: Prisma.WorkspaceRole;
 };
 
 type InviteResponse = {
   invite: WorkspaceInviteRecord;
 };
 
-export type AcceptWorkspaceInviteResult = {
-  workspaceId: string;
-  acceptedAt: string;
-  membership: {
-    id: string;
-    workspaceId: string;
-    userId: string;
-    role: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-};
+export type AcceptWorkspaceInviteResult = Pick<
+  Prisma.WorkspaceInvite,
+  "workspaceId" | "acceptedAt"
+> & { membership: Prisma.WorkspaceMember };
 
 export async function getWorkspaceInvites(
   workspaceId: string

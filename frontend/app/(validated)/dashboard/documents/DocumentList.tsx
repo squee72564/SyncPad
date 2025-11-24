@@ -4,24 +4,11 @@ import { ArrowUpRight } from "lucide-react";
 import type { DocumentRecord } from "@/lib/documents";
 import { DocumentStatusBadge } from "./DocumentStatusBadge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import DocumentSheet from "./DocumentSheet";
 
 type DocumentListProps = {
   documents: DocumentRecord[];
-};
-
-const formatDate = (value: string | null | undefined) => {
-  if (!value) {
-    return "—";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "—";
-  }
-
-  return date.toLocaleString();
 };
 
 export default function DocumentList({ documents }: DocumentListProps) {

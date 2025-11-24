@@ -7,7 +7,7 @@ import { Copy, Loader2, RefreshCcw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { WorkspaceInviteRecord } from "@/lib/invites";
 import { resendWorkspaceInviteAction, revokeWorkspaceInviteAction } from "./actions";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 
 type InviteListProps = {
   workspaceId: string;
@@ -34,19 +34,6 @@ const ROLE_STYLES: Record<string, string> = {
   EDITOR: "bg-emerald-100 text-emerald-700",
   COMMENTER: "bg-amber-100 text-amber-800",
   VIEWER: "bg-slate-100 text-slate-700",
-};
-
-const formatDate = (value: string | null | undefined) => {
-  if (!value) {
-    return "—";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "—";
-  }
-
-  return date.toLocaleString();
 };
 
 export default function InviteList({ workspaceId, invites, canManage }: InviteListProps) {

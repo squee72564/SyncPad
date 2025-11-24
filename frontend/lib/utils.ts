@@ -27,3 +27,19 @@ export function getSafeRedirect(target?: string | null, fallback = "/dashboard")
 
 export const formatError = (error: unknown, fallback: string) =>
   error instanceof Error ? error.message : fallback;
+
+export const formatDate = (value: string | null | undefined | Date) => {
+  if (!value) {
+    return "—";
+  }
+
+  if (typeof value === "string") {
+    value = new Date(value);
+  }
+
+  if (Number.isNaN(value.getTime())) {
+    return "—";
+  }
+
+  return value.toLocaleString();
+};

@@ -15,13 +15,14 @@ export type CreateDocumentInput = {
   summary?: string | null;
   parentId?: string | null;
   status?: "DRAFT" | "IN_REVIEW" | "PUBLISHED" | "ARCHIVED";
-  content?: unknown;
+  content?: JsonValue;
   publishedAt?: string;
 };
 
 import { formatError } from "@/lib/utils";
 import { ActionResult } from "@/lib/types";
 import { revalidatePaths } from "@/lib/api-client";
+import { JsonValue } from "@generated/prisma-postgres/runtime/library";
 
 export type DocumentActionResult = ActionResult<{ documentId: string }>;
 
@@ -139,7 +140,7 @@ export type UpdateDocumentInput = {
   summary?: string | null;
   parentId?: string | null;
   status?: "DRAFT" | "IN_REVIEW" | "PUBLISHED" | "ARCHIVED";
-  content?: unknown;
+  content?: JsonValue;
   publishedAt?: string | null;
 };
 
@@ -213,7 +214,7 @@ export async function updateDocumentAction(
 
 export async function saveDocumentCollabStateAction(input: {
   documentId: string;
-  snapshot: unknown;
+  snapshot: JsonValue;
   version?: number;
 }): Promise<CollabStateActionResult> {
   let workspace;

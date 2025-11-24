@@ -16,10 +16,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import type { WorkspaceInviteRole } from "@/lib/invites";
 import { createWorkspaceInviteAction } from "./actions";
 
-const ROLE_OPTIONS: { value: WorkspaceInviteRole; label: string; description: string }[] = [
+import Prisma from "@generated/prisma-postgres";
+
+const ROLE_OPTIONS: {
+  value: Exclude<Prisma.WorkspaceRole, "OWNER">;
+  label: string;
+  description: string;
+}[] = [
   {
     value: "ADMIN",
     label: "Admin",
@@ -120,7 +125,7 @@ export default function InviteComposer({ workspaceId }: InviteComposerProps) {
             <Label htmlFor="invite-role">Workspace role</Label>
             <Select
               value={formState.role}
-              onValueChange={(value: WorkspaceInviteRole) =>
+              onValueChange={(value: Exclude<Prisma.WorkspaceRole, "OWNER">) =>
                 setFormState((prev) => ({
                   ...prev,
                   role: value,
