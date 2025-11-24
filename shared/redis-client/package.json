@@ -16,11 +16,11 @@
     "build": "tsc -p tsconfig.json"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1"
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "redis": "^5.10.0",
-    "typescript": "^5.9.3",
     "winston": "^3.18.3"
   }
 }
