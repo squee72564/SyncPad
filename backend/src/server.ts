@@ -20,7 +20,7 @@ const exitHandler = async (exitCode = 0) => {
       await shutdownHocuspocus();
     }
 
-    const redisClient = getRedisClient(env.REDIS_URL ?? env.BACKEND_REDIS_URL, logger);
+    const redisClient = getRedisClient(env.REDIS_URL, logger);
 
     closeRedisClient(redisClient);
 

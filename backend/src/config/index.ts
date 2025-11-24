@@ -19,7 +19,6 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default("*"),
 
   REDIS_URL: z.url().default("redis://localhost:6379"),
-  BACKEND_REDIS_URL: z.url().default("redis://localhost:6379"),
   EMBEDDING_REDIS_STREAM_KEY: z.string().default("embedding_tasks"),
   EMBEDDING_REDIS_CONSUMER_GROUP: z.string().default("embedding_workers"),
 

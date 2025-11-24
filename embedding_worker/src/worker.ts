@@ -274,7 +274,7 @@ export class EmbeddingWorker {
 }
 
 export function createWorkerDependencies(): WorkerDependencies {
-  const redisClient = getRedisClient(config.BACKEND_REDIS_URL, logger);
+  const redisClient = getRedisClient(config.REDIS_URL, logger);
 
   const embeddingQueue = new EmbeddingQueue(redisClient, {
     streamKey: config.REDIS_STREAM_KEY,
