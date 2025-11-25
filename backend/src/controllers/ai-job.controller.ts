@@ -40,6 +40,10 @@ const listAiJob = catchAsync(async (req: GetAiJobRequest, res: Response, _next: 
 
   const result = await aiJobService.listAiJob(req.params.aiJobId, context.workspace.id);
 
+  if (!result) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "No Ai Job with that id");
+  }
+
   res.status(httpStatus.OK).json(result);
 });
 
