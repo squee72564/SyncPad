@@ -74,7 +74,7 @@ type AiJobTimelineProps = {
 };
 
 export default function AiJobTimeline({ workspaceId, aiJobs, nextCursor }: AiJobTimelineProps) {
-  const handleDelete = async (aiJob: AiListJobRecord) => {
+  const handleDelete = async (_aiJob: AiListJobRecord) => {
     // const result = await deleteAiJobAction(workspaceId, log.id);
     // if (!result.success) {
     //   throw new Error(result.error || "Failed to delete Ai Job");

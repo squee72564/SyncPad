@@ -27,7 +27,7 @@ export default function Timeline<T extends { id: string }>({
   isLoading = false,
   emptyMessage = "No items to display.",
 }: TimelineProps<T>) {
-  const [isPending, startTransition] = useTransition();
+  const [_isPending, startTransition] = useTransition();
 
   const {
     items,
