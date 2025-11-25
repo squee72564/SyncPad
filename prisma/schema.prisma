@@ -349,7 +349,7 @@ model AiJob {
   error         String?     @db.Text
 
   workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  document    Document?         @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  document    Document?         @relation(fields: [documentId], references: [id], onDelete: Cascade)
   revision    DocumentRevision? @relation(fields: [revisionId], references: [id], onDelete: SetNull)
   requestedBy User?             @relation("AiJobRequester", fields: [requestedById], references: [id], onDelete: SetNull)
 
