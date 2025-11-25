@@ -2,15 +2,15 @@ import { z } from "zod";
 import workspaceValidations from "@/validations/workspace.validations.js";
 import { paginationSchema } from "@/validations/common/pagination.ts";
 
-const documentId = z
-  .cuid({ message: "documentId must be a valid CUID" })
+export const documentId = z
+  .cuid({ error: "documentId must be a valid CUID" })
   .describe("Document identifier (cuid)");
 
 const documentSlug = z
   .string()
   .min(1, "document slug is required")
   .regex(/^[a-z0-9](?:[a-z0-9-]{1,62}[a-z0-9])?$/i, {
-    message: "slug must be alphanumeric and may include dashes",
+    error: "slug must be alphanumeric and may include dashes",
   });
 
 const documentStatus = z.enum(["DRAFT", "IN_REVIEW", "PUBLISHED", "ARCHIVED"]);
@@ -28,7 +28,7 @@ const ListDocumentsRequestSchema = z.object({
   }),
   query: paginationSchema
     .extend({
-      parentId: z.cuid({ message: "parentId must be a valid CUID" }).optional(),
+      parentId: z.cuid({ error: "parentId must be a valid CUID" }).optional(),
       status: documentStatus.optional(),
       includeContent: booleanQueryParam.optional(),
     })
@@ -44,7 +44,7 @@ const CreateDocumentRequestSchema = z.object({
     slug: documentSlug.optional(),
     headline: z.string().max(240, "headline must be 240 characters or less").optional(),
     summary: z.string().max(1024, "summary must be 1024 characters or less").optional(),
-    parentId: z.cuid({ message: "parentId must be a valid CUID" }).nullable().optional(),
+    parentId: z.cuid({ error: "parentId must be a valid CUID" }).nullable().optional(),
     status: documentStatus.optional(),
     content: z.any().optional(),
     publishedAt: z.iso.datetime().optional(),
@@ -71,13 +71,13 @@ const UpdateDocumentRequestSchema = z.object({
         .max(1024, "summary must be 1024 characters or less")
         .nullable()
         .optional(),
-      parentId: z.cuid({ message: "parentId must be a valid CUID" }).nullable().optional(),
+      parentId: z.cuid({ error: "parentId must be a valid CUID" }).nullable().optional(),
       status: documentStatus.optional(),
       content: z.any().optional(),
       publishedAt: z.iso.datetime().nullable().optional(),
     })
     .refine((val) => Object.keys(val).length > 0, {
-      message: "At least one field must be provided",
+      error: "At least one field must be provided",
     }),
 });
 

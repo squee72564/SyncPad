@@ -2,8 +2,8 @@ import { z } from "zod";
 import workspaceValidations from "@/validations/workspace.validations.js";
 import { paginationSchema } from "./common/pagination.ts";
 
-const documentId = z.cuid({ message: "documentId must be a valid CUID" });
-const shareLinkId = z.cuid({ message: "shareLinkId must be a valid CUID" });
+const documentId = z.cuid({ error: "documentId must be a valid CUID" });
+const shareLinkId = z.cuid({ error: "shareLinkId must be a valid CUID" });
 
 const WorkspaceDocumentParamsSchema = z.object({
   workspaceId: workspaceValidations.workspaceIdentifier,
@@ -17,7 +17,7 @@ const ShareLinkParamsSchema = WorkspaceDocumentParamsSchema.extend({
 const permissionEnum = z.enum(["VIEW", "COMMENT", "EDIT"]);
 
 const expiresAtSchema = z.iso
-  .datetime({ message: "expiresAt must be an ISO 8601 datetime string" })
+  .datetime({ error: "expiresAt must be an ISO 8601 datetime string" })
   .optional()
   .nullable();
 
@@ -47,7 +47,7 @@ const UpdateShareLinkRequestSchema = z.object({
         body.permission !== undefined ||
         body.expiresAt !== undefined ||
         body.regenerateToken === true,
-      { message: "At least one field must be provided" }
+      { error: "At least one field must be provided" }
     ),
 });
 

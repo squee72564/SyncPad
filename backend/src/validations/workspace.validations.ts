@@ -6,11 +6,11 @@ const workspaceSlug = z
   .string()
   .min(1, "workspace slug is required")
   .regex(/^[a-z0-9](?:[a-z0-9-]{1,62}[a-z0-9])?$/i, {
-    message: "slug must be alphanumeric and may include dashes",
+    error: "slug must be alphanumeric and may include dashes",
   });
 
 const workspaceIdentifier = z
-  .union([z.cuid({ message: "workspaceId must be a valid CUID" }), workspaceSlug])
+  .union([z.cuid({ error: "workspaceId must be a valid CUID" }), workspaceSlug])
   .describe("Workspace identifier (cuid or slug)");
 
 const WorkspaceShareTokenSchema = z.object({
@@ -69,7 +69,7 @@ const UpdateWorkspaceRequestSchema = z.object({
       (data) =>
         data.name !== undefined || data.slug !== undefined || data.description !== undefined,
       {
-        message: "At least one field must be provided",
+        error: "At least one field must be provided",
       }
     ),
 });
