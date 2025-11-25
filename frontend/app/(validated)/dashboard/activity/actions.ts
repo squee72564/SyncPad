@@ -54,7 +54,7 @@ export const loadActivityLogsAction = async (
   } catch (error) {
     return {
       success: false,
-      error: formatError(error, "Failed to load more activity"),
+      error: formatError(error, "Failed to load more Activity Logs"),
     };
   }
 };
