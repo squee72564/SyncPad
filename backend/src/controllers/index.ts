@@ -5,6 +5,7 @@ import documentController from "@/controllers/document.controller.js";
 import shareLinkController from "@/controllers/share-link.controller.js";
 import activityLogController from "@/controllers/activity-log.controller.js";
 import aiJobController from "@/controllers/ai-job.controller.ts";
+import documentEmbeddingController from "./document-embedding.controller.ts";
 
 export {
   userController,
@@ -14,4 +15,5 @@ export {
   shareLinkController,
   activityLogController,
   aiJobController,
+  documentEmbeddingController,
 };

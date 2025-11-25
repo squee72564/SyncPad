@@ -5,6 +5,7 @@ import documentValidations from "@/validations/document.validations.js";
 import shareLinkValidations from "@/validations/share-link.validations.js";
 import activityLogValidations from "@/validations/activity-log.validations.js";
 import aiJobValidations from "@/validations/ai-job.validations.ts";
+import documentEmbeddingValidations from "./document-embedding.validations.ts";
 
 export {
   userValidations,
@@ -14,4 +15,5 @@ export {
   shareLinkValidations,
   activityLogValidations,
   aiJobValidations,
+  documentEmbeddingValidations,
 };
