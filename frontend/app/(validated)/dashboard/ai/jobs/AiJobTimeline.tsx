@@ -120,12 +120,17 @@ export default function AiJobTimeline({ workspaceId, aiJobs, nextCursor }: AiJob
           <p>Started at: {formatTimestamp(aiJob.startedAt)}</p>
           <p>Completed at: {formatTimestamp(aiJob.completedAt)}</p>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-wrap gap-2">
           {aiJob.type === $Enums.AiJobType.EMBEDDING && aiJob.document ? (
             <Link href={`/dashboard/documents/${aiJob.documentId}`}>
-              <Badge variant={"secondary"}>Document: {getDocumentLabel(aiJob.document)}</Badge>
+              <Badge variant={"secondary"} className="hover:border-primary">
+                Document: {getDocumentLabel(aiJob.document)}
+              </Badge>
             </Link>
           ) : null}
+          <Badge variant={aiJob.status === "FAILED" ? "destructive" : "outline"}>
+            {aiJob.status}
+          </Badge>
         </CardFooter>
       </>
     );
