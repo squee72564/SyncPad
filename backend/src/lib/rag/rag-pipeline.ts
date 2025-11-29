@@ -1,15 +1,7 @@
 import { OpenAI } from "openai";
 import { type GuardrailResult, type GuardrailBundle, runGuardrails } from "@openai/guardrails";
 import { z } from "zod";
-import {
-  Agent,
-  handoff,
-  Runner,
-  UserMessageItem,
-  SystemMessageItem,
-  tool,
-  setOpenAIAPI,
-} from "@openai/agents";
+import { Agent, Runner, UserMessageItem, setOpenAIAPI } from "@openai/agents";
 import prisma from "@syncpad/prisma-client";
 import Prisma, { Prisma as PrismaNamespace } from "@generated/prisma-postgres/index.js";
 import config from "@/config/index.ts";
@@ -22,9 +14,10 @@ import {
   AmbiguousRequestResponseSchema,
 } from "./ambiguousRequestAgent.ts";
 
-export type Result<T, U> =
-  | { success: true; data: T }
-  | { success: false; type: "Guardrail"; data: U }
+export type Result<U> =
+  | { success: true; data: string }
+  | { success: false; type: "InputGuardrail"; data: U }
+  | { success: false; type: "OuputGuardrail"; data: U }
   | { success: false; type: "Agent"; error: string };
 
 const guardrailsConfig: GuardrailBundle = {
@@ -47,6 +40,17 @@ const guardrailsConfig: GuardrailBundle = {
           "illicit",
           "illicit/violent",
         ],
+      },
+    },
+  ],
+};
+
+const outputGuardrailsConfig: GuardrailBundle = {
+  guardrails: [
+    {
+      name: "Hallucination Detection",
+      config: {
+        categories: ["hallucination"],
       },
     },
   ],
@@ -471,7 +475,7 @@ export default class RAGOrchestrator {
     workspaceId: string,
     userInput: string,
     _history: unknown
-  ): Promise<Result<Object, ReturnType<typeof this.buildGuardrailFailOutput>>> {
+  ): Promise<Result<ReturnType<typeof this.buildGuardrailFailOutput>>> {
     logger.debug("Running RAG Pipeline: ", {
       userInput: userInput,
     });
@@ -489,7 +493,7 @@ export default class RAGOrchestrator {
 
       return {
         success: false,
-        type: "Guardrail",
+        type: "InputGuardrail",
         data: guardrailsFailOutput,
       };
     }
@@ -550,15 +554,46 @@ export default class RAGOrchestrator {
       logger.debug("Relevant Context: ", relevanceCheckedContext.output_parsed.relevantResults);
       logger.debug("Discarded Context: ", relevanceCheckedContext.output_parsed.discardedResults);
 
+      const MAX_RELEVANT_RESULTS = 8;
+      const MIN_RELEVANCE_SCORE = 0.5;
+
+      const filteredRelevantResults = relevanceCheckedContext.output_parsed.relevantResults
+        .filter((item) => item.relevanceScore >= MIN_RELEVANCE_SCORE)
+        .sort((a, b) => a.rank - b.rank)
+        .slice(0, MAX_RELEVANT_RESULTS);
+
+      const trimmedContext = {
+        ...relevanceCheckedContext.output_parsed,
+        relevantResults: filteredRelevantResults,
+      };
+
       const response = await this.generateFinalResponse(
         guardrailsPassOutput.safe_text,
         output_text,
-        relevanceCheckedContext.output_parsed.relevantResults
+        trimmedContext
       );
+
+      const {
+        hasTripwire: outputTripwire,
+        failOutput: outputFailOutput,
+        passOutput: outputPassOutput,
+      } = await this.runAndApplyGuardrails(response.output_parsed.response, outputGuardrailsConfig);
+
+      logger.debug("Final response: ", {
+        response: response.output_parsed.response,
+      });
+
+      if (outputTripwire) {
+        return {
+          success: false,
+          type: "OuputGuardrail",
+          data: outputFailOutput,
+        };
+      }
 
       return {
         success: true,
-        data: response.output_parsed,
+        data: outputPassOutput.safe_text,
       };
     } catch (error) {
       return {
