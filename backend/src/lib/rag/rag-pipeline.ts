@@ -488,7 +488,7 @@ export default class RAGOrchestrator {
     const {
       hasTripwire: guardrailsHasTripwire,
       failOutput: guardrailsFailOutput,
-      passOutput: guardrailsPassOutput,
+      passOutput: inputPassOutput,
     } = await this.runAndApplyGuardrails(userInput, guardrailsConfig);
 
     if (guardrailsHasTripwire) {
@@ -504,11 +504,11 @@ export default class RAGOrchestrator {
     }
 
     logger.debug("User request passed guardrails: ", {
-      guardrailsPassOutput,
+      inputPassOutput,
     });
 
     const conversationHistory: UserMessageItem[] = [
-      { role: "user", content: [{ type: "input_text", text: guardrailsPassOutput.safe_text }] },
+      { role: "user", content: [{ type: "input_text", text: inputPassOutput.safe_text }] },
       // Figure out how to properly add historical chat context
     ];
 
@@ -522,7 +522,7 @@ export default class RAGOrchestrator {
 
       if (output_parsed.isRequestAmbiguous) {
         const response = await this.handleAmbiguousRequest(
-          guardrailsPassOutput.safe_text,
+          inputPassOutput.safe_text,
           output_parsed.reasoning
         );
         return {
@@ -539,7 +539,7 @@ export default class RAGOrchestrator {
       const context = await this.composeContext(
         output_parsed.actions,
         workspaceId,
-        guardrailsPassOutput.safe_text
+        inputPassOutput.safe_text
       );
 
       // Now that we have the context, we need to pass this into the relevanceJudgeAgent
@@ -572,11 +572,10 @@ export default class RAGOrchestrator {
         relevantResults: filteredRelevantResults,
       };
 
-      const response = await this.generateFinalResponse(
-        guardrailsPassOutput.safe_text,
-        output_text,
-        trimmedContext
-      );
+      const response = await this.generateFinalResponse(inputPassOutput.safe_text, output_text, {
+        requestSummary: relevanceCheckedContext.output_parsed.requestSummary,
+        relevantResults: trimmedContext,
+      });
 
       logger.debug("Final response: ", {
         response: response.output_parsed.response,
