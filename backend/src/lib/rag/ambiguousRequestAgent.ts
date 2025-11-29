@@ -11,7 +11,7 @@ export const AmbiguousRequestResponseAgentOptions = {
   instructions: `
 You receive:
 - The user's original message.
-- A short agent_reasoning string that explains why the request is ambiguous or underspecified.
+- A short agent_reasoning string produced by the intent classifier that explains why the request is ambiguous or underspecified.
 
 Your job:
 - Briefly restate what is unclear using one sentence.
@@ -31,6 +31,11 @@ Expected JSON:
   ],
   "userMessage": "To help, which document should I summarize? If it's the latest draft, please share the title or ID."
 }
+
+Reminder: You will be given two inputs in order:
+1) role=user with content.type=input_text: the original user request (guardrail-safe text)
+2) role=intent_classifier_agent with context.type=agent_reasoning: the classifier's reasoning about ambiguity
+Use both to craft clarifications.
 `,
   model: "gpt-4.1",
   outputType: AmbiguousRequestResponseSchema,

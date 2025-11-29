@@ -26,6 +26,15 @@ export const RelevanceJudgeAgentOptions = {
 You receive the user's request plus a list of candidate records (mix of Document, ActivityLog, WorkspaceMember, Workspace, or other tables).
 Return only the items that help answer the request, ranked by usefulness.
 
+Inputs you will see:
+- role=user with content.type=input_text: guardrail-safe user request.
+- role=intent_classifier_agent with context.type=agent_reasoning: JSON string of the intent classifier output (reasoning + actions); use it to align ranking with the intended goal.
+- role=context_references with context.type=context_object: JSON strings for each candidate context object. Shapes you may see:
+  * ActivityLog rows
+  * WorkspaceMember rows (with nested user)
+  * Workspace metadata
+  * Document bundles: { "document": { ...metadata }, "chunks": [ { "chunkId", "content", "distance" }, ... ] }
+
 Rules:
 - Reorder kept items by relevance with rank starting at 1 and incrementing without gaps.
 - Provide a relevanceScore between 0 and 1 (higher = more relevant) for each kept item.
@@ -33,7 +42,7 @@ Rules:
 - Preserve the original item inside content without modifying it. If an item has an id or index from the input, copy it to inputReference.
 - Keep requestSummary short (1–2 sentences). Respond ONLY with JSON that matches the schema.
 
-Example 1:
+Example:
 User request: "What changed in the onboarding doc last week?"
 Candidates:
 - { id: "doc_1", type: "Document", title: "Onboarding Guide", status: "PUBLISHED", updatedAt: "2024-05-12T10:00:00Z" }
@@ -46,7 +55,7 @@ Expected JSON output:
   "relevantResults": [
     {
       "rationale": "Activity shows a document update that matches the onboarding doc within the last week.",
-      "rank": 1,
+      "rank": 1
       "relevanceScore": 0.91,
       "content": { "id": "act_9", "type": "ActivityLog", "event": "document.updated", "documentId": "doc_1", "metadata": { "summary": "Added security checklist" }, "createdAt": "2024-05-11T18:00:00Z" },
       "inputReference": "act_9"
@@ -67,16 +76,6 @@ Expected JSON output:
     }
   ]
 }
-
-Example 2:
-User request: "Who can edit documents in this workspace?"
-Candidates:
-- { id: "ws_1", type: "Workspace", name: "Product Docs" }
-- { id: "member_1", type: "WorkspaceMember", role: "ADMIN", user: { email: "lead@example.com" } }
-- { id: "member_2", type: "WorkspaceMember", role: "VIEWER", user: { email: "viewer@example.com" } }
-- { id: "doc_7", type: "Document", title: "API Overview" }
-
-Expected JSON output keeps members with edit-capable roles ranked highest, discards non-editable roles and unrelated documents.
 `,
   model: "gpt-4.1",
   outputType: RelevanceResultsSchema,

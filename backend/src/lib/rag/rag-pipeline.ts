@@ -1,7 +1,15 @@
 import { OpenAI } from "openai";
 import { type GuardrailResult, type GuardrailBundle, runGuardrails } from "@openai/guardrails";
 import { z } from "zod";
-import { Agent, handoff, Runner, UserMessageItem, tool, setOpenAIAPI } from "@openai/agents";
+import {
+  Agent,
+  handoff,
+  Runner,
+  UserMessageItem,
+  SystemMessageItem,
+  tool,
+  setOpenAIAPI,
+} from "@openai/agents";
 import prisma from "@syncpad/prisma-client";
 import Prisma, { Prisma as PrismaNamespace } from "@generated/prisma-postgres/index.js";
 import config from "@/config/index.ts";
@@ -157,19 +165,152 @@ export default class RAGOrchestrator {
     return selectedIntentResult;
   }
 
-  private retrieveDocumentEmbeddings() {}
+  private async getWorkspaceContext(workspaceId: string) {
+    return prisma.workspace.findUnique({
+      where: {
+        id: workspaceId,
+      },
+      select: {
+        name: true,
+        id: true,
+        createdAt: true,
+        description: true,
+        updatedAt: true,
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
 
-  private retrieveDocumentInformation() {}
+  private async getActivityLogContext(workspaceId: string) {
+    return prisma.activityLog.findMany({
+      where: {
+        workspaceId: workspaceId,
+      },
+    });
+  }
 
-  private retrieveWorkspaceInformation() {}
+  private async getWorkspaceMemberContext(workspaceId: string) {
+    return prisma.workspaceMember.findMany({
+      where: {
+        workspaceId: workspaceId,
+      },
+      select: {
+        createdAt: true,
+        role: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
 
-  private retrieveActivityLogInformation() {}
+  private async generateQueryEmbedding(text: string) {
+    const embeddingResponse = await this.client.embeddings.create({
+      model: "text-embedding-3-small",
+      input: text,
+    });
 
-  private runRelevanceCheck() {}
+    const embedding = embeddingResponse.data?.[0]?.embedding;
+
+    if (!embedding) {
+      throw new Error("Failed to generate embedding for user query");
+    }
+
+    return embedding;
+  }
+
+  private async findSimilarDocuments(
+    workspaceId: string,
+    queryEmbedding: number[],
+    limit = 12,
+    maxDistance = 0.6, // TODO: tune with offline evals for this workspace/content mix
+    maxChunksPerDocument = 3
+  ) {
+    const embeddingVector = PrismaNamespace.sql`ARRAY[${PrismaNamespace.join(queryEmbedding)}]::vector`;
+
+    const rows = await prisma.$queryRaw<
+      Array<{ documentId: string; chunkId: string; content: string; distance: number }>
+    >(PrismaNamespace.sql`
+      SELECT "documentId", "chunkId", "content", (embedding <=> ${embeddingVector}) AS distance
+      FROM "document_embedding"
+      WHERE "workspaceId" = ${workspaceId}
+        AND (embedding <=> ${embeddingVector}) <= ${maxDistance}
+      ORDER BY embedding <=> ${embeddingVector}
+      LIMIT ${limit * maxChunksPerDocument}
+    `);
+
+    const grouped = new Map<
+      string,
+      Array<{ chunkId: string; content: string; distance: number }>
+    >();
+
+    for (const row of rows) {
+      if (row.distance > maxDistance) continue;
+      const collection = grouped.get(row.documentId) ?? [];
+      if (collection.length >= maxChunksPerDocument) continue;
+      collection.push({ chunkId: row.chunkId, content: row.content, distance: row.distance });
+      grouped.set(row.documentId, collection);
+    }
+
+    return grouped;
+  }
+
+  private async getDocumentContext(workspaceId: string, userInput: string) {
+    const documentContext: Array<{
+      document: Pick<Prisma.Document, "id" | "title" | "summary" | "status" | "updatedAt">;
+      chunks: Array<{ chunkId: string; content: string; distance: number }>;
+    }> = [];
+
+    const queryEmbedding = await this.generateQueryEmbedding(userInput);
+    const similarDocuments = await this.findSimilarDocuments(workspaceId, queryEmbedding);
+    const documentIds = Array.from(similarDocuments.keys());
+
+    if (documentIds.length) {
+      const documents = await prisma.document.findMany({
+        where: {
+          id: {
+            in: documentIds,
+          },
+        },
+        select: {
+          id: true,
+          title: true,
+          summary: true,
+          status: true,
+          updatedAt: true,
+        },
+      });
+
+      const documentLookup = new Map(documents.map((doc) => [doc.id, doc]));
+
+      for (const [documentId, chunks] of similarDocuments.entries()) {
+        const document = documentLookup.get(documentId);
+        if (!document) continue;
+
+        documentContext.push({
+          document,
+          chunks,
+        });
+      }
+    }
+
+    return documentContext;
+  }
 
   private async composeContext(
     actions: z.infer<typeof IntentSchema>["actions"],
-    workspaceId: string
+    workspaceId: string,
+    userInput: string
   ) {
     if (!actions || actions.length === 0) {
       throw new Error("composeContext requires a valid actions array");
@@ -180,10 +321,10 @@ export default class RAGOrchestrator {
     >();
 
     let context: (
-      | Partial<Prisma.ActivityLog>
-      | Partial<Prisma.Workspace>
-      | Partial<Prisma.Document>
-      | Partial<Prisma.WorkspaceMember>
+      | Awaited<ReturnType<typeof this.getActivityLogContext>>[number]
+      | NonNullable<Awaited<ReturnType<typeof this.getWorkspaceContext>>>
+      | Awaited<ReturnType<typeof this.getWorkspaceMemberContext>>[number]
+      | Awaited<ReturnType<typeof this.getDocumentContext>>[number]
     )[] = [];
 
     for (const action of actions) {
@@ -193,66 +334,34 @@ export default class RAGOrchestrator {
         requiredContextSources.add(requiredContext);
       }
     }
+    const activityLogsPromise = requiredContextSources.has("activityLogs")
+      ? this.getActivityLogContext(workspaceId)
+      : Promise.resolve<Awaited<ReturnType<typeof this.getActivityLogContext>>>([]);
 
-    if (requiredContextSources.has("activityLogs")) {
-      const activityLogs = await prisma.activityLog.findMany({
-        where: {
-          workspaceId: workspaceId,
-        },
-      });
-      context.push(...activityLogs);
-    }
+    const workspaceMembersPromise = requiredContextSources.has("collaborators")
+      ? this.getWorkspaceMemberContext(workspaceId)
+      : Promise.resolve<Awaited<ReturnType<typeof this.getWorkspaceMemberContext>>>([]);
 
-    if (requiredContextSources.has("collaborators")) {
-      const workspaceMembers = await prisma.workspaceMember.findMany({
-        where: {
-          workspaceId: workspaceId,
-        },
-        select: {
-          createdAt: true,
-          role: true,
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
-      });
+    const workspaceMetadataPromise = requiredContextSources.has("workspace")
+      ? this.getWorkspaceContext(workspaceId)
+      : Promise.resolve<Awaited<ReturnType<typeof this.getWorkspaceContext>>>(null);
 
-      context.push(...workspaceMembers);
-    }
+    const documentPromise = requiredContextSources.has("documents")
+      ? this.getDocumentContext(workspaceId, userInput)
+      : Promise.resolve<Awaited<ReturnType<typeof this.getDocumentContext>>>([]);
 
-    if (requiredContextSources.has("documents")) {
-      // Get embedding for user request, and then do some kind of similarity search based on documentEmbeddings
-      // Take the top X unique documents above some certain distance threshold and get them to push into context
-    }
+    const [activityLogs, workspaceMembers, workspaceMetadata, documents] = await Promise.all([
+      activityLogsPromise,
+      workspaceMembersPromise,
+      workspaceMetadataPromise,
+      documentPromise,
+    ]);
 
-    if (requiredContextSources.has("workspace")) {
-      const workspaceMetadata = await prisma.workspace.findUnique({
-        where: {
-          id: workspaceId,
-        },
-        select: {
-          name: true,
-          id: true,
-          createdAt: true,
-          description: true,
-          updatedAt: true,
-          createdBy: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
-      });
-
-      if (workspaceMetadata) {
-        context.push(workspaceMetadata);
-      }
+    context.push(...documents);
+    context.push(...activityLogs);
+    context.push(...workspaceMembers);
+    if (workspaceMetadata !== null) {
+      context.push(workspaceMetadata);
     }
 
     return context;
@@ -261,7 +370,7 @@ export default class RAGOrchestrator {
   private async handleAmbiguousRequest(userInput: string, reasoning: string) {
     const ambiguousRequestResponse = await this.runner.run(this.ambiguousRequestResponseAgent, [
       { role: "user", content: [{ type: "input_text", text: userInput }] },
-      { role: "Agent", context: [{ type: "agent_reasoning", text: reasoning }] },
+      { role: "intent_classifier_agent", context: [{ type: "agent_reasoning", text: reasoning }] },
     ]);
 
     if (!ambiguousRequestResponse.finalOutput) {
@@ -280,6 +389,77 @@ export default class RAGOrchestrator {
     };
 
     return selectedIntentResult;
+  }
+
+  private async contextRelevanceCheck(
+    context: object[],
+    userInput: string,
+    intentSchemaOutput: string
+  ) {
+    const relevanceJudgeResponse = await this.runner.run(this.relevanceJudgeAgent, [
+      { role: "user", content: [{ type: "input_text", text: userInput }] },
+      {
+        role: "intent_classifier_agent",
+        context: [{ type: "agent_reasoning", text: intentSchemaOutput }],
+      },
+      {
+        role: "context_references",
+        context: context.map((contextObject) => ({
+          type: "context_object",
+          text: JSON.stringify(contextObject),
+        })),
+      },
+    ]);
+
+    if (!relevanceJudgeResponse.finalOutput) {
+      throw new Error("Agent result is undefined");
+    }
+
+    const result = RelevanceResultsSchema.safeParse(relevanceJudgeResponse.finalOutput);
+
+    if (!result.success) {
+      throw new Error("Agent did not return the correct schema");
+    }
+
+    const relevanceCheckedContext = {
+      output_text: JSON.stringify(relevanceJudgeResponse.finalOutput),
+      output_parsed: result.data,
+    };
+
+    return relevanceCheckedContext;
+  }
+
+  private async generateFinalResponse(
+    userInput: string,
+    intentSchemaOutput: string,
+    relevanceCheckedContext: object
+  ) {
+    const response = await this.runner.run(this.responseGeneratorAgent, [
+      { role: "user", content: [{ type: "input_text", text: userInput }] },
+      {
+        role: "intent_classifier_agent",
+        context: [{ type: "agent_reasoning", text: intentSchemaOutput }],
+      },
+      {
+        role: "relevance_judge",
+        context: [{ type: "context_object", text: JSON.stringify(relevanceCheckedContext) }],
+      },
+    ]);
+
+    if (!response.finalOutput) {
+      throw new Error("Agent result is undefined");
+    }
+
+    const parsed = ResponseGeneratorSchema.safeParse(response.finalOutput);
+
+    if (!parsed.success) {
+      throw new Error("Agent did not return the correct schema");
+    }
+
+    return {
+      output_text: JSON.stringify(response.finalOutput),
+      output_parsed: parsed.data,
+    };
   }
 
   // We probably want to add the ability to insert previous historical context from the chat
@@ -347,17 +527,38 @@ export default class RAGOrchestrator {
         throw new Error("Intent is not ambiguous but no actions generated");
       }
 
-      const context = await this.composeContext(output_parsed.actions, workspaceId);
+      const context = await this.composeContext(
+        output_parsed.actions,
+        workspaceId,
+        guardrailsPassOutput.safe_text
+      );
 
-      const finalAnswer: string | null = "test";
+      // Now that we have the context, we need to pass this into the relevanceJudgeAgent
+      // this agent should rerank and filter this context to get the most relevant context for the user input
+      // I think it may be wise to use the user input, the parsed output from the IntentClassifierAgent
+      // (so we have the intent as well as each action item we need to complete), and the context we pulled from the database
+      // This agent should get relevant and non-relvant stuff and send it to the last agent that will compose the response
+      const relevanceCheckedContext = await this.contextRelevanceCheck(
+        context,
+        userInput,
+        output_text
+      );
 
-      if (!finalAnswer || !finalAnswer.length) {
-        throw new Error("RAG Failed");
-      }
+      logger.debug("Relevance Check Summary: ", {
+        summary: relevanceCheckedContext.output_parsed.requestSummary,
+      });
+      logger.debug("Relevant Context: ", relevanceCheckedContext.output_parsed.relevantResults);
+      logger.debug("Discarded Context: ", relevanceCheckedContext.output_parsed.discardedResults);
+
+      const response = await this.generateFinalResponse(
+        guardrailsPassOutput.safe_text,
+        output_text,
+        relevanceCheckedContext.output_parsed.relevantResults
+      );
 
       return {
         success: true,
-        data: {},
+        data: response.output_parsed,
       };
     } catch (error) {
       return {
