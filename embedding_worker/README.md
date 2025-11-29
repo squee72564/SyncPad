@@ -24,7 +24,7 @@ The embedding worker ingests document jobs from Redis Streams, chunks document c
 
 - Redis: `REDIS_URL`, `REDIS_STREAM_KEY`, `REDIS_CONSUMER_GROUP`.
 - Chunking: `EMBEDDING_CHUNK_*` tokens + chars per token.
-- Provider: `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`, `EMBEDDING_BASE_URL`, `EMBEDDING_API_KEY`, timeouts, max batch size, concurrency, retries, and token limits.
+- Provider: `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`, `EMBEDDING_BASE_URL`, `LLM_API_KEY`, timeouts, max batch size, concurrency, retries, and token limits.
 
 Place `.env.development` / `.env.production` files in the repo root and populate the required variables before running `pnpm --filter ./embedding_worker start:dev`.
 

@@ -4,7 +4,7 @@ const mockConfig = {
   EMBEDDING_PROVIDER: "openai",
   EMBEDDING_MODEL: "test-model",
   EMBEDDING_BASE_URL: "https://example.com",
-  EMBEDDING_API_KEY: "test-key",
+  LLM_API_KEY: "test-key",
   EMBEDDING_TIMEOUT_MS: 1000,
   EMBEDDING_MAX_BATCH: 2,
   EMBEDDING_CONCURRENCY: 2,
@@ -38,7 +38,7 @@ const resetConfig = (overrides: Record<string, unknown> = {}) => {
     EMBEDDING_PROVIDER: "openai",
     EMBEDDING_MODEL: "test-model",
     EMBEDDING_BASE_URL: "https://example.com",
-    EMBEDDING_API_KEY: "test-key",
+    LLM_API_KEY: "test-key",
     EMBEDDING_TIMEOUT_MS: 1000,
     EMBEDDING_MAX_BATCH: 2,
     EMBEDDING_CONCURRENCY: 2,
@@ -140,7 +140,7 @@ describe("createEmbeddingProvider", () => {
   });
 
   it("requires API key for OpenAI provider", async () => {
-    resetConfig({ EMBEDDING_API_KEY: undefined });
+    resetConfig({ LLM_API_KEY: undefined });
     const provider = createEmbeddingProvider();
     await expect(provider.generateEmbeddings(["a"])).rejects.toThrow(
       "OpenAI API key is not configured"
