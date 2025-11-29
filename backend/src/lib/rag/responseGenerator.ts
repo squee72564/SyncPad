@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ModelSettings } from "@openai/agents";
 
 export const ResponseGeneratorSchema = z.object({
   response: z.string(),
@@ -23,7 +24,6 @@ You will be given:
       },
       ...
     ],
-    "discardedResults": [...]
   }
   Records may include document bundles like { "document": { id, title, summary, status, updatedAt, workspaceId }, "chunks": [ { chunkId, content, distance }, ... ] } or other tables (ActivityLog, WorkspaceMember, Workspace).
 
@@ -43,10 +43,11 @@ Expected response JSON:
   "response": "The onboarding guide was updated last week to add a security checklist to the process."
 }
 `,
-  model: "gpt-4.1",
+  model: "gpt-5",
   outputType: ResponseGeneratorSchema,
   modelSettings: {
     toolChoice: "none",
     store: false,
-  },
+    reasoning: { effort: "medium", summary: "concise" },
+  } as ModelSettings,
 };
