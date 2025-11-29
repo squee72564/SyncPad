@@ -1,7 +1,7 @@
 import { OpenAI } from "openai";
 import { type GuardrailResult, type GuardrailBundle, runGuardrails } from "@openai/guardrails";
 import { z } from "zod";
-import { Agent, Runner, UserMessageItem, setOpenAIAPI } from "@openai/agents";
+import { Agent, OpenAIProvider, Runner, UserMessageItem, setOpenAIAPI } from "@openai/agents";
 import prisma from "@syncpad/prisma-client";
 import Prisma, { Prisma as PrismaNamespace } from "@generated/prisma-postgres/index.js";
 import config from "@/config/index.ts";
@@ -65,8 +65,6 @@ export default class RAGOrchestrator {
   private ambiguousRequestResponseAgent: Agent<unknown, typeof AmbiguousRequestResponseSchema>;
 
   constructor() {
-    setOpenAIAPI("responses");
-
     this.client = new OpenAI({ apiKey: config.LLM_API_KEY, organization: "Syncpad" });
     this.runner = new Runner({
       workflowName: "Syncpad RAG Orchestrator",
@@ -74,7 +72,14 @@ export default class RAGOrchestrator {
         __trace_source__: "RAG-Orchestrator",
         workflow_id: "wf_692620119e349190ba8174a658c8e0a00a005c7883024fc0",
       },
+      modelProvider: new OpenAIProvider({
+        apiKey: config.LLM_API_KEY,
+        useResponses: true,
+        organization: "Syncpad",
+      }),
     });
+
+    setOpenAIAPI("responses");
 
     this.ambiguousRequestResponseAgent = new Agent({ ...AmbiguousRequestResponseAgentOptions });
 
@@ -573,15 +578,15 @@ export default class RAGOrchestrator {
         trimmedContext
       );
 
+      logger.debug("Final response: ", {
+        response: response.output_parsed.response,
+      });
+
       const {
         hasTripwire: outputTripwire,
         failOutput: outputFailOutput,
         passOutput: outputPassOutput,
       } = await this.runAndApplyGuardrails(response.output_parsed.response, outputGuardrailsConfig);
-
-      logger.debug("Final response: ", {
-        response: response.output_parsed.response,
-      });
 
       if (outputTripwire) {
         return {
