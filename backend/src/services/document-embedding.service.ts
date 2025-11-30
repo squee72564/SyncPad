@@ -1,7 +1,13 @@
-import { ListDocumentEmbeddingArgs } from "@/types/document-embedding.types.ts";
+import {
+  ListDocumentEmbeddingArgs,
+  SimilarDocumentEmbeddingsArgs,
+} from "@/types/document-embedding.types.ts";
 import { buildPaginationParams, paginateItems } from "@/utils/pagination.ts";
 import Prisma, { Prisma as PrismaNamespace } from "@generated/prisma-postgres/index.js";
 import prisma from "@syncpad/prisma-client";
+
+const DEFAULT_SIMILAR_LIMIT = 10;
+const MAX_SIMILAR_LIMIT = 50;
 
 const deleteDocumentEmbeddings = async (documentId: string, revisionId?: string) => {
   return prisma.documentEmbedding.deleteMany({
@@ -56,7 +62,50 @@ const listDocumentEmbeddings = async (args: ListDocumentEmbeddingArgs) => {
   };
 };
 
+const findSimilarDocuments = async (args: {
+  workspaceId: SimilarDocumentEmbeddingsArgs["workspaceId"];
+  documentId: SimilarDocumentEmbeddingsArgs["documentId"];
+  limit?: SimilarDocumentEmbeddingsArgs["limit"];
+}) => {
+  const limit = Math.min(args.limit ?? DEFAULT_SIMILAR_LIMIT, MAX_SIMILAR_LIMIT);
+
+  const hasSourceEmbeddings = await prisma.documentEmbedding.count({
+    where: { workspaceId: args.workspaceId, documentId: args.documentId },
+  });
+
+  if (!hasSourceEmbeddings) {
+    return null;
+  }
+
+  const rows = await prisma.$queryRaw<{ documentId: string; distance: number }[]>(
+    PrismaNamespace.sql`
+      WITH source_chunks AS (
+        SELECT embedding
+        FROM "document_embedding"
+        WHERE "workspaceId" = ${args.workspaceId}
+          AND "documentId" = ${args.documentId}
+      ),
+      scored AS (
+        SELECT other."documentId" AS "documentId",
+               MIN(other.embedding <-> source_chunks.embedding) AS distance
+        FROM source_chunks
+        JOIN "document_embedding" other
+          ON other."workspaceId" = ${args.workspaceId}
+         AND other."documentId" <> ${args.documentId}
+        GROUP BY other."documentId"
+      )
+      SELECT "documentId", distance
+      FROM scored
+      ORDER BY distance ASC, "documentId" ASC
+      LIMIT ${limit}
+    `
+  );
+
+  return { similarDocuments: rows };
+};
+
 export default {
   deleteDocumentEmbeddings,
   listDocumentEmbeddings,
+  findSimilarDocuments,
 };
