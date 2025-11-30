@@ -1,22 +1,23 @@
+import { ModelSettings } from "@openai/agents";
 import { z } from "zod";
 
 const RankedResultSchema = z.object({
   rationale: z.string(),
   rank: z.number().int().positive(),
   relevanceScore: z.number().min(0).max(1),
-  content: z.unknown(),
-  inputReference: z.union([z.string(), z.number()]).optional(),
+  content: z.string(),
+  inputReference: z.union([z.string(), z.number()]).nullable(),
 });
 
 const DiscardedResultSchema = z.object({
   rationale: z.string(),
-  content: z.unknown(),
-  inputReference: z.union([z.string(), z.number()]).optional(),
+  content: z.string(),
+  inputReference: z.union([z.string(), z.number()]).nullable(),
 });
 
 export const RelevanceResultsSchema = z.object({
   requestSummary: z.string(),
-  relevantResults: z.array(RankedResultSchema).nonempty(),
+  relevantResults: z.array(RankedResultSchema).default([]),
   discardedResults: z.array(DiscardedResultSchema).default([]),
 });
 
@@ -28,8 +29,8 @@ Return only the items that help answer the request, ranked by usefulness.
 
 Inputs you will see:
 - role=user with content.type=input_text: guardrail-safe user request.
-- role=intent_classifier_agent with context.type=agent_reasoning: JSON string of the intent classifier output (reasoning + actions); use it to align ranking with the intended goal.
-- role=context_references with context.type=context_object: JSON strings for each candidate context object. Shapes you may see:
+- role=system with content.type=input_text: JSON string of the intent classifier output (reasoning + actions); use it to align ranking with the intended goal.
+- role=system with content.type=input_text: List of JSON strings for each candidate context object. Shapes you may see:
   * ActivityLog rows
   * WorkspaceMember rows (with nested user)
   * Workspace metadata
@@ -82,5 +83,10 @@ Expected JSON output:
   modelSettings: {
     toolChoice: "none",
     store: false,
-  },
+    temperature: 0.2,
+    //reasoning: {
+    //  effort: "medium",
+    //  summary: "concise",
+    //}
+  } as ModelSettings,
 };
