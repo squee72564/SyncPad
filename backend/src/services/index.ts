@@ -7,6 +7,7 @@ import shareLinkService from "@/services/share-link.service.js";
 import userService from "@/services/user.service.js";
 import workspaceService from "@/services/workspace.service.js";
 import aiJobService from "@/services/aiJob.service.ts";
+import ragService from "./rag.service.ts";
 
 export {
   activityLogService,
@@ -18,4 +19,5 @@ export {
   userService,
   workspaceService,
   aiJobService,
+  ragService,
 };

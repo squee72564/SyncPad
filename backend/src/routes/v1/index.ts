@@ -10,6 +10,7 @@ import shareLinkPublicRoute from "./share-link.public.route.js";
 import activityLogRoute from "./activity-log.route.js";
 import aiJobRoute from "./ai-job.route.ts";
 import documentEmbeddingRoute from "./document-embedding.route.ts";
+import ragRoute from "./rag.route.ts";
 
 const router: Router = express.Router();
 
@@ -53,6 +54,10 @@ const defaultRoutes = [
   {
     path: "/workspaces/:workspaceId/ai-jobs",
     route: aiJobRoute,
+  },
+  {
+    path: "/workspaces/:workspaceId/rag",
+    route: ragRoute,
   },
 ] as { path: string; route: Router }[];
 
