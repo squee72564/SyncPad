@@ -14,13 +14,15 @@ import prisma from "@syncpad/prisma-client";
 import Prisma, { Prisma as PrismaNamespace } from "@generated/prisma-postgres/index.js";
 import config from "@/config/index.ts";
 import logger from "@/config/logger.ts";
-import { IntentAgentOptions, IntentSchema } from "./intentClassifier.ts";
+import { IntentAgentOptions, IntentSchema } from "./intentClassifierAgent.ts";
 import { RelevanceJudgeAgentOptions, RelevanceResultsSchema } from "./relevanceJudge.ts";
 import { ResponseGeneratorAgentOptions, ResponseGeneratorSchema } from "./responseGenerator.ts";
 import {
   AmbiguousRequestResponseAgentOptions,
   AmbiguousRequestResponseSchema,
 } from "./ambiguousRequestAgent.ts";
+import { QueryNormalizerAgentOptions, QueryNormalizerAgentSchema } from "./queryNormalizerAgent.ts";
+import { ContextRetrievalAgentOptions, ContextRetrievalSchema } from "./contextRetrievalAgent.ts";
 
 export type Result<U> =
   | { success: true; data: string }
@@ -56,9 +58,11 @@ export default class RAGOrchestrator {
   private client: OpenAI;
   private runner: Runner;
   private intentClassifierAgent: Agent<unknown, typeof IntentSchema>;
+  private queryNormalizerAgent: Agent<unknown, typeof QueryNormalizerAgentSchema>;
   private relevanceJudgeAgent: Agent<unknown, typeof RelevanceResultsSchema>;
   private responseGeneratorAgent: Agent<unknown, typeof ResponseGeneratorSchema>;
   private ambiguousRequestResponseAgent: Agent<unknown, typeof AmbiguousRequestResponseSchema>;
+  private contextRetrivalAgent: Agent<unknown, typeof ContextRetrievalSchema>;
 
   constructor() {
     this.client = new OpenAI({ apiKey: config.LLM_API_KEY });
@@ -81,6 +85,10 @@ export default class RAGOrchestrator {
     this.relevanceJudgeAgent = new Agent({ ...RelevanceJudgeAgentOptions });
 
     this.intentClassifierAgent = new Agent({ ...IntentAgentOptions });
+
+    this.queryNormalizerAgent = new Agent({ ...QueryNormalizerAgentOptions });
+
+    this.contextRetrivalAgent = new Agent({ ...ContextRetrievalAgentOptions });
   }
 
   private guardrailsHasTripwire(results: GuardrailResult[]): boolean {
@@ -143,6 +151,30 @@ export default class RAGOrchestrator {
     };
   }
 
+  private async normalizeQuery(conversationHistory: UserMessageItem[]) {
+    const normalizedQueriesResponse = await this.runner.run(
+      this.queryNormalizerAgent,
+      conversationHistory
+    );
+
+    if (!normalizedQueriesResponse) {
+      throw new Error("Query normalizer Agent result is undefined");
+    }
+
+    const result = QueryNormalizerAgentSchema.safeParse(normalizedQueriesResponse.finalOutput);
+
+    if (!result.success) {
+      throw new Error("Query normalizer Agent did not return correct schema");
+    }
+
+    const normalizedQueryResult = {
+      output_text: JSON.stringify(normalizedQueriesResponse.finalOutput),
+      output_parsed: result.data,
+    };
+
+    return normalizedQueryResult;
+  }
+
   private async classifyIntent(conversationHistory: UserMessageItem[]) {
     const selectedIntentResponse = await this.runner.run(
       this.intentClassifierAgent,
@@ -150,13 +182,13 @@ export default class RAGOrchestrator {
     );
 
     if (!selectedIntentResponse.finalOutput) {
-      throw new Error("Agent result is undefined");
+      throw new Error("Intent Agent result is undefined");
     }
 
-    const result = z.safeParse(IntentSchema, selectedIntentResponse.finalOutput);
+    const result = IntentSchema.safeParse(selectedIntentResponse.finalOutput);
 
     if (!result.success) {
-      throw new Error("Agent did not return the correct schema");
+      throw new Error("Intent Agent did not return the correct schema");
     }
 
     const selectedIntentResult = {
@@ -165,55 +197,6 @@ export default class RAGOrchestrator {
     };
 
     return selectedIntentResult;
-  }
-
-  private async getWorkspaceContext(workspaceId: string) {
-    return prisma.workspace.findUnique({
-      where: {
-        id: workspaceId,
-      },
-      select: {
-        name: true,
-        id: true,
-        createdAt: true,
-        description: true,
-        updatedAt: true,
-        createdBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
-  }
-
-  private async getActivityLogContext(workspaceId: string) {
-    return prisma.activityLog.findMany({
-      where: {
-        workspaceId: workspaceId,
-      },
-    });
-  }
-
-  private async getWorkspaceMemberContext(workspaceId: string) {
-    return prisma.workspaceMember.findMany({
-      where: {
-        workspaceId: workspaceId,
-      },
-      select: {
-        createdAt: true,
-        role: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
   }
 
   private async generateQueryEmbedding(text: string) {
@@ -234,8 +217,8 @@ export default class RAGOrchestrator {
   private async findSimilarDocuments(
     workspaceId: string,
     queryEmbedding: number[],
-    limit = 12,
-    maxDistance = 0.6, // TODO: tune with offline evals for this workspace/content mix
+    limit = 10,
+    maxDistance = 0.55,
     maxChunksPerDocument = 3
   ) {
     const embeddingVector = PrismaNamespace.sql`ARRAY[${PrismaNamespace.join(queryEmbedding)}]::vector`;
@@ -309,66 +292,6 @@ export default class RAGOrchestrator {
     return documentContext;
   }
 
-  private async composeContext(
-    actions: z.infer<typeof IntentSchema>["actions"],
-    workspaceId: string,
-    userInput: string
-  ) {
-    if (!actions || actions.length === 0) {
-      throw new Error("composeContext requires a valid actions array");
-    }
-
-    let requiredContextSources = new Set<
-      "workspace" | "documents" | "activityLogs" | "collaborators"
-    >();
-
-    let context: (
-      | Awaited<ReturnType<typeof this.getActivityLogContext>>[number]
-      | NonNullable<Awaited<ReturnType<typeof this.getWorkspaceContext>>>
-      | Awaited<ReturnType<typeof this.getWorkspaceMemberContext>>[number]
-      | Awaited<ReturnType<typeof this.getDocumentContext>>[number]
-    )[] = [];
-
-    for (const action of actions) {
-      if (!action.requiredContextSources) continue;
-
-      for (const requiredContext of action.requiredContextSources) {
-        requiredContextSources.add(requiredContext);
-      }
-    }
-    const activityLogsPromise = requiredContextSources.has("activityLogs")
-      ? this.getActivityLogContext(workspaceId)
-      : Promise.resolve<Awaited<ReturnType<typeof this.getActivityLogContext>>>([]);
-
-    const workspaceMembersPromise = requiredContextSources.has("collaborators")
-      ? this.getWorkspaceMemberContext(workspaceId)
-      : Promise.resolve<Awaited<ReturnType<typeof this.getWorkspaceMemberContext>>>([]);
-
-    const workspaceMetadataPromise = requiredContextSources.has("workspace")
-      ? this.getWorkspaceContext(workspaceId)
-      : Promise.resolve<Awaited<ReturnType<typeof this.getWorkspaceContext>>>(null);
-
-    const documentPromise = requiredContextSources.has("documents")
-      ? this.getDocumentContext(workspaceId, userInput)
-      : Promise.resolve<Awaited<ReturnType<typeof this.getDocumentContext>>>([]);
-
-    const [activityLogs, workspaceMembers, workspaceMetadata, documents] = await Promise.all([
-      activityLogsPromise,
-      workspaceMembersPromise,
-      workspaceMetadataPromise,
-      documentPromise,
-    ]);
-
-    context.push(...documents);
-    context.push(...activityLogs);
-    context.push(...workspaceMembers);
-    if (workspaceMetadata !== null) {
-      context.push(workspaceMetadata);
-    }
-
-    return context;
-  }
-
   private async handleAmbiguousRequest(userInput: string, reasoning: string) {
     const ambiguousRequestResponse = await this.runner.run(this.ambiguousRequestResponseAgent, [
       {
@@ -384,13 +307,13 @@ export default class RAGOrchestrator {
     ]);
 
     if (!ambiguousRequestResponse.finalOutput) {
-      throw new Error("Agent result is undefined");
+      throw new Error("Ambiguous Request Response Agent result is undefined");
     }
 
     const result = AmbiguousRequestResponseSchema.safeParse(ambiguousRequestResponse.finalOutput);
 
     if (!result.success) {
-      throw new Error("Agent did not return the correct schema");
+      throw new Error("Ambiguous Request Reponse Agent did not return the correct schema");
     }
 
     const selectedIntentResult = {
@@ -430,19 +353,19 @@ export default class RAGOrchestrator {
         ],
         context: {
           description:
-            "This is application data that was retrieved for this user request. Only use these for your task.",
+            "This is application data that was retrieved for this user request. Only use these for your task. If there is nothing do not insert any data for the response.",
         },
       },
     ]);
 
     if (!relevanceJudgeResponse.finalOutput) {
-      throw new Error("Agent result is undefined");
+      throw new Error("Relevance Judge Agent result is undefined");
     }
 
     const result = RelevanceResultsSchema.safeParse(relevanceJudgeResponse.finalOutput);
 
     if (!result.success) {
-      throw new Error("Agent did not return the correct schema");
+      throw new Error("Relevance Judge Agent did not return the correct schema");
     }
 
     const relevanceCheckedContext = {
@@ -453,10 +376,55 @@ export default class RAGOrchestrator {
     return relevanceCheckedContext;
   }
 
+  private async getContextFromAgent(
+    userInput: string,
+    workspaceId: string,
+    intentSchemaOutput: string
+  ) {
+    const contextRetrievalResponse = await this.runner.run(this.contextRetrivalAgent, [
+      {
+        role: "user",
+        content: [{ type: "input_text", text: userInput }],
+        context: { description: "This is the user input" },
+      },
+      {
+        role: "system",
+        content: [{ type: "input_text", text: intentSchemaOutput }],
+        context: {
+          description:
+            "This is a schema generated by the intent classifier agent. It breaks down the intent of the request into actions",
+        },
+      },
+      {
+        role: "system",
+        content: [{ type: "input_text", text: JSON.stringify({ workspaceId: workspaceId }) }],
+        context: {
+          description: "This is the workspace ID. You will need this for all tool calling ",
+        },
+      },
+    ]);
+
+    if (!contextRetrievalResponse.finalOutput) {
+      throw Error("Context Retrieval Agent result is undefined");
+    }
+
+    const result = ContextRetrievalSchema.safeParse(contextRetrievalResponse.finalOutput);
+
+    if (!result.success) {
+      throw Error("Context Retrieval Agent did not return the correct schema");
+    }
+
+    return {
+      output_text: contextRetrievalResponse.finalOutput,
+      output_parsed: result.data,
+    };
+  }
+
   private async generateFinalResponse(
     userInput: string,
     intentSchemaOutput: string,
-    relevanceCheckedContext: object
+    relevanceCheckedContext: object,
+    additionalContext: object
   ) {
     const response = await this.runner.run(this.responseGeneratorAgent, [
       {
@@ -479,16 +447,23 @@ export default class RAGOrchestrator {
           description: "This is relevant content that has been ranked by a relevance judge agent.",
         },
       },
+      {
+        role: "system",
+        content: [{ type: "input_text", text: JSON.stringify(additionalContext) }],
+        context: {
+          description: "This is additional context pulled in from a previous agent.",
+        },
+      },
     ]);
 
     if (!response.finalOutput) {
-      throw new Error("Agent result is undefined");
+      throw new Error("Final Response Agent result is undefined");
     }
 
     const parsed = ResponseGeneratorSchema.safeParse(response.finalOutput);
 
     if (!parsed.success) {
-      throw new Error("Agent did not return the correct schema");
+      throw new Error("Final Response Agent did not return the correct schema");
     }
 
     return {
@@ -535,16 +510,20 @@ export default class RAGOrchestrator {
     ];
 
     try {
-      const { output_text, output_parsed } = await this.classifyIntent(conversationHistory);
+      const [intentResult, normalizedQueryResult] = await Promise.all([
+        this.classifyIntent(conversationHistory),
+        this.normalizeQuery(conversationHistory),
+      ]);
 
-      logger.debug("Ran agent to classify intent of user query: ", {
-        output_parsed,
+      logger.debug("Classified intent and normalized queries", {
+        intent: intentResult.output_parsed,
+        queries: normalizedQueryResult.output_parsed,
       });
 
-      if (output_parsed.isRequestAmbiguous) {
+      if (intentResult.output_parsed.isRequestAmbiguous) {
         const response = await this.handleAmbiguousRequest(
           inputPassOutput.safe_text,
-          output_parsed.reasoning
+          intentResult.output_parsed.reasoning
         );
         return {
           success: false,
@@ -553,59 +532,73 @@ export default class RAGOrchestrator {
         };
       }
 
-      if (!output_parsed.actions || output_parsed.actions.length === 0) {
+      if (!intentResult.output_parsed.actions || intentResult.output_parsed.actions.length === 0) {
         throw new Error("Intent is not ambiguous but no actions generated");
       }
 
-      const context = await this.composeContext(
-        output_parsed.actions,
-        workspaceId,
-        inputPassOutput.safe_text
+      const documentCollections = normalizedQueryResult.output_parsed.normalizedQueries
+        ? await Promise.all(
+            normalizedQueryResult.output_parsed.normalizedQueries.map((normQueries) =>
+              this.getDocumentContext(workspaceId, normQueries.normalizedQuery)
+            )
+          )
+        : [];
+      const uniqueDocumentSet = new Set<string>();
+
+      const uniqueDocuments = documentCollections.flatMap((documentCollection) =>
+        documentCollection.filter((documentData) => {
+          if (uniqueDocumentSet.has(documentData.document.id)) {
+            return false;
+          }
+          uniqueDocumentSet.add(documentData.document.id);
+          return true;
+        })
       );
 
-      logger.debug("Context retrieved: ", {
-        context: context,
+      logger.debug("Potential Relevant Documents: ", {
+        uniqueDocuments: uniqueDocuments,
       });
 
-      if (!context || context.length === 0) {
+      const obj = {
+        requestSummary: "There are no relevant documents based on the user request",
+        relevantResults: null,
+        discardedResults: null,
+      };
+
+      const relevanceCheck =
+        uniqueDocuments.length === 0
+          ? Promise.resolve({ output_text: JSON.stringify(obj), output_parsed: obj })
+          : this.contextRelevanceCheck(uniqueDocuments, userInput, intentResult.output_text);
+
+      const [relevanceCheckedDocuments, additionalContext] = await Promise.all([
+        relevanceCheck,
+        this.getContextFromAgent(userInput, workspaceId, intentResult.output_text),
+      ]);
+
+      const { output_parsed: relevanceCheckedChunks, output_text: _relevanceCheckedChunks } =
+        relevanceCheckedDocuments;
+      const { output_parsed: additionalContextParsed, output_text: _additionalContextText } =
+        additionalContext;
+
+      logger.debug("Data after relevance check and context retrieval from agent: ", {
+        relevanceCheck: relevanceCheckedChunks,
+        additional_context: additionalContextParsed,
+      });
+
+      const documentChunksAbsent =
+        !relevanceCheckedChunks.relevantResults ||
+        relevanceCheckedChunks.relevantResults.length == 0;
+      const additionalContentAbsent =
+        !additionalContextParsed.activityLogs &&
+        !additionalContextParsed.workspace &&
+        !additionalContextParsed.workspaceMembers;
+
+      if (documentChunksAbsent && additionalContentAbsent) {
         const response = await this.handleAmbiguousRequest(
           inputPassOutput.safe_text,
           `
-          There is no relevant context for this request.
-          We should inform the user that we could not find any related information and
-          we should ask the user to specify possible data sources:
-          "documents" | "workspace" | "activity logs" | "collaborators".
-          You only have access to data within this application so do not mention or prompt
-          for any generalized data.
-          `
-        );
-        return {
-          success: false,
-          type: "Agent",
-          error: response.output_parsed.userMessage,
-        };
-      }
-
-      const { output_parsed: relevanceCheckedParsed, output_text: relevanceCheckedText } =
-        await this.contextRelevanceCheck(context, userInput, output_text);
-
-      logger.debug("Relevance Checked Data: ", {
-        summary: relevanceCheckedParsed.requestSummary,
-        relevant_data: relevanceCheckedParsed.relevantResults,
-        non_relevant_data: relevanceCheckedParsed.discardedResults,
-      });
-
-      if (
-        !relevanceCheckedParsed.relevantResults ||
-        relevanceCheckedParsed.relevantResults.length === 0
-      ) {
-        const response = await this.handleAmbiguousRequest(
-          inputPassOutput.safe_text,
-          `
-          There is no relevant context for this request.
-          The rationale for the context that we recieved but decided was not relevant is as follows:
-          ${relevanceCheckedParsed.discardedResults.map((contextObject) => ({ rationale: contextObject.rationale }))}
-          Please let the user know that we did not find the requested information and prompt clarifying questions.
+          There is no relevant context for this request. Tell the user that you could not find any information
+          about the request, and that you would be happy to answer any other questions they have.
           `
         );
         return {
@@ -618,19 +611,26 @@ export default class RAGOrchestrator {
       const MAX_RELEVANT_RESULTS = 8;
       const MIN_RELEVANCE_SCORE = 0.5;
 
-      const filteredRelevantResults = relevanceCheckedParsed.relevantResults
-        .filter((item) => item.relevanceScore >= MIN_RELEVANCE_SCORE)
-        .sort((a, b) => a.rank - b.rank)
-        .slice(0, MAX_RELEVANT_RESULTS);
+      const filteredRelevantResults = relevanceCheckedChunks.relevantResults
+        ? relevanceCheckedChunks.relevantResults
+            .filter((item) => item.relevanceScore >= MIN_RELEVANCE_SCORE)
+            .sort((a, b) => a.rank - b.rank)
+            .slice(0, MAX_RELEVANT_RESULTS)
+        : [];
 
       const trimmedContext = {
         relevantResults: filteredRelevantResults,
       };
 
-      const response = await this.generateFinalResponse(inputPassOutput.safe_text, output_text, {
-        requestSummary: relevanceCheckedParsed.requestSummary,
-        relevantResults: trimmedContext,
-      });
+      const response = await this.generateFinalResponse(
+        inputPassOutput.safe_text,
+        intentResult.output_text,
+        {
+          requestSummary: relevanceCheckedChunks.requestSummary,
+          relevantResults: trimmedContext,
+        },
+        additionalContext
+      );
 
       logger.debug("Final response: ", {
         response: response.output_parsed.response,

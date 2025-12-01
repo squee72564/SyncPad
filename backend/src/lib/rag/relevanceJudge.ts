@@ -17,8 +17,8 @@ const DiscardedResultSchema = z.object({
 
 export const RelevanceResultsSchema = z.object({
   requestSummary: z.string(),
-  relevantResults: z.array(RankedResultSchema).default([]),
-  discardedResults: z.array(DiscardedResultSchema).default([]),
+  relevantResults: z.array(RankedResultSchema).nullable(),
+  discardedResults: z.array(DiscardedResultSchema).nullable(),
 });
 
 export const RelevanceJudgeAgentOptions = {
