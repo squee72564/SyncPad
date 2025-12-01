@@ -21,7 +21,7 @@ const envSchema = z.object({
   EMBEDDING_PROVIDER: z.enum(["openai", "azure", "voyage", "self_hosted"]).default("openai"),
   EMBEDDING_MODEL: z.string().default("text-embedding-3-small"),
   EMBEDDING_BASE_URL: z.url().transform((value) => value?.replace(/\/+$/, "")),
-  EMBEDDING_API_KEY: z.string(),
+  LLM_API_KEY: z.string(),
   EMBEDDING_TIMEOUT_MS: z.coerce.number().int().positive().default(60_000),
   EMBEDDING_MAX_BATCH: z.coerce.number().int().positive().default(16),
   EMBEDDING_CONCURRENCY: z.coerce.number().int().positive().default(4),

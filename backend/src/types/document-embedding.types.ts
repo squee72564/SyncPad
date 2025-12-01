@@ -7,3 +7,11 @@ export type ListDocumentEmbeddingsRequest = ZodRequest<
 export type ListDocumentEmbeddingParams = ListDocumentEmbeddingsRequest["params"];
 export type ListDocumentEmbeddingQuery = ListDocumentEmbeddingsRequest["query"];
 export type ListDocumentEmbeddingArgs = ListDocumentEmbeddingParams & ListDocumentEmbeddingQuery;
+
+export type SimilarDocumentEmbeddingsRequest = ZodRequest<
+  typeof documentEmbeddingValidations.SimilarDocumentEmbeddingsRequestSchema
+>;
+export type SimilarDocumentEmbeddingsParams = SimilarDocumentEmbeddingsRequest["params"];
+export type SimilarDocumentEmbeddingsQuery = SimilarDocumentEmbeddingsRequest["query"];
+export type SimilarDocumentEmbeddingsArgs = SimilarDocumentEmbeddingsParams &
+  SimilarDocumentEmbeddingsQuery;

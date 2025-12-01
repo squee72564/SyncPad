@@ -342,7 +342,7 @@ export function createEmbeddingProvider(): EmbeddingProvider {
     provider: config.EMBEDDING_PROVIDER,
     model: config.EMBEDDING_MODEL,
     baseUrl: config.EMBEDDING_BASE_URL,
-    apiKey: config.EMBEDDING_API_KEY,
+    apiKey: config.LLM_API_KEY,
     maxBatchSize: config.EMBEDDING_MAX_BATCH,
     concurrency: config.EMBEDDING_CONCURRENCY,
     timeoutMs: config.EMBEDDING_TIMEOUT_MS,
