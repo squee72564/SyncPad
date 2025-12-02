@@ -61,7 +61,7 @@ const defaultRoutes = [
     route: aiChatThreadsRoute,
   },
   {
-    path: "/workspaces/:workspaceId/thread/:threadId",
+    path: "/workspaces/:workspaceId/thread/:threadId/message",
     route: aiChatMessageRoute,
   },
 ] as { path: string; route: Router }[];

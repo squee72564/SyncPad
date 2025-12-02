@@ -1,114 +1,180 @@
 import httpStatus from "http-status";
 
 import prisma from "@syncpad/prisma-client";
-import { RagChatRole } from "@generated/prisma-postgres/index.js";
+import { Prisma } from "@generated/prisma-postgres/index.js";
 import ApiError from "@/utils/ApiError.js";
+import {
+  CreateAiChatMessageArgs,
+  RetrieveAiChatMessageParams,
+  UpdateAiChatMessageArgs,
+  DeleteAiChatMessageParams,
+  ListAiChatMessageArgs,
+  RunRagPipelineArgs,
+} from "@/types/ai-chat-messages.types.ts";
+import { buildPaginationParams, paginateItems } from "@/utils/pagination.ts";
+import RAGOrchestrator from "@/lib/rag/rag-pipeline.ts";
 
-type CreateThreadArgs = {
-  workspaceId: string;
-  createdById?: string | null;
-  title?: string | null;
-};
+const ragOrchestrator = new RAGOrchestrator();
 
-type AppendMessageArgs = {
-  threadId: string;
-  workspaceId: string;
-  authorId?: string | null;
-  role: RagChatRole;
-  content: string;
-  error?: boolean;
-};
-
-const DEFAULT_HISTORY_LIMIT = 30;
-
-const getThread = async (workspaceId: string, threadId: string) => {
-  return prisma.ragChatThread.findFirst({
-    where: { id: threadId, workspaceId },
-  });
-};
-
-const assertThreadInWorkspace = async (workspaceId: string, threadId: string) => {
-  const thread = await getThread(workspaceId, threadId);
-
-  if (!thread) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Chat thread not found");
-  }
-
-  return thread;
-};
-
-const createThread = async ({ workspaceId, createdById, title }: CreateThreadArgs) => {
-  return prisma.ragChatThread.create({
-    data: {
-      workspaceId,
-      createdById: createdById ?? null,
-      title: title ?? null,
-    },
-  });
-};
-
-const appendMessage = async ({
-  threadId,
+const createAiChatMessage = async ({
   workspaceId,
+  threadId,
   authorId,
   role,
   content,
   error,
-}: AppendMessageArgs) => {
-  const now = new Date();
-
-  const message = await prisma.$transaction(async (tx) => {
-    const created = await tx.ragChatMessage.create({
-      data: {
-        threadId,
-        workspaceId,
-        authorId: authorId ?? null,
-        role,
-        content,
-        error: error ?? false,
-      },
-    });
-
-    await tx.ragChatThread.update({
-      where: { id: threadId },
-      data: { lastMessageAt: now },
-    });
-
-    return created;
-  });
-
-  return message;
-};
-
-const getRecentMessages = async (threadId: string, limit = DEFAULT_HISTORY_LIMIT) => {
-  return prisma.ragChatMessage.findMany({
-    where: { threadId },
-    orderBy: { createdAt: "asc" },
-    take: limit,
-    select: {
-      content: true,
-      role: true,
+}: CreateAiChatMessageArgs) => {
+  return prisma.ragChatMessage.create({
+    data: {
+      threadId,
+      workspaceId,
+      authorId: authorId ?? null,
+      role,
+      content,
+      error,
     },
   });
 };
 
-const getConversationHistory = async (threadId: string) => {
-  return prisma.ragChatMessage.findMany({
-    where: { threadId },
-    orderBy: { createdAt: "asc" },
+const getAiChatMessage = async ({
+  workspaceId,
+  threadId,
+  messageId,
+}: RetrieveAiChatMessageParams) => {
+  const aiChatMessage = await prisma.ragChatMessage.findUnique({
+    where: { id: messageId, threadId, workspaceId },
+  });
+
+  if (!aiChatMessage) {
+    throw new ApiError(httpStatus.NOT_FOUND, "RagChatMessage not found");
+  }
+
+  return aiChatMessage;
+};
+
+const updateAiChatMessage = async ({
+  workspaceId,
+  threadId,
+  messageId,
+  authorId,
+  role,
+  content,
+  error,
+}: UpdateAiChatMessageArgs) => {
+  const data = {} as Prisma.RagChatMessageUpdateArgs["data"];
+
+  if (authorId) data.authorId = authorId;
+  if (role) data.role = role;
+  if (content) data.content = content;
+  if (error) data.error = error;
+
+  return await prisma.ragChatMessage.update({
+    where: {
+      id: messageId,
+      workspaceId,
+      threadId,
+    },
+    data,
+  });
+};
+
+const deleteAiChatMessage = async ({
+  workspaceId,
+  threadId,
+  messageId,
+}: DeleteAiChatMessageParams) => {
+  await prisma.ragChatMessage.delete({
+    where: {
+      id: messageId,
+      workspaceId,
+      threadId,
+    },
+  });
+};
+
+const listAiChatMessages = async ({
+  workspaceId,
+  threadId,
+  cursor,
+  limit,
+  order = "desc",
+}: ListAiChatMessageArgs & { order: "desc" | "asc" }) => {
+  const pagination = buildPaginationParams({ cursor: cursor, limit: limit });
+
+  const chatMessages = await prisma.ragChatMessage.findMany({
+    where: {
+      workspaceId,
+      threadId,
+    },
     select: {
+      id: true,
       content: true,
       role: true,
       error: true,
+      author: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
     },
+    orderBy: { createdAt: order },
+    take: pagination.take,
+    ...(pagination.cursor ? { cursor: pagination.cursor, skip: pagination.skip } : {}),
   });
+
+  const { items, nextCursor } = paginateItems(chatMessages, pagination.limit);
+
+  return {
+    messages: items,
+    nextCursor,
+  };
+};
+
+type RagPipelineResult =
+  | { success: true; data: string }
+  | { success: false; type: "Agent" | "InputGuardrail"; error: string };
+
+const runRagPipeline = async ({
+  workspaceId,
+  threadId,
+  query,
+  limit,
+}: RunRagPipelineArgs & { limit: number }): Promise<RagPipelineResult> => {
+  const { messages: recentMessages } = await listAiChatMessages({
+    workspaceId,
+    threadId,
+    cursor: undefined,
+    limit,
+    order: "asc",
+  });
+
+  const filteredMessageHistory = recentMessages.map((message) => ({
+    role: message.role,
+    content: message.content,
+  }));
+
+  const result = await ragOrchestrator.runRAGPipeline(workspaceId, query, filteredMessageHistory);
+
+  if (!result.success) {
+    return {
+      success: false,
+      type: result.type,
+      error: result.type === "Agent" ? result.error : "Your request cannot be processed.",
+    };
+  }
+
+  return {
+    success: true,
+    data: result.data,
+  };
 };
 
 export default {
-  getThread,
-  assertThreadInWorkspace,
-  createThread,
-  appendMessage,
-  getRecentMessages,
-  getConversationHistory,
+  createAiChatMessage,
+  getAiChatMessage,
+  updateAiChatMessage,
+  deleteAiChatMessage,
+  listAiChatMessages,
+  runRagPipeline,
 };
