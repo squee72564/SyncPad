@@ -1,18 +1,35 @@
 "use server";
 
+import PageHeader from "@/components/PageHeader";
+import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
+import { resolveActiveWorkspace } from "@/lib/workspaces";
+import QaChat from "./QaChat";
+
+const pageTextData = {
+  title: "Workspace Q&A",
+  description: "Ask questions in natural language and get responses grounded in your documents.",
+};
+
 export default async function AiQaPage() {
+  const { activeWorkspace } = await resolveActiveWorkspace();
+
+  if (!activeWorkspace) {
+    return (
+      <WorkspaceSelectionPrompt
+        title={pageTextData.title}
+        description={pageTextData.description}
+        body="Pick a workspace from the sidebar or create one to start asking questions."
+      />
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Workspace Q&amp;A</h1>
-        <p className="text-sm text-muted-foreground">
-          Ask SyncPad natural-language questions and receive answers grounded in workspace docs.
-        </p>
-      </div>
-      <div className="rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-        Conversational interface coming soon. This experience will blend retrieval-augmented
-        responses with document citations.
-      </div>
+    <div className="flex w-full flex-col gap-6 p-6">
+      <PageHeader header={pageTextData.title} body={pageTextData.description} />
+      <QaChat
+        workspaceId={activeWorkspace.workspace.id}
+        workspaceName={activeWorkspace.workspace.name}
+      />
     </div>
   );
 }

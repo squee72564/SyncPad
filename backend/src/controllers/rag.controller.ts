@@ -34,17 +34,19 @@ const runRagPipeline = catchAsync(
     });
 
     if (result.success) {
-      return res.status(httpStatus.OK).json({ response: result.data });
+      return res.status(httpStatus.OK).json({ success: true, response: result.data });
     }
 
     if (result.type === "InputGuardrail") {
       return res.status(httpStatus.BAD_REQUEST).json({
+        success: false,
         type: "InputGuardrail",
-        data: result.data,
+        error: "Gaurdrails failed",
       });
     }
 
     return res.status(httpStatus.BAD_GATEWAY).json({
+      success: false,
       type: "Agent",
       error: result.error ?? "RAG pipeline failed",
     });
