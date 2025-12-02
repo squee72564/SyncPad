@@ -1,6 +1,5 @@
 import httpStatus from "http-status";
 
-import { Prisma } from "@generated/prisma-postgres/index.js";
 import prisma from "@syncpad/prisma-client";
 import { RagChatRole } from "@generated/prisma-postgres/index.js";
 import ApiError from "@/utils/ApiError.js";

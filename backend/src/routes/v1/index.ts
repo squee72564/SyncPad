@@ -10,7 +10,7 @@ import shareLinkPublicRoute from "./share-link.public.route.js";
 import activityLogRoute from "./activity-log.route.js";
 import aiJobRoute from "./ai-job.route.ts";
 import documentEmbeddingRoute from "./document-embedding.route.ts";
-import ragRoute from "./rag.route.ts";
+import ragRoute from "./ai-chat.route.ts";
 
 const router: Router = express.Router();
 

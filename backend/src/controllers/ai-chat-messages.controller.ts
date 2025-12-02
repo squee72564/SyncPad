@@ -5,7 +5,7 @@ import logger from "@/config/logger.ts";
 import { ragService, ragChatService } from "@/services/index.ts";
 import ApiError from "@/utils/ApiError.js";
 import catchAsync from "@/utils/catchAsync.js";
-import { RunRagPipelineRequest } from "@/types/rag.types.ts";
+import { RunRagPipelineRequest } from "@/types/ai-chat-messages.types.ts";
 
 const runRagPipeline = catchAsync(
   async (req: RunRagPipelineRequest, res: Response, _next: NextFunction) => {

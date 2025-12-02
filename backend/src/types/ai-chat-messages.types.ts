@@ -1,5 +1,5 @@
 import { ZodRequest } from "@/utils/zodReqeust.ts";
-import ragValidations from "@/validations/rag.validations.ts";
+import ragValidations from "@/validations/ai-chat-messages.validations.ts";
 
 export type RunRagPipelineRequest = ZodRequest<typeof ragValidations.RunRagPipelineRequestSchema>;
 export type RunRagPipelineParams = RunRagPipelineRequest["params"];

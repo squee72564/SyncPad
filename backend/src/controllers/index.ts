@@ -6,7 +6,7 @@ import shareLinkController from "@/controllers/share-link.controller.js";
 import activityLogController from "@/controllers/activity-log.controller.js";
 import aiJobController from "@/controllers/ai-job.controller.ts";
 import documentEmbeddingController from "./document-embedding.controller.ts";
-import ragController from "./rag.controller.ts";
+import ragController from "./ai-chat-messages.controller.ts";
 
 export {
   userController,
