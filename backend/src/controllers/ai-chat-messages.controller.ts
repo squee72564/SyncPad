@@ -26,10 +26,12 @@ const GetAiChatMessage = catchAsync(
     }
 
     const aiChatMessage = await aiChatMessageService.getAiChatMessage({
-      ...req.params,
+      workspaceId: context.workspace.id,
+      threadId: req.params.threadId,
+      messageId: req.params.messageId,
     });
 
-    res.send(httpStatus.OK).json(aiChatMessage);
+    res.status(httpStatus.OK).json(aiChatMessage);
   }
 );
 
@@ -46,11 +48,13 @@ const UpdateAiChatMessage = catchAsync(
     }
 
     const updatedAiChatMessage = await aiChatMessageService.updateAiChatMessage({
-      ...req.params,
+      workspaceId: context.workspace.id,
+      threadId: req.params.threadId,
+      messageId: req.params.messageId,
       ...req.body,
     });
 
-    res.send(httpStatus.OK).json(updatedAiChatMessage);
+    res.status(httpStatus.OK).json(updatedAiChatMessage);
   }
 );
 
@@ -66,9 +70,13 @@ const DeleteAiChatMessage = catchAsync(
       throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
-    await aiChatMessageService.deleteAiChatMessage(req.params);
+    await aiChatMessageService.deleteAiChatMessage({
+      workspaceId: context.workspace.id,
+      threadId: req.params.threadId,
+      messageId: req.params.messageId,
+    });
 
-    res.send(httpStatus.NO_CONTENT);
+    res.sendStatus(httpStatus.NO_CONTENT);
   }
 );
 
@@ -85,7 +93,8 @@ const ListAiChatMessages = catchAsync(
     }
 
     const result = await aiChatMessageService.listAiChatMessages({
-      ...req.params,
+      workspaceId: context.workspace.id,
+      threadId: req.params.threadId,
       ...req.query,
       order: "asc",
     });
@@ -110,7 +119,8 @@ const runRagPipeline = catchAsync(
     }
 
     await aiChatMessageService.createAiChatMessage({
-      ...req.params,
+      workspaceId: context.workspace.id,
+      threadId: req.params.threadId,
       role: "USER",
       error: false,
       authorId: req.user.id,
@@ -120,15 +130,16 @@ const runRagPipeline = catchAsync(
     const startedAt = Date.now();
 
     const result = await aiChatMessageService.runRagPipeline({
-      ...req.params,
+      workspaceId: context.workspace.id,
+      threadId: req.params.threadId,
       ...req.body,
-      limit: 5,
+      limit: 2,
     });
 
     const latencyMs = Date.now() - startedAt;
 
     logger.info("RAG pipeline executed", {
-      workspaceId: req.params.workspaceId,
+      workspaceId: context.workspace.id,
       userId: req.user.id,
       result: result,
       latency: `${latencyMs / 1000} seconds`,
@@ -136,7 +147,8 @@ const runRagPipeline = catchAsync(
 
     if (result.success) {
       await aiChatMessageService.createAiChatMessage({
-        ...req.params,
+        workspaceId: context.workspace.id,
+        threadId: req.params.threadId,
         role: "ASSISTANT",
         error: false,
         authorId: undefined,
@@ -144,7 +156,7 @@ const runRagPipeline = catchAsync(
       });
     }
 
-    res.send(httpStatus.OK).send({
+    res.status(httpStatus.OK).json({
       result,
     });
   }

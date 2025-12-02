@@ -23,20 +23,20 @@ router
   )
   .get(
     auth([...defaultRoles, ...adminRoles]),
-    validate(aiChatThreadValidations.GetAiChatThreadSchema),
+    validate(aiChatThreadValidations.ListAiChatThreadSchema),
     attachWorkspaceContext(),
     requireWorkspacePermission("document:read"),
-    aiChatThreadController.GetAiChatThread
+    aiChatThreadController.ListAiChatThreads
   );
 
 router
   .route("/:threadId")
   .get(
     auth([...defaultRoles, ...adminRoles]),
-    validate(aiChatThreadValidations.ListAiChatThreadSchema),
+    validate(aiChatThreadValidations.GetAiChatThreadSchema),
     attachWorkspaceContext(),
     requireWorkspacePermission("document:read"),
-    aiChatThreadController.ListAiChatThreads
+    aiChatThreadController.GetAiChatThread
   )
   .patch(
     auth([...defaultRoles, ...adminRoles]),

@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 
 import prisma from "@syncpad/prisma-client";
-import { Prisma } from "@generated/prisma-postgres/index.js";
+import Prisma, { Prisma as PrismaNamespace } from "@generated/prisma-postgres/index.js";
 import ApiError from "@/utils/ApiError.js";
 import {
   CreateAiChatMessageArgs,
@@ -61,7 +61,7 @@ const updateAiChatMessage = async ({
   content,
   error,
 }: UpdateAiChatMessageArgs) => {
-  const data = {} as Prisma.RagChatMessageUpdateArgs["data"];
+  const data = {} as PrismaNamespace.RagChatMessageUpdateArgs["data"];
 
   if (authorId) data.authorId = authorId;
   if (role) data.role = role;
@@ -152,6 +152,7 @@ const runRagPipeline = async ({
   const filteredMessageHistory = recentMessages.map((message) => ({
     role: message.role,
     content: message.content,
+    isAssistant: message.role === Prisma.RagChatRole.ASSISTANT,
   }));
 
   const result = await ragOrchestrator.runRAGPipeline(workspaceId, query, filteredMessageHistory);

@@ -2,6 +2,10 @@
 
 import PageHeader from "@/components/PageHeader";
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
+import ThreadList from "./ThreadList";
+import { formatError } from "@/lib/utils";
+import { listAiChatThreads, AiChatThreadRecord } from "@/lib/ai-chat-thread";
+import { PaginatedResult } from "@/lib/types";
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 
 const pageTextData = {
@@ -22,15 +26,35 @@ export default async function AiQaPage() {
     );
   }
 
+  let threadsData: PaginatedResult<AiChatThreadRecord> | null = null;
+  let fetchError: string | null = null;
+
+  try {
+    threadsData = await listAiChatThreads(
+      activeWorkspace.workspace.id,
+      activeWorkspace.workspace.slug,
+      {
+        limit: 10,
+      }
+    );
+  } catch (error) {
+    fetchError = formatError(error, "Unable to load chat threads");
+  }
+
   return (
     <div className="flex w-full flex-col gap-6 p-6">
       <PageHeader header={pageTextData.title} body={pageTextData.description} />
-      {/*
-      Create components here to manage RagChatThread lifecycle
-      Should get all chats from backend and list them, manage creation and deletion of chat threads
-      We should be able to do something like click on a chat thread card and it will take us to frontend/app/(validated)/dashboard/ai/qa/[threadId]
-      for that specific thread
-       */}
+      {fetchError ? (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+          {fetchError}
+        </div>
+      ) : (
+        <ThreadList
+          workspaceName={activeWorkspace.workspace.name}
+          threads={threadsData?.data ?? []}
+          nextCursor={threadsData?.nextCursor ?? null}
+        />
+      )}
     </div>
   );
 }

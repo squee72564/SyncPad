@@ -1,4 +1,9 @@
+import PageHeader from "@/components/PageHeader";
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
+import { AiChatThreadRecord, getAiChatThread } from "@/lib/ai-chat-thread";
+import { AiChatMessageRecord, listAiChatMessages } from "@/lib/ai-chat-message";
+import { PaginatedResult } from "@/lib/types";
+import { formatError } from "@/lib/utils";
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 import QaChat from "./QaChat";
 
@@ -14,9 +19,10 @@ const pageTextData = {
 export default async function QAChatThreadPage({
   params,
 }: {
-  params: Promise<QAChatThreadPageProps>;
+  params: Promise<QAChatThreadPageProps> | QAChatThreadPageProps;
 }) {
-  const { threadId } = await params;
+  const awaitedParams = params instanceof Promise ? await params : params;
+  const { threadId } = awaitedParams;
   const { activeWorkspace } = await resolveActiveWorkspace();
 
   if (!activeWorkspace) {
@@ -29,21 +35,56 @@ export default async function QAChatThreadPage({
     );
   }
 
-  // Do some server action to get the messages using this workspaceId and threadId
+  let thread: AiChatThreadRecord | null = null;
+  let messages: PaginatedResult<AiChatMessageRecord> | null = null;
+  let fetchError: string | null = null;
+
+  try {
+    thread = await getAiChatThread(
+      activeWorkspace.workspace.id,
+      activeWorkspace.workspace.slug,
+      threadId
+    );
+    messages = await listAiChatMessages(
+      activeWorkspace.workspace.id,
+      activeWorkspace.workspace.slug,
+      threadId,
+      {
+        limit: 50,
+      }
+    );
+  } catch (error) {
+    fetchError = formatError(error, "Unable to load chat thread");
+  }
+
+  if (!thread || !messages) {
+    return (
+      <div className="flex w-full flex-col gap-4 p-6">
+        <PageHeader header={pageTextData.title} body={pageTextData.description} />
+        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+          {fetchError ?? "Chat thread not found."}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      {/*
-      Render the chat for this thread passing in all the
-      initial messages from previous chatting sessions
-      and whatever other info we need
-      */}
-      <QaChat
-        workspaceId={activeWorkspace.workspace.id}
-        threadId={threadId}
-        workspaceName={activeWorkspace.workspace.name}
-        history={[]} // We need to pass the current history here, and also let this component update it as we go along
-      />
-    </>
+    <div className="flex w-full flex-col gap-6 p-6">
+      <PageHeader header={thread.title ?? "Untitled chat"} body={pageTextData.description} />
+      {fetchError ? (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+          {fetchError}
+        </div>
+      ) : (
+        <QaChat
+          workspaceId={activeWorkspace.workspace.id}
+          threadId={threadId}
+          threadTitle={thread.title ?? "Untitled chat"}
+          workspaceName={activeWorkspace.workspace.name}
+          initialMessages={messages.data}
+          nextCursor={messages.nextCursor}
+        />
+      )}
+    </div>
   );
 }

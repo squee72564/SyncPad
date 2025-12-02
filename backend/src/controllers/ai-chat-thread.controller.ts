@@ -24,9 +24,15 @@ const CreateAiChatThread = catchAsync(
       throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
-    const result = await aiChatThreadService.createAiChatThread(req.params, req.user.id);
+    const result = await aiChatThreadService.createAiChatThread(
+      {
+        workspaceId: context.workspace.id,
+        title: req.body.title,
+      },
+      req.user.id
+    );
 
-    res.send(httpStatus.CREATED).json(result);
+    res.status(httpStatus.CREATED).json(result);
   }
 );
 
@@ -42,9 +48,12 @@ const GetAiChatThread = catchAsync(
       throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
-    const result = await aiChatThreadService.getAiChatThread(req.params);
+    const result = await aiChatThreadService.getAiChatThread({
+      workspaceId: context.workspace.id,
+      threadId: req.params.threadId,
+    });
 
-    res.send(httpStatus.OK).json(result);
+    res.status(httpStatus.OK).json(result);
   }
 );
 
@@ -60,9 +69,13 @@ const EditAiChatThread = catchAsync(
       throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
-    const result = await aiChatThreadService.updateAiChatThread(req.params);
+    const result = await aiChatThreadService.updateAiChatThread({
+      workspaceId: context.workspace.id,
+      threadId: req.params.threadId,
+      title: req.body.title,
+    });
 
-    res.send(httpStatus.OK).json(result);
+    res.status(httpStatus.OK).json(result);
   }
 );
 
@@ -78,9 +91,12 @@ const DeleteAiChatThread = catchAsync(
       throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
-    await aiChatThreadService.deleteAiChatThread(req.params);
+    await aiChatThreadService.deleteAiChatThread({
+      workspaceId: context.workspace.id,
+      threadId: req.params.threadId,
+    });
 
-    res.send(httpStatus.NO_CONTENT);
+    res.sendStatus(httpStatus.NO_CONTENT);
   }
 );
 
@@ -97,7 +113,7 @@ const ListAiChatThreads = catchAsync(
     }
 
     const result = await aiChatThreadService.listAiChatThreads({
-      ...req.params,
+      workspaceId: context.workspace.id,
       ...req.query,
     });
 
