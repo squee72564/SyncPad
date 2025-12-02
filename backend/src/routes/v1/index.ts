@@ -56,7 +56,7 @@ const defaultRoutes = [
     route: aiJobRoute,
   },
   {
-    path: "/workspaces/:workspaceId/rag",
+    path: "/workspaces/:workspaceId/chat",
     route: ragRoute,
   },
 ] as { path: string; route: Router }[];

@@ -12,13 +12,21 @@ import { adminRoles, defaultRoles } from "@/lib/permissions.ts";
 
 const router: Router = Router({ mergeParams: true });
 
-router.post(
-  "/query",
-  auth([...defaultRoles, ...adminRoles]),
-  validate(ragValidations.RunRagPipelineRequestSchema),
-  attachWorkspaceContext(),
-  requireWorkspacePermission("document:read"),
-  ragController.runRagPipeline
-);
+router
+  .route("/:threadId")
+  .post(
+    auth([...defaultRoles, ...adminRoles]),
+    validate(ragValidations.RunRagPipelineRequestSchema),
+    attachWorkspaceContext(),
+    requireWorkspacePermission("document:read"),
+    ragController.runRagPipeline
+  )
+  .get(
+    auth([...defaultRoles, ...adminRoles]),
+    validate(ragValidations.RunRagPipelineRequestSchema),
+    attachWorkspaceContext(),
+    requireWorkspacePermission("document:read"),
+    ragController.getConversationHistory
+  );
 
 export default router;

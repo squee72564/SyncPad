@@ -10,10 +10,11 @@ export type AskQuestionResponse = {
 
 export const askWorkspaceQuestionAction = async (
   workspaceId: string,
+  threadId: string,
   payload: RagQueryPayload
 ): Promise<ActionResult<AskQuestionResponse>> => {
   try {
-    const result = await runRagQuery(workspaceId, payload);
+    const result = await runRagQuery(workspaceId, threadId, payload);
 
     if (result.success) {
       return {

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { askWorkspaceQuestionAction } from "./actions";
+import { askWorkspaceQuestionAction } from "../actions";
 import { RagHistoryMessage } from "@/lib/rag";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -16,16 +16,17 @@ type ChatMessage = RagHistoryMessage & { id: string; error: boolean };
 
 type QaChatProps = {
   workspaceId: string;
+  threadId: string;
   workspaceName?: string;
 };
 
 const createId = () => Math.random().toString(36).slice(2);
 
-export default function QaChat({ workspaceId, workspaceName }: QaChatProps) {
+export default function QaChat({ threadId, workspaceId, workspaceName }: QaChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "intro",
-      role: "assistant",
+      role: "ASSISTANT",
       content: workspaceName
         ? `You’re chatting with your ${workspaceName} workspace. Ask me about documents, decisions, or anything saved here.`
         : "You’re chatting with your workspace. Ask me about documents, decisions, or anything saved here.",
@@ -45,7 +46,7 @@ export default function QaChat({ workspaceId, workspaceName }: QaChatProps) {
     const trimmed = input.trim();
     const userMessage: ChatMessage = {
       id: createId(),
-      role: "user",
+      role: "USER",
       content: trimmed,
       error: false,
     };
@@ -55,16 +56,9 @@ export default function QaChat({ workspaceId, workspaceName }: QaChatProps) {
     setInput("");
 
     startTransition(async () => {
-      const history = nextMessages.map(({ role, content }) => ({ role, content }));
-      const result = await askWorkspaceQuestionAction(workspaceId, {
+      const result = await askWorkspaceQuestionAction(workspaceId, threadId, {
         query: trimmed,
-        history,
       });
-
-      // if (!result.success) {
-      //   toast.error(result.error ?? "Unable to get an answer right now.");
-      //   return;
-      // }
 
       if (result.success && !result.data) {
         toast.error("Error processing request.");
@@ -73,7 +67,7 @@ export default function QaChat({ workspaceId, workspaceName }: QaChatProps) {
 
       const assistantMessage: ChatMessage = {
         id: createId(),
-        role: "assistant",
+        role: "ASSISTANT",
         content: result.success
           ? result.data
             ? result.data.response
@@ -101,13 +95,13 @@ export default function QaChat({ workspaceId, workspaceName }: QaChatProps) {
                 variant={message.error ? "destructive" : "outline"}
                 className={cn(
                   "flex flex-col gap-1 rounded-lg p-3 text-sm shadow-sm",
-                  message.role === "assistant"
+                  message.role === "ASSISTANT"
                     ? "border border-primary/20 bg-primary/5"
                     : "border ml-auto border-muted-foreground/30 bg-background"
                 )}
               >
                 <span className="text-xs font-semibold uppercase text-muted-foreground">
-                  {message.role === "assistant" ? "Assistant" : "You"}
+                  {message.role === "ASSISTANT" ? "Assistant" : "You"}
                 </span>
                 <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
               </Badge>

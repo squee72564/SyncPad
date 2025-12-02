@@ -3,7 +3,6 @@
 import PageHeader from "@/components/PageHeader";
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
 import { resolveActiveWorkspace } from "@/lib/workspaces";
-import QaChat from "./QaChat";
 
 const pageTextData = {
   title: "Workspace Q&A",
@@ -26,10 +25,10 @@ export default async function AiQaPage() {
   return (
     <div className="flex w-full flex-col gap-6 p-6">
       <PageHeader header={pageTextData.title} body={pageTextData.description} />
-      <QaChat
-        workspaceId={activeWorkspace.workspace.id}
-        workspaceName={activeWorkspace.workspace.name}
-      />
+      {/*
+      Create components here to manage ChatThread lifecycle
+      Should get all chats from backend and list them, manage creation and deletion of chat threads
+       */}
     </div>
   );
 }
