@@ -1,11 +1,13 @@
 import { ZodRequest } from "@/utils/zodReqeust.ts";
-import ragValidations from "@/validations/ai-chat-messages.validations.ts";
+import { aiChatMessagesValidations } from "@/validations/index.ts";
 
-export type RunRagPipelineRequest = ZodRequest<typeof ragValidations.RunRagPipelineRequestSchema>;
+export type RunRagPipelineRequest = ZodRequest<
+  typeof aiChatMessagesValidations.RunRagPipelineRequestSchema
+>;
 export type RunRagPipelineParams = RunRagPipelineRequest["params"];
 export type RunRagPipelineBody = RunRagPipelineRequest["body"];
 
 export type GetConversationHistoryRequest = ZodRequest<
-  typeof ragValidations.GetConversationHistorySchema
+  typeof aiChatMessagesValidations.GetConversationHistorySchema
 >;
 export type GetConversationHistoryParams = GetConversationHistoryRequest["params"];

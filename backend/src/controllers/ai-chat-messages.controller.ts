@@ -2,7 +2,7 @@ import type { Response, NextFunction } from "express";
 import httpStatus from "http-status";
 
 import logger from "@/config/logger.ts";
-import { ragService, ragChatService } from "@/services/index.ts";
+import { ragService, aiChatMessageService } from "@/services/index.ts";
 import ApiError from "@/utils/ApiError.js";
 import catchAsync from "@/utils/catchAsync.js";
 import { RunRagPipelineRequest } from "@/types/ai-chat-messages.types.ts";
@@ -23,7 +23,7 @@ const runRagPipeline = catchAsync(
     const { query } = req.body;
     const startedAt = Date.now();
 
-    const history = await ragChatService.getRecentMessages(threadId, 5);
+    const history = await aiChatMessageService.getRecentMessages(threadId, 5);
 
     const result = await ragService.runPipeline(workspaceId, query, history);
     const latencyMs = Date.now() - startedAt;
@@ -67,7 +67,7 @@ const getConversationHistory = catchAsync(
       throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
-    const history = await ragChatService.getConversationHistory(req.params.threadId);
+    const history = await aiChatMessageService.getConversationHistory(req.params.threadId);
 
     res.status(httpStatus.OK).json({
       history: history,

@@ -6,27 +6,27 @@ import {
   attachWorkspaceContext,
   requireWorkspacePermission,
 } from "@/middleware/index.ts";
-import { ragController } from "@/controllers/index.js";
-import { ragValidations } from "@/validations/index.js";
+import { aiChatMessageController } from "@/controllers/index.js";
+import { aiChatMessagesValidations } from "@/validations/index.js";
 import { adminRoles, defaultRoles } from "@/lib/permissions.ts";
 
 const router: Router = Router({ mergeParams: true });
 
 router
-  .route("/:threadId")
+  .route("/message")
   .post(
     auth([...defaultRoles, ...adminRoles]),
-    validate(ragValidations.RunRagPipelineRequestSchema),
+    validate(aiChatMessagesValidations.RunRagPipelineRequestSchema),
     attachWorkspaceContext(),
     requireWorkspacePermission("document:read"),
-    ragController.runRagPipeline
+    aiChatMessageController.runRagPipeline
   )
   .get(
     auth([...defaultRoles, ...adminRoles]),
-    validate(ragValidations.RunRagPipelineRequestSchema),
+    validate(aiChatMessagesValidations.GetConversationHistorySchema),
     attachWorkspaceContext(),
     requireWorkspacePermission("document:read"),
-    ragController.getConversationHistory
+    aiChatMessageController.getConversationHistory
   );
 
 export default router;
