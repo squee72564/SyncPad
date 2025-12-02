@@ -506,15 +506,14 @@ export default class RAGOrchestrator {
 
     const conversationHistory: UserMessageItem[] = [
       ...(history ?? []).map((message) => {
-        const isAssistant = message.role === Prisma.RagChatRole.ASSISTANT || message.isAssistant;
+        const isAssistant = message.role === Prisma.RagChatRole.ASSISTANT;
         return {
           role: isAssistant ? "assistant" : "user",
-          // Agents expect assistant turns to use output_text, user turns to use input_text
           content: [
             {
               type: isAssistant ? "output_text" : "input_text",
               text: message.content,
-            } as { type: "output_text" | "input_text"; text: string },
+            },
           ],
         };
       }),

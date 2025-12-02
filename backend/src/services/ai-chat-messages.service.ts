@@ -13,6 +13,7 @@ import {
 } from "@/types/ai-chat-messages.types.ts";
 import { buildPaginationParams, paginateItems } from "@/utils/pagination.ts";
 import RAGOrchestrator from "@/lib/rag/rag-pipeline.ts";
+import logger from "@/config/logger.ts";
 
 const ragOrchestrator = new RAGOrchestrator();
 
@@ -146,14 +147,19 @@ const runRagPipeline = async ({
     threadId,
     cursor: undefined,
     limit,
-    order: "asc",
+    order: "desc",
   });
 
-  const filteredMessageHistory = recentMessages.map((message) => ({
-    role: message.role,
-    content: message.content,
-    isAssistant: message.role === Prisma.RagChatRole.ASSISTANT,
-  }));
+  const filteredMessageHistory = recentMessages
+    .map((message) => ({
+      role: message.role,
+      content: message.content,
+    }))
+    .reverse();
+
+  logger.debug("Recent Messages: ", {
+    filteredMessageHistory,
+  });
 
   const result = await ragOrchestrator.runRAGPipeline(workspaceId, query, filteredMessageHistory);
 

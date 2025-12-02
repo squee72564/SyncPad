@@ -118,7 +118,7 @@ const runRagPipeline = catchAsync(
       throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
-    await aiChatMessageService.createAiChatMessage({
+    const userChatMessage = await aiChatMessageService.createAiChatMessage({
       workspaceId: context.workspace.id,
       threadId: req.params.threadId,
       role: "USER",
@@ -145,14 +145,22 @@ const runRagPipeline = catchAsync(
       latency: `${latencyMs / 1000} seconds`,
     });
 
-    if (result.success) {
+    if (result.success || (!result.success && result.type === "Agent")) {
       await aiChatMessageService.createAiChatMessage({
         workspaceId: context.workspace.id,
         threadId: req.params.threadId,
         role: "ASSISTANT",
         error: false,
         authorId: undefined,
-        content: result.data,
+        content: result.success ? result.data : result.error,
+      });
+    }
+
+    if (!result.success && result.type === "InputGuardrail") {
+      await aiChatMessageService.deleteAiChatMessage({
+        workspaceId: context.workspace.id,
+        threadId: req.params.threadId,
+        messageId: userChatMessage.id,
       });
     }
 

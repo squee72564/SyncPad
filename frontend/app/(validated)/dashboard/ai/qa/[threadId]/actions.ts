@@ -67,6 +67,13 @@ export async function sendQaMessageAction(input: {
     await revalidatePaths([`${THREAD_PATH}/${input.threadId}`]);
 
     if (!result.success) {
+      if (result.type === "Agent") {
+        return {
+          success: true,
+          data: { assistantResponse: result.error ?? "I am unable to process your request." },
+        };
+      }
+
       return {
         success: false,
         error: result.error ?? "Unable to process your request.",
