@@ -480,7 +480,7 @@ export default class RAGOrchestrator {
   async runRAGPipeline(
     workspaceId: string,
     userInput: string,
-    _history: unknown
+    history?: Array<{ role: Prisma.RagChatRole; content: string; isAssistant?: boolean }>
   ): Promise<Result<ReturnType<typeof this.buildGuardrailFailOutput>>> {
     logger.debug("Running RAG Pipeline with user input: ", {
       userInput: userInput,
@@ -505,8 +505,19 @@ export default class RAGOrchestrator {
     }
 
     const conversationHistory: UserMessageItem[] = [
+      ...(history ?? []).map((message) => {
+        const isAssistant = message.role === Prisma.RagChatRole.ASSISTANT;
+        return {
+          role: isAssistant ? "assistant" : "user",
+          content: [
+            {
+              type: isAssistant ? "output_text" : "input_text",
+              text: message.content,
+            },
+          ],
+        };
+      }),
       { role: "user", content: [{ type: "input_text", text: inputPassOutput.safe_text }] },
-      // Figure out how to properly add historical chat context
     ];
 
     try {

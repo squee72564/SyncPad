@@ -6,8 +6,10 @@ import embeddingQueueService from "@/services/embedding-queue.service.js";
 import shareLinkService from "@/services/share-link.service.js";
 import userService from "@/services/user.service.js";
 import workspaceService from "@/services/workspace.service.js";
-import aiJobService from "@/services/aiJob.service.ts";
+import aiJobService from "@/services/ai-job.service.ts";
+import aiChatMessageService from "@/services/ai-chat-messages.service.ts";
 import ragService from "./rag.service.ts";
+import aiChatThreadService from "./ai-chat-thread.service.ts";
 
 export {
   activityLogService,
@@ -19,5 +21,7 @@ export {
   userService,
   workspaceService,
   aiJobService,
+  aiChatThreadService,
+  aiChatMessageService,
   ragService,
 };

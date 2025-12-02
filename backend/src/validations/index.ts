@@ -6,7 +6,8 @@ import shareLinkValidations from "@/validations/share-link.validations.js";
 import activityLogValidations from "@/validations/activity-log.validations.js";
 import aiJobValidations from "@/validations/ai-job.validations.ts";
 import documentEmbeddingValidations from "./document-embedding.validations.ts";
-import ragValidations from "./rag.validations.ts";
+import aiChatMessagesValidations from "./ai-chat-messages.validations.ts";
+import aiChatThreadValidations from "./ai-chat-thread.validations.ts";
 
 export {
   userValidations,
@@ -17,5 +18,6 @@ export {
   activityLogValidations,
   aiJobValidations,
   documentEmbeddingValidations,
-  ragValidations,
+  aiChatMessagesValidations,
+  aiChatThreadValidations,
 };

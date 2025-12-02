@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "./generated/prisma-postgres"
+  provider      = "prisma-client-js"
+  output        = "./generated/prisma-postgres"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -58,6 +58,11 @@ enum AiJobStatus {
   FAILED
 }
 
+enum RagChatRole {
+  USER
+  ASSISTANT
+}
+
 model User {
   id                   String              @id
   name                 String
@@ -79,10 +84,12 @@ model User {
   activityLogs         ActivityLog[]       @relation("ActivityActor")
   aiJobs               AiJob[]             @relation("AiJobRequester")
 
-  role       String?
-  banned     Boolean?  @default(false)
-  banReason  String?
-  banExpires DateTime?
+  role            String?
+  banned          Boolean?         @default(false)
+  banReason       String?
+  banExpires      DateTime?
+  ragChatThreads  RagChatThread[]
+  ragChatMessages RagChatMessage[]
 
   @@unique([email])
   @@map("user")
@@ -152,9 +159,11 @@ model Workspace {
   aiJobs              AiJob[]
   DocumentEmbedding   DocumentEmbedding[]
   DocumentCollabState DocumentCollabState[]
+  ragChatThreads      RagChatThread[]
+  ragChatMessages     RagChatMessage[]
 
-  @@map("workspace")
   @@index([createdAt])
+  @@map("workspace")
 }
 
 model WorkspaceMember {
@@ -355,4 +364,40 @@ model AiJob {
 
   @@index([workspaceId, status])
   @@map("ai_job")
+}
+
+model RagChatThread {
+  id            String   @id @default(cuid())
+  workspaceId   String
+  createdById   String?
+  title         String?
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  workspace Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  messages  RagChatMessage[]
+
+  @@index([workspaceId, lastMessageAt])
+  @@map("rag_chat_thread")
+}
+
+model RagChatMessage {
+  id          String      @id @default(cuid())
+  threadId    String
+  workspaceId String
+  authorId    String?
+  role        RagChatRole
+  content     String      @db.Text
+  error       Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  thread    RagChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  author    User?         @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([threadId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@map("rag_chat_message")
 }
