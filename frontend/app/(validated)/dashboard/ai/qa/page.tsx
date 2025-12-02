@@ -26,8 +26,10 @@ export default async function AiQaPage() {
     <div className="flex w-full flex-col gap-6 p-6">
       <PageHeader header={pageTextData.title} body={pageTextData.description} />
       {/*
-      Create components here to manage ChatThread lifecycle
+      Create components here to manage RagChatThread lifecycle
       Should get all chats from backend and list them, manage creation and deletion of chat threads
+      We should be able to do something like click on a chat thread card and it will take us to frontend/app/(validated)/dashboard/ai/qa/[threadId]
+      for that specific thread
        */}
     </div>
   );
