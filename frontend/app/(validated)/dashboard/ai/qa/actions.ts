@@ -25,7 +25,7 @@ async function ensureWorkspace() {
 }
 
 export async function createAiChatThreadAction(input: {
-  title?: string | null;
+  title: string;
 }): Promise<ActionResult<{ thread: AiChatThreadRecord }>> {
   let workspace;
 

@@ -75,7 +75,12 @@ export default function ThreadList({ workspaceName, threads, nextCursor }: Threa
     const trimmed = title.trim();
 
     startTransition(async () => {
-      const result = await createAiChatThreadAction({ title: trimmed || null });
+      if (!trimmed) {
+        toast.error("Please input a title for this chat.");
+        return;
+      }
+
+      const result = await createAiChatThreadAction({ title: trimmed });
 
       if (!result.success) {
         toast.error(result.error ?? "Unable to create chat");
