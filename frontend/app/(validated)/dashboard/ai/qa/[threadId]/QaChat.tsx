@@ -6,17 +6,10 @@ import { Loader2, RefreshCcw, Send } from "lucide-react";
 import { $Enums } from "@generated/prisma-postgres";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { cn, formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { AiChatMessageRecord } from "@/lib/ai-chat-message";
 import { loadAiChatMessagesAction, sendQaMessageAction } from "./actions";
 
@@ -155,24 +148,14 @@ export default function QaChat({
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full max-h-screen -my-6 bg-transparent border-transparent">
       <CardHeader className="flex flex-col gap-1">
         <CardTitle className="flex flex-wrap items-center gap-3">
           {threadTitle}
           <Badge variant="secondary">{workspaceName}</Badge>
         </CardTitle>
-        <CardDescription>Converse with the assistant about your workspace content.</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            {messages.length} message{messages.length === 1 ? "" : "s"}
-          </span>
-          {lastAssistantMessage ? (
-            <span>Last reply at {formatDate(lastAssistantMessage.createdAt)}</span>
-          ) : null}
-        </div>
-
+      <CardContent className="flex flex-col gap-4 overflow-y-auto">
         <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-4">
           {messages.length === 0 ? (
             <div className="text-sm text-muted-foreground">
@@ -198,11 +181,9 @@ export default function QaChat({
                     )}
                   >
                     <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground/80">
-                      <span>{isAssistant ? "Assistant" : "You"}</span>
                       {message.author?.name ? (
                         <span className="text-muted-foreground/70">{message.author.name}</span>
                       ) : null}
-                      <span>• {formatDate(message.createdAt)}</span>
                       {message.local ? <span className="text-orange-500">pending</span> : null}
                       {isError ? <span className="text-destructive">error</span> : null}
                     </div>

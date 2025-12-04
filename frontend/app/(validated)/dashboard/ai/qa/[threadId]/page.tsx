@@ -1,4 +1,3 @@
-import PageHeader from "@/components/PageHeader";
 import WorkspaceSelectionPrompt from "@/components/WorkspaceSelectionPrompt";
 import { AiChatThreadRecord, getAiChatThread } from "@/lib/ai-chat-thread";
 import { AiChatMessageRecord, listAiChatMessages } from "@/lib/ai-chat-message";
@@ -6,6 +5,7 @@ import { PaginatedResult } from "@/lib/types";
 import { formatError } from "@/lib/utils";
 import { resolveActiveWorkspace } from "@/lib/workspaces";
 import QaChat from "./QaChat";
+import { redirect } from "next/navigation";
 
 type QAChatThreadPageProps = {
   threadId: string;
@@ -40,37 +40,22 @@ export default async function QAChatThreadPage({
   let fetchError: string | null = null;
 
   try {
-    thread = await getAiChatThread(
-      activeWorkspace.workspace.id,
-      activeWorkspace.workspace.slug,
-      threadId
-    );
-    messages = await listAiChatMessages(
-      activeWorkspace.workspace.id,
-      activeWorkspace.workspace.slug,
-      threadId,
-      {
+    [thread, messages] = await Promise.all([
+      getAiChatThread(activeWorkspace.workspace.id, activeWorkspace.workspace.slug, threadId),
+      listAiChatMessages(activeWorkspace.workspace.id, activeWorkspace.workspace.slug, threadId, {
         limit: 50,
-      }
-    );
+      }),
+    ]);
   } catch (error) {
     fetchError = formatError(error, "Unable to load chat thread");
   }
 
   if (!thread || !messages) {
-    return (
-      <div className="flex w-full flex-col gap-4 p-6">
-        <PageHeader header={pageTextData.title} body={pageTextData.description} />
-        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-          {fetchError ?? "Chat thread not found."}
-        </div>
-      </div>
-    );
+    redirect("/dashboard/ai/qa");
   }
 
   return (
-    <div className="flex w-full flex-col gap-6 p-6">
-      <PageHeader header={thread.title ?? "Untitled chat"} body={pageTextData.description} />
+    <div className="flex w-full flex-col gap-6">
       {fetchError ? (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
           {fetchError}
