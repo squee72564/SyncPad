@@ -1,23 +1,9 @@
 import config from "@/config/config.ts";
 
 type DocumentChunkerOptions = {
-  /**
-   * Approximate maximum tokens per chunk (converted to characters using the average token size).
-   * Defaults to 800 tokens which roughly maps to ~3200 characters.
-   */
   targetTokens?: number;
-  /**
-   * How many tokens of overlap to include between chunks. Defaults to 200 tokens (~800 characters).
-   */
   overlapTokens?: number;
-  /**
-   * Minimum number of tokens before we consider a chunk valid. Defaults to 200 tokens.
-   * This primarily prevents emitting lots of tiny chunks when documents contain short paragraphs.
-   */
   minTokens?: number;
-  /**
-   * Approximate number of characters per token. OpenAI-style tokenizers average ~4 chars/token.
-   */
   averageCharsPerToken?: number;
 };
 
@@ -59,17 +45,12 @@ export default class DocumentChunker {
   }
 
   private normalizeContent(content: string): string {
-    return (
-      content
-        // Normalize Windows line endings and strip null chars
-        .replace(/\r\n/g, "\n")
-        // eslint-disable-next-line no-control-regex
-        .replace(/\u0000/g, "")
-        // Normalize tabs and repeated spaces but keep paragraph/newline boundaries
-        .replace(/\t+/g, " ")
-        .replace(/[ ]{2,}/g, " ")
-        .trim()
-    );
+    return content
+      .replace(/\r\n/g, "\n")
+      .replace(/\u0000/g, "")
+      .replace(/\t+/g, " ")
+      .replace(/[ ]{2,}/g, " ")
+      .trim();
   }
 
   private createSegments(content: string): string[] {
