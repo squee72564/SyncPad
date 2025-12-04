@@ -2,26 +2,21 @@ import HomeNavigationMenu from "@/components/HomeNavigationMenu";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-const navLinks = [
-  { label: "Sign In", href: "/signin", variant: "default" as const },
-  { label: "Request Demo", href: "/contact", variant: "outline" as const },
-];
+const navLinks = [{ label: "Sign In", href: "/signin", variant: "default" as const }];
 
 const pillars = [
   {
     title: "Collaborative Workspaces",
     description:
-      "Organise knowledge by team, project, or client. Role-aware permissions keep every workspace secure and focused.",
+      "Organise knowledge within workspaces. Role-aware permissions keep every workspace secure and focused.",
   },
   {
-    title: "AI-Augmented Docs",
-    description:
-      "Generate summaries, Q&A answers, and smart highlights powered by retrieval-augmented generation and vector search.",
+    title: "AI-Augmented Workflows",
+    description: "Leverage AI Agents to discover insights about your knowledge base.",
   },
   {
     title: "Realtime Co-authoring",
-    description:
-      "WebSockets and CRDTs power conflict-free editing, inline comments, and review threads for frictionless handoffs.",
+    description: "Utilize our realtime editing for documents to instantly collaborate with others.",
   },
 ];
 
@@ -29,17 +24,15 @@ const highlights = [
   {
     title: "Document Intelligence",
     points: [
-      "Semantic search surfaces relevant pages instantly.",
-      "AI jobs track embeddings, summaries, and alerts.",
-      "Share links control read, comment, or edit access at scale.",
+      "Use AI to summarize, compare, and garner insights from workspace knowledge.",
+      "Share documents outside of your organization with read, comment, or edit access at scale.",
     ],
   },
   {
     title: "Operational Confidence",
     points: [
-      "Prisma + PostgreSQL ensure reliable storage and versioning.",
-      "Activity logs and audit views keep leadership in the loop.",
-      "Cloud-ready architecture slots into CDK, Terraform, or your platform of choice.",
+      "Reliable storage for all your workspace knowledge.",
+      "Activity logs for workspace activity keep leadership in the loop.",
     ],
   },
 ];
@@ -156,14 +149,6 @@ export default function Home() {
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg" variant="secondary">
                 <Link href="/signup">Create your workspace</Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="ghost"
-                className="text-primary-foreground hover:text-primary"
-              >
-                <Link href="/contact">Talk to us about enterprise</Link>
               </Button>
             </div>
           </div>
