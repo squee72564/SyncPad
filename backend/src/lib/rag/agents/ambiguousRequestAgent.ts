@@ -39,7 +39,7 @@ Reminder: You will be given two inputs in order:
 2) role=intent_classifier_agent with context.type=agent_reasoning: the classifier's reasoning about ambiguity
 Use both to craft clarifications.
 `,
-  model: "gpt-4.1",
+  model: "gpt-4.1-mini",
   outputType: AmbiguousRequestResponseSchema,
   modelSettings: {
     toolChoice: "none",

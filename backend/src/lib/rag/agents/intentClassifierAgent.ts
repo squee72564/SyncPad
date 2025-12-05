@@ -2,9 +2,7 @@ import { z } from "zod";
 const ActionSchema = z.object({
   requestGoal: z.string(),
   taskType: z.enum(["list_items", "analyze", "compare", "plan"]),
-  requiredContextSources: z.array(
-    z.enum(["workspace", "documents", "activityLogs", "workspaceMembers"])
-  ),
+  requiredContextSources: z.enum(["workspace", "documents", "activityLogs", "workspaceMembers"]),
   confidence: z.number().min(0).max(1),
 });
 
@@ -16,9 +14,11 @@ export const IntentSchema = z.object({
 
 export const IntentAgentOptions = {
   instructions: `
-You are the Intent Classification Agent. Your job is to interpret the user's raw request and classify it into high-level task types, determine what structured context is required, and detect whether the request is ambiguous.
+You are the Intent Classification Agent. Your job is to interpret the user's raw request and classify it into high-level task types,
+determine what structured context is required, and detect whether the request is ambiguous.
 
-You do NOT plan tool usage, fetch data, execute actions, or determine how the task will be completed. You only describe the intent so that downstream coordinator agents know what type of action is requested.
+You do NOT plan tool usage, fetch data, execute actions, or determine how the task will be completed.
+You only describe the intent so that downstream coordinator agents know what type of action is requested.
 
 You MUST return output that exactly matches the provided JSON schema:
 - reasoning: one short sentence explaining your interpretation
@@ -26,7 +26,7 @@ You MUST return output that exactly matches the provided JSON schema:
 - actions: array of one or more actions, or null if the request *cannot* be interpreted
   - requestGoal: one short sentence describing the goal
   - taskType: 'list_items' | 'analyze' | 'compare' | 'plan'
-  - requiredContext: non-empty array describing which structured context is needed
+  - requiredContext: field describing which structured context is needed
   - confidence: number 0.0–1.0
 
 ### Ambiguity Rules
@@ -34,11 +34,6 @@ A request is NOT ambiguous if:
 - it can be rewritten into a meaningful, standalone request (e.g., “tell me about syncing” → analyze: ['documents'])
 - it refers to a topic even if no document is explicitly named
 - it is broad but understandable
-
-A request IS ambiguous if:
-- the user references an unspecified item required to perform the task (“compare these”, “summarize that section”)
-- multiple interpretations exist and the system cannot choose one
-- the user refers to prior conversation context that is not available
 
 ### Example
 

@@ -14,15 +14,39 @@ import prisma from "@syncpad/prisma-client";
 import Prisma, { Prisma as PrismaNamespace } from "@generated/prisma-postgres/index.js";
 import config from "@/config/index.ts";
 import logger from "@/config/logger.ts";
-import { IntentAgentOptions, IntentSchema } from "./intentClassifierAgent.ts";
-import { RelevanceJudgeAgentOptions, RelevanceResultsSchema } from "./relevanceJudge.ts";
-import { ResponseGeneratorAgentOptions, ResponseGeneratorSchema } from "./responseGenerator.ts";
+import { IntentAgentOptions, IntentSchema } from "./agents/intentClassifierAgent.ts";
+import {
+  RelevanceJudgeAgentOptions,
+  RelevanceResultsSchema,
+} from "./agents/relevanceJudgeAgent.ts";
+import {
+  ResponseGeneratorAgentOptions,
+  ResponseGeneratorSchema,
+} from "./agents/finalResponseGeneratorAgent.ts";
 import {
   AmbiguousRequestResponseAgentOptions,
   AmbiguousRequestResponseSchema,
-} from "./ambiguousRequestAgent.ts";
-import { QueryNormalizerAgentOptions, QueryNormalizerAgentSchema } from "./queryNormalizerAgent.ts";
-import { ContextRetrievalAgentOptions, ContextRetrievalSchema } from "./contextRetrievalAgent.ts";
+} from "./agents/ambiguousRequestAgent.ts";
+import {
+  QueryNormalizerAgentOptions,
+  QueryNormalizerAgentSchema,
+} from "./agents/queryNormalizerAgent.ts";
+import {
+  WorkspaceContextRetrievalAgentOptions,
+  WorkspaceContextRetrievalSchema,
+} from "./agents/workspaceContextRetrievalAgent.ts";
+import {
+  WorkspaceMemberContextRetrievalAgentOptions,
+  WorkspaceMemberContextRetrievalSchema,
+} from "./agents/workspaceMemberContextRetrievalAgent.ts";
+import {
+  DocumentContextRetrievalAgentOptions,
+  DocumentContextRetrievalSchema,
+} from "./agents/documentContextRetrievalAgent.ts";
+import {
+  ActivityLogContextRetrievalAgentOptions,
+  ActivityLogContextRetrievalSchema,
+} from "./agents/activityLogContextRetrievalAgent.ts";
 
 export type Result<U> =
   | { success: true; data: string }
@@ -62,7 +86,17 @@ export default class RAGOrchestrator {
   private relevanceJudgeAgent: Agent<unknown, typeof RelevanceResultsSchema>;
   private responseGeneratorAgent: Agent<unknown, typeof ResponseGeneratorSchema>;
   private ambiguousRequestResponseAgent: Agent<unknown, typeof AmbiguousRequestResponseSchema>;
-  private contextRetrivalAgent: Agent<unknown, typeof ContextRetrievalSchema>;
+  //private contextRetrivalAgent: Agent<unknown, typeof ContextRetrievalSchema>;
+  private workspaceContextRetrievalAgent: Agent<unknown, typeof WorkspaceContextRetrievalSchema>;
+  private workspaceMemberContextRetrievalAgent: Agent<
+    unknown,
+    typeof WorkspaceMemberContextRetrievalSchema
+  >;
+  private documentContextRetrievalAgent: Agent<unknown, typeof DocumentContextRetrievalSchema>;
+  private activityLogContextRetrievalAgent: Agent<
+    unknown,
+    typeof ActivityLogContextRetrievalSchema
+  >;
 
   constructor() {
     this.client = new OpenAI({ apiKey: config.LLM_API_KEY });
@@ -88,7 +122,16 @@ export default class RAGOrchestrator {
 
     this.queryNormalizerAgent = new Agent({ ...QueryNormalizerAgentOptions });
 
-    this.contextRetrivalAgent = new Agent({ ...ContextRetrievalAgentOptions });
+    //this.contextRetrivalAgent = new Agent({ ...ContextRetrievalAgentOptions });
+
+    this.workspaceContextRetrievalAgent = new Agent({ ...WorkspaceContextRetrievalAgentOptions });
+    this.workspaceMemberContextRetrievalAgent = new Agent({
+      ...WorkspaceMemberContextRetrievalAgentOptions,
+    });
+    this.documentContextRetrievalAgent = new Agent({ ...DocumentContextRetrievalAgentOptions });
+    this.activityLogContextRetrievalAgent = new Agent({
+      ...ActivityLogContextRetrievalAgentOptions,
+    });
   }
 
   private guardrailsHasTripwire(results: GuardrailResult[]): boolean {
@@ -376,17 +419,13 @@ export default class RAGOrchestrator {
     return relevanceCheckedContext;
   }
 
-  private async getContextFromAgent(
-    userInput: string,
+  private async getContextFromAgent<T extends z.ZodTypeAny>(
     workspaceId: string,
-    intentSchemaOutput: string
+    intentSchemaOutput: string,
+    schema: T,
+    agent: Agent<unknown, T>
   ) {
-    const contextRetrievalResponse = await this.runner.run(this.contextRetrivalAgent, [
-      {
-        role: "user",
-        content: [{ type: "input_text", text: userInput }],
-        context: { description: "This is the user input" },
-      },
+    const contextRetrievalResponse = await this.runner.run(agent, [
       {
         role: "system",
         content: [{ type: "input_text", text: intentSchemaOutput }],
@@ -408,7 +447,7 @@ export default class RAGOrchestrator {
       throw Error("Context Retrieval Agent result is undefined");
     }
 
-    const result = ContextRetrievalSchema.safeParse(contextRetrievalResponse.finalOutput);
+    const result = schema.safeParse(contextRetrievalResponse.finalOutput);
 
     if (!result.success) {
       throw Error("Context Retrieval Agent did not return the correct schema");
@@ -472,11 +511,6 @@ export default class RAGOrchestrator {
     };
   }
 
-  // We probably want to add the ability to insert previous historical context from the chat
-  // We need to figure out how this should be formatted for conversationHistory in a way the
-  // model will understand well. For example the history will likely be a back and forth between
-  // the user and agent with different roles specified ect
-
   async runRAGPipeline(
     workspaceId: string,
     userInput: string,
@@ -531,22 +565,6 @@ export default class RAGOrchestrator {
         queries: normalizedQueryResult.output_parsed,
       });
 
-      if (intentResult.output_parsed.isRequestAmbiguous) {
-        const response = await this.handleAmbiguousRequest(
-          inputPassOutput.safe_text,
-          intentResult.output_parsed.reasoning
-        );
-        return {
-          success: false,
-          type: "Agent",
-          error: response.output_parsed.userMessage,
-        };
-      }
-
-      if (!intentResult.output_parsed.actions || intentResult.output_parsed.actions.length === 0) {
-        throw new Error("Intent is not ambiguous but no actions generated");
-      }
-
       const documentCollections = normalizedQueryResult.output_parsed.normalizedQueries
         ? await Promise.all(
             normalizedQueryResult.output_parsed.normalizedQueries.map((normQueries) =>
@@ -554,6 +572,7 @@ export default class RAGOrchestrator {
             )
           )
         : [];
+
       const uniqueDocumentSet = new Set<string>();
 
       const uniqueDocuments = documentCollections.flatMap((documentCollection) =>
@@ -576,33 +595,102 @@ export default class RAGOrchestrator {
         discardedResults: null,
       };
 
+      if (intentResult.output_parsed.isRequestAmbiguous) {
+        const response = await this.handleAmbiguousRequest(
+          inputPassOutput.safe_text,
+          intentResult.output_parsed.reasoning
+        );
+        return {
+          success: false,
+          type: "Agent",
+          error: response.output_parsed.userMessage,
+        };
+      }
+
+      if (!intentResult.output_parsed.actions || intentResult.output_parsed.actions.length === 0) {
+        throw new Error("Intent is not ambiguous but no actions generated");
+      }
+
       const relevanceCheck =
         uniqueDocuments.length === 0
           ? Promise.resolve({ output_text: JSON.stringify(obj), output_parsed: obj })
           : this.contextRelevanceCheck(uniqueDocuments, userInput, intentResult.output_text);
 
-      const [relevanceCheckedDocuments, additionalContext] = await Promise.all([
+      const workspaceActions = intentResult.output_parsed.actions.filter(
+        (action) => action.requiredContextSources === "workspace"
+      );
+      const workspaceMemberActions = intentResult.output_parsed.actions.filter(
+        (action) => action.requiredContextSources === "workspaceMembers"
+      );
+      const documentActions = intentResult.output_parsed.actions.filter(
+        (action) => action.requiredContextSources === "documents"
+      );
+      const activityLogsActions = intentResult.output_parsed.actions.filter(
+        (action) => action.requiredContextSources === "activityLogs"
+      );
+
+      const [
+        relevanceCheckedDocuments,
+        workspaceContent,
+        workspaceMemberContent,
+        documentContent,
+        activityLogContent,
+      ] = await Promise.all([
         relevanceCheck,
-        this.getContextFromAgent(userInput, workspaceId, intentResult.output_text),
+        workspaceActions.length > 0
+          ? this.getContextFromAgent(
+              workspaceId,
+              JSON.stringify(workspaceActions),
+              WorkspaceContextRetrievalSchema,
+              this.workspaceContextRetrievalAgent
+            )
+          : Promise.resolve(null),
+        workspaceMemberActions.length > 0
+          ? this.getContextFromAgent(
+              workspaceId,
+              JSON.stringify(workspaceMemberActions),
+              WorkspaceMemberContextRetrievalSchema,
+              this.workspaceMemberContextRetrievalAgent
+            )
+          : Promise.resolve(null),
+        documentActions.length > 0
+          ? this.getContextFromAgent(
+              workspaceId,
+              JSON.stringify(documentActions),
+              DocumentContextRetrievalSchema,
+              this.documentContextRetrievalAgent
+            )
+          : Promise.resolve(null),
+        activityLogsActions.length > 0
+          ? this.getContextFromAgent(
+              workspaceId,
+              JSON.stringify(activityLogsActions),
+              ActivityLogContextRetrievalSchema,
+              this.activityLogContextRetrievalAgent
+            )
+          : Promise.resolve(null),
       ]);
 
-      const { output_parsed: relevanceCheckedChunks, output_text: _relevanceCheckedChunks } =
-        relevanceCheckedDocuments;
-      const { output_parsed: additionalContextParsed, output_text: _additionalContextText } =
-        additionalContext;
-
       logger.debug("Data after relevance check and context retrieval from agent: ", {
-        relevanceCheck: relevanceCheckedChunks,
-        additional_context: additionalContextParsed,
+        relevantDocs: relevanceCheckedDocuments.output_parsed,
+        workspace: workspaceContent?.output_parsed ?? null,
+        workspaceMembers: workspaceMemberContent?.output_parsed ?? null,
+        documents: documentContent?.output_parsed ?? null,
+        activityLogs: activityLogContent?.output_parsed ?? null,
       });
 
       const documentChunksAbsent =
-        !relevanceCheckedChunks.relevantResults ||
-        relevanceCheckedChunks.relevantResults.length == 0;
+        !relevanceCheckedDocuments.output_parsed.relevantResults ||
+        relevanceCheckedDocuments.output_parsed.relevantResults.length === 0;
+
       const additionalContentAbsent =
-        !additionalContextParsed.activityLogs &&
-        !additionalContextParsed.workspace &&
-        !additionalContextParsed.workspaceMembers;
+        !workspaceContent?.output_parsed.workspace &&
+        (!workspaceMemberContent?.output_parsed.workspaceMembers ||
+          workspaceMemberContent.output_parsed.workspaceMembers.length === 0) &&
+        (!documentContent?.output_parsed.documents ||
+          documentContent.output_parsed.documents.length === 0) &&
+        (!activityLogContent?.output_parsed.activityLogs ||
+          activityLogContent.output_parsed.activityLogs.length === 0);
 
       if (documentChunksAbsent && additionalContentAbsent) {
         const response = await this.handleAmbiguousRequest(
@@ -622,8 +710,8 @@ export default class RAGOrchestrator {
       const MAX_RELEVANT_RESULTS = 8;
       const MIN_RELEVANCE_SCORE = 0.5;
 
-      const filteredRelevantResults = relevanceCheckedChunks.relevantResults
-        ? relevanceCheckedChunks.relevantResults
+      const filteredRelevantResults = relevanceCheckedDocuments.output_parsed.relevantResults
+        ? relevanceCheckedDocuments.output_parsed.relevantResults
             .filter((item) => item.relevanceScore >= MIN_RELEVANCE_SCORE)
             .sort((a, b) => a.rank - b.rank)
             .slice(0, MAX_RELEVANT_RESULTS)
@@ -637,10 +725,15 @@ export default class RAGOrchestrator {
         inputPassOutput.safe_text,
         intentResult.output_text,
         {
-          requestSummary: relevanceCheckedChunks.requestSummary,
+          requestSummary: relevanceCheckedDocuments.output_parsed.requestSummary,
           relevantResults: trimmedContext,
         },
-        additionalContext
+        {
+          workspace: workspaceContent?.output_parsed ?? null,
+          workspaceMembers: workspaceMemberContent?.output_parsed ?? null,
+          documents: documentContent?.output_parsed ?? null,
+          activityLogs: activityLogContent?.output_parsed ?? null,
+        }
       );
 
       logger.debug("Final response: ", {
