@@ -86,7 +86,6 @@ export default class RAGOrchestrator {
   private relevanceJudgeAgent: Agent<unknown, typeof RelevanceResultsSchema>;
   private responseGeneratorAgent: Agent<unknown, typeof ResponseGeneratorSchema>;
   private ambiguousRequestResponseAgent: Agent<unknown, typeof AmbiguousRequestResponseSchema>;
-  //private contextRetrivalAgent: Agent<unknown, typeof ContextRetrievalSchema>;
   private workspaceContextRetrievalAgent: Agent<unknown, typeof WorkspaceContextRetrievalSchema>;
   private workspaceMemberContextRetrievalAgent: Agent<
     unknown,
@@ -121,8 +120,6 @@ export default class RAGOrchestrator {
     this.intentClassifierAgent = new Agent({ ...IntentAgentOptions });
 
     this.queryNormalizerAgent = new Agent({ ...QueryNormalizerAgentOptions });
-
-    //this.contextRetrivalAgent = new Agent({ ...ContextRetrievalAgentOptions });
 
     this.workspaceContextRetrievalAgent = new Agent({ ...WorkspaceContextRetrievalAgentOptions });
     this.workspaceMemberContextRetrievalAgent = new Agent({
