@@ -12,7 +12,7 @@ const globalForPrisma = globalThis as unknown as GlobalWithPrisma;
 
 const createPrismaClient = (node_env: "development" | "test" | "production") => {
   return new PrismaClientPostgres({
-    log: node_env === "development" ? ["query", "error", "warn"] : ["error"],
+    log: node_env === "development" ? ["error", "warn"] : ["error"],
   });
 }
 
