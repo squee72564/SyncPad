@@ -53,6 +53,30 @@ Output:
   ]
 }
 
+Example 2:
+
+User Message: What documents are in my workspace and what additional information is associated with those documents?
+
+Ouput:
+{
+  "reasoning": "The user requests a list of documents in their workspace along with associated metadata or details.",
+  "isRequestAmbiguous": false,
+  "actions": [
+    {
+      "requestGoal": "List all documents in the user's workspace with their associated information.",
+      "taskType": "list_items",
+      "requiredContextSources": "documents",
+      "confidence": 0.95
+    },
+    {
+      "requestGoal": "List the current workspace for additional information.",
+      "taskType: "list_items",
+      "requiredContextSources": "workspace",
+      "confidence": 0.92
+    }
+  ]
+}
+
 ### Begin classification
 `,
   name: "User Request Intention Analyzer Expert",
