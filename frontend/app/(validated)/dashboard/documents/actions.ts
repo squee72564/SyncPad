@@ -214,7 +214,7 @@ export async function updateDocumentAction(
 
 export async function saveDocumentCollabStateAction(input: {
   documentId: string;
-  snapshot: JsonValue;
+  snapshot: string;
   version?: number;
 }): Promise<CollabStateActionResult> {
   let workspace;

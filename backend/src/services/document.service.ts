@@ -241,20 +241,20 @@ const getDocumentCollabState = async (workspaceId: string, documentId: string) =
 const upsertDocumentCollabState = async (
   workspaceId: string,
   documentId: string,
-  snapshot: Prisma.JsonValue | undefined,
+  snapshot: string | undefined,
   version?: number
 ) => {
   return prisma.documentCollabState.upsert({
     where: { documentId },
     update: {
-      snapshot: snapshot ?? Prisma.JsonNull,
+      snapshot: snapshot ?? null,
       version: version !== undefined ? version : { increment: 1 },
       workspaceId,
     },
     create: {
       documentId,
       workspaceId,
-      snapshot: snapshot ?? Prisma.JsonNull,
+      snapshot: snapshot ?? null,
       version: version ?? 1,
     },
   });

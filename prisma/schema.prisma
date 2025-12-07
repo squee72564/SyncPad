@@ -255,7 +255,7 @@ model DocumentRevision {
 model DocumentCollabState {
   documentId  String   @id
   workspaceId String
-  snapshot    Json?
+  snapshot    String?
   version     Int      @default(0)
   updatedAt   DateTime @updatedAt
 
