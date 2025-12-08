@@ -209,9 +209,8 @@ model Document {
   slug         String?
   headline     String?
   status       DocumentStatus @default(DRAFT)
-  searchText   String?        @db.Text
   summary      String?        @db.Text
-  content      Json?
+  content      String?        @db.Text
   publishedAt  DateTime?
   lastEditedAt DateTime       @default(now())
   createdAt    DateTime       @default(now())
@@ -240,7 +239,7 @@ model DocumentRevision {
   authorId   String?
   version    Int
   changeNote String?  @db.Text
-  content    Json?
+  content    String?
   createdAt  DateTime @default(now())
 
   document   Document            @relation(fields: [documentId], references: [id], onDelete: Cascade)
