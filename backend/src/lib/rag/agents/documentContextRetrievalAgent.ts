@@ -14,7 +14,6 @@ const listDocumentsByWorkspaceIdTool = tool({
     const documents = await prisma.document.findMany({
       where: { workspaceId },
       omit: {
-        id: true,
         content: true,
         updatedAt: true,
       },
@@ -37,11 +36,21 @@ const getDocumentByWorkspaceIdAndDocumentId = tool({
     documentId: z.string(),
   }),
   async execute({ workspaceId, documentId }: { workspaceId: string; documentId: string }) {
-    const doc = await prisma.document.findUnique({
+    const doc = await prisma.document.findFirst({
       where: { workspaceId, id: documentId },
-      omit: {
-        id: true,
-        updatedAt: true,
+      select: {
+        workspaceId: true,
+        slug: true,
+        parentId: true,
+        status: true,
+        title: true,
+        headline: true,
+        summary: true,
+        content: true,
+        publishedAt: true,
+        authorId: true,
+        lastEditedAt: true,
+        createdAt: true,
       },
     });
 
@@ -49,7 +58,7 @@ const getDocumentByWorkspaceIdAndDocumentId = tool({
 
     const filtered = {
       ...doc,
-      content: JSON.stringify(doc.content) ?? "",
+      content: doc.content,
       publishedAt: doc.publishedAt?.toISOString() ?? null,
       createdAt: doc.createdAt.toISOString(),
       lastEditedAt: doc.lastEditedAt.toISOString(),
