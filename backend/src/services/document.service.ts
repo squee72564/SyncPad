@@ -136,7 +136,7 @@ const materializeDocumentForEmbedding = async (
   }
 
   // Prefer the collaborative snapshot; fall back to existing content.
-  const collabText = collabSnapshotToPlainText(collabState?.snapshot as string | null);
+  const collabText = collabSnapshotToPlainText(collabState?.snapshot);
   const embeddingContent = collabText || normalizeEmbeddingContent(document.content);
 
   const revision = await prisma.$transaction(async (tx) => {
@@ -145,14 +145,14 @@ const materializeDocumentForEmbedding = async (
         documentId: document.id,
         authorId: requestedById ?? null,
         version: nextVersion,
-        content: embeddingContent || Prisma.JsonNull,
+        content: embeddingContent,
       },
     });
 
     await tx.document.update({
       where: { id: document.id },
       data: {
-        content: embeddingContent || Prisma.JsonNull,
+        content: embeddingContent,
         lastEditedAt: new Date(),
       },
     });
