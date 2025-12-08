@@ -24,6 +24,32 @@ type QaChatProps = {
 
 type UiMessage = AiChatMessageRecord & { local?: boolean };
 
+function MessageBubble({ message }: { message: UiMessage }) {
+  const isAssistant = message.role === $Enums.RagChatRole.ASSISTANT;
+  const isError = message.error;
+
+  return (
+    <div className={cn("flex max-w-full", isAssistant ? "justify-start" : "justify-end")}>
+      <div
+        className={cn(
+          "w-fit max-w-full rounded-lg border px-3 py-2 text-sm shadow-sm break-words md:max-w-3xl",
+          isAssistant ? "bg-background text-foreground" : "bg-primary text-primary-foreground",
+          isError && "border-destructive text-destructive-foreground bg-destructive/10"
+        )}
+      >
+        <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground/80">
+          {message.author?.name ? (
+            <span className="text-muted-foreground/70">{message.author.name}</span>
+          ) : null}
+          {message.local ? <span className="text-orange-500">pending</span> : null}
+          {isError ? <span className="text-destructive">error</span> : null}
+        </div>
+        <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function QaChat({
   threadId,
   threadTitle,
@@ -148,53 +174,23 @@ export default function QaChat({
   };
 
   return (
-    <Card className="w-full max-h-screen -my-6 bg-transparent border-transparent">
+    <Card className="flex h-screen max-w-full flex-col overflow-hidden bg-transparent border-transparent">
       <CardHeader className="flex flex-col gap-1">
         <CardTitle className="flex flex-wrap items-center gap-3">
           {threadTitle}
           <Badge variant="secondary">{workspaceName}</Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4 overflow-y-auto">
-        <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-4">
+      <CardContent className="mx-6 flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto rounded-lg border bg-muted/30">
+        <div className="flex flex-col gap-4">
           {messages.length === 0 ? (
-            <div className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               No messages yet. Ask your first question below to start the conversation.
-            </div>
+            </p>
           ) : (
-            messages.map((message) => {
-              const isAssistant = message.role === $Enums.RagChatRole.ASSISTANT;
-              const isError = message.error;
-
-              return (
-                <div
-                  key={message.id}
-                  className={cn("flex", isAssistant ? "justify-start" : "justify-end")}
-                >
-                  <div
-                    className={cn(
-                      "max-w-3xl rounded-lg border px-3 py-2 text-sm shadow-sm",
-                      isAssistant
-                        ? "bg-background text-foreground"
-                        : "bg-primary text-primary-foreground",
-                      isError && "border-destructive text-destructive-foreground bg-destructive/10"
-                    )}
-                  >
-                    <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground/80">
-                      {message.author?.name ? (
-                        <span className="text-muted-foreground/70">{message.author.name}</span>
-                      ) : null}
-                      {message.local ? <span className="text-orange-500">pending</span> : null}
-                      {isError ? <span className="text-destructive">error</span> : null}
-                    </div>
-                    <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
-                  </div>
-                </div>
-              );
-            })
+            messages.map((message) => <MessageBubble key={message.id} message={message} />)
           )}
         </div>
-
         {nextCursor ? (
           <div className="flex justify-center">
             <Button

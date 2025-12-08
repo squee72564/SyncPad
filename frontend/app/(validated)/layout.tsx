@@ -12,5 +12,5 @@ export default async function ValidatedLayout({
     redirect("/signin", RedirectType.replace);
   }
 
-  return <div className="w-full min-h-screen p-5">{children}</div>;
+  return <div className="w-full min-h-screen">{children}</div>;
 }
